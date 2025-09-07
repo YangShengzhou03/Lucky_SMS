@@ -77,11 +77,12 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
+import service from '@/utils/request';
 import {
   User, Lock, ArrowLeft
 } from '@element-plus/icons-vue';
-import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const showQRCode = ref(false);
@@ -110,12 +111,43 @@ const toggleQRCode = () => {
 const handleLogin = async () => {
   loginLoading.value = true;
   try {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    ElMessage.success('登录成功！');
-    router.push('/student');
+    // 1. 转换字段名（保持原逻辑）
+    const loginData = new URLSearchParams();
+    loginData.append('username', loginForm.username); // 前端username对应后端username
+    loginData.append('keyhash', loginForm.password); // 前端password对应后端keyhash
+
+    // 2. 去掉.then()，用await直接接收响应（符合async/await语法）
+    // 注意：service.post成功后返回的是后端的 { code, msg, data }（来自request.js封装）
+    const res = await service.post('/login', loginData, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded' // 表单传参必备
+      }
+    });
+
+    // 3. 直接判断res.code（无需多取一层data）
+    if (res.code === 200) {
+      ElMessage.success('登录成功！');
+      // 4. 读取角色（res.data才是后端返回的业务数据）
+      const role = res.data?.role; 
+      if (role === 'admin') {
+        router.push('/admin');
+      } else if (role === 'student') {
+        router.push('/student');
+      } else if (role === 'teacher') {
+        router.push('/teacher');
+      } else {
+        ElMessage.error('登录失败: 角色未定义');
+      }
+    } else {
+      // 5. 错误信息读取res.msg（而非Response.message）
+      ElMessage.error('登录失败: ' + (res.message || '用户名或密码错误'));
+    }
+
   } catch (error) {
-    ElMessage.error('登录失败: ' + (error.message || '用户名或密码错误'));
+    // 6. catch捕获网络错误或后端500等异常（error.message来自request.js封装）
+    ElMessage.error('登录失败: ' + (error.message || '网络异常，请稍后重试'));
   } finally {
+    // 7. 无论成功/失败，都关闭loading
     loginLoading.value = false;
   }
 };

@@ -64,6 +64,7 @@ import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import { User, Key, Phone } from '@element-plus/icons-vue';
 import router from '@/router';
+import service from '@/utils/request.js';
 
 const registerForm = reactive({
   username: '',
@@ -134,13 +135,30 @@ const sendCaptcha = () => {
   ElMessage.success(`验证码已发送至 ${registerForm.phone}`);
 };
 
+// 提交注册表单
 const handleRegister = async () => {
   registerLoading.value = true;
 
+  const registerDate = new URLSearchParams();
+  registerDate.append('username', registerForm.username);
+  registerDate.append('phone', registerForm.phone);
+  registerDate.append('captcha', registerForm.captcha);
+
   try {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    ElMessage.success('注册成功！');
-    router.push('/teacher')
+    const res = await service.post('/register', registerForm, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded' // 表单传参必备
+      }
+    });
+    console.log(res);
+
+    if (res.code==200) {
+      ElMessage.success('注册成功！');
+      router.push('/teacher')
+    } else {
+      ElMessage.error("注册失败，请稍后重试")
+    }
+
   } catch (error) {
     ElMessage.error('注册失败: ' + (error.message || '请稍后再试'));
   } finally {

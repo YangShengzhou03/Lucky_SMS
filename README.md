@@ -306,17 +306,7 @@ A:
 
 ### 👥 贡献者
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tr>
-    <td align="center"><a href="https://github.com/YangShengzhou03"><img src="https://avat.githubusercontent.com/u/xxxxxxx?v=4" width="100px;" alt=""/><br /><sub><b>YangShengzhou03</b></sub></a><br />💻 📖 🎨</td>
-  </tr>
-</table>
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-<!-- ALL-CONTRIBUTORS-LIST:END -->
+[![Contributors](https://contrib.rocks/image?repo=YangShengzhou03/Lucky_SMSS)](https://github.com/YangShengzhou03/Lucky_SMSS/graphs/contributors)
 
 ### 📊 项目统计
 

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -14,16 +15,17 @@ public class UserService {
     @Resource
     private UserMapper userMapper;
 
-    public LoginVO login(String phone, String keyhash) {
+    public LoginVO login(String username, String keyhash) {
         // 1. 参数校验
-        if (phone == null || keyhash == null) {
+        if (Objects.equals(username, "") || Objects.equals(keyhash, "")) {
+            // 如果传到后端的任意一个为空则抛出错误
             throw new IllegalArgumentException("手机号或密码不能为空");
         }
 
         // 2. 调用Mapper查询（直接返回包含角色的LoginVO）
         Map<String, Object> params = new HashMap<>();
-        params.put("phone", phone);
-        params.put("passwordHash", keyhash); // 注意参数名与XML中一致（XML用的是#{passwordHash}）
+        params.put("username", username);
+        params.put("passwordHash", keyhash); // 注意参数名与mapper的XML一致
         LoginVO loginVO = userMapper.login(params);
 
         // 3. 处理登录结果

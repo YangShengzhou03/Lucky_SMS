@@ -17,20 +17,23 @@ public class LoginController {
 
     @PostMapping("/login")
     public Map<String, Object> login(
-            @RequestParam String phone,
+            @RequestParam String username,
             @RequestParam String keyhash
     ) {
-        Map<String, Object> result = new HashMap<>();
+        System.out.println("接收到：" + username);
+        System.out.println("密码：" + keyhash);
+        Map<String, Object> loginResult = new HashMap<>();
         try {
-            LoginVO loginVO = userService.login(phone, keyhash);
-            result.put("code", 200);       // 状态码：200成功
-            result.put("message", "登录成功");
-            result.put("data", loginVO);   // 响应数据
+            LoginVO loginVO = userService.login(username, keyhash);
+            loginResult.put("code", 200);       // 状态码：200成功
+            loginResult.put("message", "登录成功");
+            loginResult.put("data", loginVO);   // 响应数据
         } catch (Exception e) {
-            result.put("code", 400);       // 状态码：400失败
-            result.put("message", e.getMessage());
-            result.put("data", null);
+            loginResult.put("code", 400);       // 状态码：400失败
+            loginResult.put("message", e.getMessage());
+            loginResult.put("data", null);
         }
-        return result;
+        System.out.println(loginResult);
+        return loginResult;
     }
 }
