@@ -87,6 +87,7 @@ public class JwtUtil {
             parseTokenClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
+            System.out.println(e.getMessage());
             // 捕获所有 JWT 相关异常（过期、签名错误等）
             return false;
         }

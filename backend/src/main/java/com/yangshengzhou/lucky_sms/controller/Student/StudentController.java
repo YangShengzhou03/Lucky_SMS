@@ -24,6 +24,7 @@ public class StudentController {
         try {
             // 1. 从请求头中获取 Authorization（Token 通常在这里）
             String authorization = request.getHeader("Authorization");
+
             if (authorization == null || !authorization.startsWith("Bearer ")) {
                 result.put("code", 401);
                 result.put("message", "请携带有效的 Token（格式：Bearer <token>）");
@@ -32,6 +33,7 @@ public class StudentController {
 
             // 2. 提取纯 Token（去掉 "Bearer " 前缀）
             String token = authorization.substring(7);
+            System.out.println(token);
 
             // 3. 验证 Token 有效性
             if (!jwtUtil.validateToken(token)) {

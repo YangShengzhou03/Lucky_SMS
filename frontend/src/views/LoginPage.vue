@@ -262,7 +262,12 @@ const sendCaptcha = async () => {
 };
 
 // 处理登录成功后的路由跳转
-const handleLoginSuccess = (role) => {
+const handleLoginSuccess = (role, token) => {
+  // 将token存储到localStorage
+  if (token) {
+    localStorage.setItem('token', token);
+  }
+  
   ElMessage.success('登录成功！');
   switch (role) {
     case 'ADMIN':
@@ -299,7 +304,7 @@ const handleLogin = async () => {
     });
 
     if (res.code === 200) {
-      handleLoginSuccess(res.date?.role);
+      handleLoginSuccess(res.date?.role, res.date?.token);
     } else {
       ElMessage.error('登录失败: ' + (res.message || '用户名或密码错误'));
     }
@@ -339,7 +344,7 @@ const handlePhoneLogin = async () => {
     });
 
     if (res.code === 200) {
-      handleLoginSuccess(res.data?.role);
+      handleLoginSuccess(res.data?.role, res.data?.token);
     } else {
       ElMessage.error('登录失败: ' + (res.message || '手机号或验证码错误'));
     }

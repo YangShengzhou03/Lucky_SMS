@@ -38,5 +38,5 @@ redis:
 
 # JWT的基本配置
 jwt:
-  secret: your-32bit-or-longer-secure-secret-key-here!@#$%^&*  # 至少 32 位
+  secret: 3f7d2a9b5e8c1d4f6h0j2k7m9n1p3q5r8t0v2x4y6z8b0d2f4h6j8l0n2p  # 至少 32 位
   expiration: 86400000  # 过期时间（毫秒），24小时=86400000
