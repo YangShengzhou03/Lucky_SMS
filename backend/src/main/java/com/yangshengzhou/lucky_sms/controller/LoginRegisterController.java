@@ -23,7 +23,7 @@ public class LoginRegisterController {
             @RequestParam String phone,
             @RequestParam String captcha) {
         LoginVO loginVO = new LoginVO();
-        // 封装返回Map
+        // 封装登录返回响应
         Map<String, Object> loginResult = new HashMap<>();
         try {
             // TODO 对验证码进行校验

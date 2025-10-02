@@ -24,7 +24,7 @@ public class UserService {
         }
         loginVO = userMapper.loginByPhone(phone);
 
-        // 成令牌
+        // 生成令牌
         String token = UUID.randomUUID().toString();
         loginVO.setToken(token);
 
@@ -47,11 +47,11 @@ public class UserService {
             throw new RuntimeException("用户名或密码错误");
         }
 
-        // 成令牌
+        // 令牌
         String token = UUID.randomUUID().toString();
         loginVO.setToken(token);
 
-        // 手机号脱敏（直接操作VO中的phone字段）
+        // 手机号脱敏
         loginVO.setPhone(desensitizePhone(loginVO.getPhone()));
 
         return loginVO;

@@ -864,9 +864,7 @@ INSERT INTO courses (course_code, course_name, course_description, department_id
 
 -- 初始化用户表（学生）
 INSERT INTO users (username, password_hash, email, phone, gender, status) VALUES
-('student1', '123456', 'student1@lucky-sms.com', '13800138003', 'M', 'ACTIVE'),
-('student2', '123456', 'student2@lucky-sms.com', '13800138004', 'F', 'ACTIVE'),
-('student3', '123456', 'student3@lucky-sms.com', '13800138005', 'M', 'ACTIVE');
+('student1', '123456', 'student1@lucky-sms.com', '13800138003', 'M', 'ACTIVE');
 
 -- 为学生分配角色（学生角色ID为3）
 INSERT INTO user_roles (user_id, role_id) VALUES (4, 3), (5, 3), (6, 3);

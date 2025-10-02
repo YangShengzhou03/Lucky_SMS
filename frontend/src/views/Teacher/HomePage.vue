@@ -1,13 +1,6 @@
 <template>
   <div class="teacher-home">
-    <div v-if="error" class="error-container">
-      <el-icon class="error-icon">
-        <WarningFilled />
-      </el-icon>
-      <div class="error-message">{{ error }}</div>
-      <el-button type="primary" @click="fetchData">重试</el-button>
-    </div>
-    <div v-else>
+    <div>
       <div class="welcome-section">
         <div class="welcome-card">
           <div class="avatar-container">

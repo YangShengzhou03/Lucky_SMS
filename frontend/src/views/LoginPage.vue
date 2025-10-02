@@ -244,6 +244,9 @@ const sendCaptcha = async () => {
     
     // 模拟发送验证码
     captchaCooldown.value = 60;
+
+    phoneForm.captcha = '123456';
+
     captchaTimer = setInterval(() => {
       captchaCooldown.value--;
       if (captchaCooldown.value <= 0) {
