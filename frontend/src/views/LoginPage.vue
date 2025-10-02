@@ -82,8 +82,8 @@
               class="login-form"
               @keyup.enter="handleLogin"
             >
-              <el-form-item prop="username" class="form-item">
-                <el-input v-model="loginForm.username" placeholder="输入用户名" size="large" :prefix-icon="User" clearable
+              <el-form-item prop="phone" class="form-item">
+                <el-input v-model="loginForm.phone" placeholder="输入手机号" size="large" :prefix-icon="User" clearable
                   class="custom-input" />
               </el-form-item>
 
@@ -161,14 +161,13 @@ const captchaBtnText = computed(() =>
 
 // 账号密码登录表单
 const loginForm = reactive({
-  username: '',
+  phone: '',
   password: '',
-  remember: false
 });
 
 const loginRules = reactive({
-  username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
+  phone: [
+    { required: true, message: '请输入手机号', trigger: 'blur' },
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
@@ -287,8 +286,8 @@ const handleLogin = async () => {
     loginLoading.value = true;
     
     const loginData = new URLSearchParams();
-    loginData.append('username', loginForm.username);
-    loginData.append('keyhash', loginForm.password);
+    loginData.append('phone', loginForm.phone);
+    loginData.append('password', loginForm.password);
 
     const res = await service.post('/login/password', loginData, {
       headers: {
@@ -297,7 +296,7 @@ const handleLogin = async () => {
     });
 
     if (res.code === 200) {
-      handleLoginSuccess(res.data?.role);
+      handleLoginSuccess(res.date?.role);
     } else {
       ElMessage.error('登录失败: ' + (res.message || '用户名或密码错误'));
     }
