@@ -39,6 +39,24 @@ public class UserService {
         return rowNum != 0;
     }
 
+    public LoginVO loginByPassword(String phone, String password) {
+        LoginVO loginVO = userMapper.loginByPassword(phone, password);
+
+        if (loginVO == null) {
+            // 用户不存在，需要注册
+            throw new RuntimeException("用户名或密码错误");
+        }
+
+        // 成令牌
+        String token = UUID.randomUUID().toString();
+        loginVO.setToken(token);
+
+        // 手机号脱敏（直接操作VO中的phone字段）
+        loginVO.setPhone(desensitizePhone(loginVO.getPhone()));
+
+        return loginVO;
+    }
+
     // 手机号脱敏方法
     private String desensitizePhone(String phone) {
         if (phone == null || phone.length() != 11) {

@@ -290,7 +290,7 @@ const handleLogin = async () => {
     loginData.append('username', loginForm.username);
     loginData.append('keyhash', loginForm.password);
 
-    const res = await service.post('/login', loginData, {
+    const res = await service.post('/login/password', loginData, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }

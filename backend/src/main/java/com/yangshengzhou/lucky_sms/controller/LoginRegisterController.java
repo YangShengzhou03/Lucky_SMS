@@ -19,7 +19,7 @@ public class LoginRegisterController {
     private UserService userService;
 
     @PostMapping("/phone")
-    public Map<String, Object> loginPhone(
+    public Map<String, Object> loginByPhone(
             @RequestParam String phone,
             @RequestParam String captcha) {
         LoginVO loginVO = new LoginVO();
@@ -39,6 +39,25 @@ public class LoginRegisterController {
             loginResult.put("code", 500);
             loginResult.put("message", e.getMessage());
             loginResult.put("data", loginVO);
+        }
+        return loginResult;
+    }
+
+    @PostMapping("/password")
+    public Map<String, Object> loginByPassword(
+            @RequestParam String phone,
+            @RequestParam String password
+    ){
+        HashMap<String, Object> loginResult = new HashMap<>();
+        LoginVO loginVO = userService.loginByPassword(phone, password);
+        try {
+            loginResult.put("code", 200);
+            loginResult.put("message", "登录成功");
+            loginResult.put("date", loginVO);
+        } catch (Exception e) {
+            loginResult.put("code", 500);
+            loginResult.put("message", e.getMessage());
+            loginResult.put("date", loginVO);
         }
         return loginResult;
     }

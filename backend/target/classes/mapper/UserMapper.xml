@@ -23,10 +23,26 @@
         VALUES (#{phone})
     </insert>
 
+    <!-- 通过手机号重设密码 -->
     <insert id="resetPasswordByPhone" parameterType="java.util.Map">
         UPDATE users
         SET password_hash = #{password}
         WHERE phone = #{phone}
     </insert>
+
+    <!-- 通过手机号密码登录 -->
+    <select id="loginByPassword" parameterType="java.util.Map">
+        SELECT
+            u.user_id,
+            u.username,
+            u.phone,
+            r.role_name  -- 角色名称（TEACHER/STUDENT）
+        FROM users u
+                 LEFT JOIN user_roles ur ON u.user_id = ur.user_id
+                 LEFT JOIN roles r ON ur.role_id = r.role_id
+        WHERE u.phone = #{phone}
+          AND u.password_hash = #{password}
+          AND u.status = 'ACTIVE'
+    </select>
 
 </mapper>

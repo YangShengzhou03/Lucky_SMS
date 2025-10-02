@@ -13,4 +13,7 @@ public interface UserMapper {
 
     // 通过手机号重设密码
     int resetPasswordByPhone(String phone, String password);
+
+    // 通过手机号密码登录
+    LoginVO loginByPassword(String phone, String password);
 }
