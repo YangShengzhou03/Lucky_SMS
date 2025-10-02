@@ -1073,3 +1073,150 @@ INSERT INTO book_borrow_statuses (status_name, description) VALUES
 ('RETURNED', '已归还'),
 ('OVERDUE', '已逾期'),
 ('LOST', '已丢失');
+
+-- 初始化职称表
+INSERT INTO teacher_titles (title_name, title_level) VALUES
+('助教', 1),
+('讲师', 1),
+('副教授', 2),
+('教授', 3);
+
+-- 初始化学院表
+INSERT INTO departments (department_name, department_code) VALUES
+('计算机科学与技术学院', 'CS'),
+('信息工程学院', 'IE'),
+('经济管理学院', 'EM'),
+('人文艺术学院', 'HA');
+
+-- 初始化专业表
+INSERT INTO majors (major_name, department_id, major_code) VALUES
+('计算机科学与技术', 1, 'CS01'),
+('软件工程', 1, 'CS02'),
+('网络工程', 1, 'CS03'),
+('信息管理与信息系统', 2, 'IE01'),
+('电子商务', 2, 'IE02'),
+('国际经济与贸易', 3, 'EM01'),
+('市场营销', 3, 'EM02'),
+('汉语言文学', 4, 'HA01'),
+('英语', 4, 'HA02');
+
+-- 初始化图书分类表
+INSERT INTO book_categories (category_name, parent_id) VALUES
+('计算机科学', NULL),
+('文学', NULL),
+('经济管理', NULL),
+('编程语言', 1),
+('数据库', 1),
+('网络技术', 1),
+('中国文学', 2),
+('外国文学', 2),
+('经济学', 3),
+('管理学', 3);
+
+-- 初始化学期表
+INSERT INTO semesters (academic_year, semester_name, start_date, end_date, is_current) VALUES
+('2023-2024', '第一学期', '2023-09-01', '2024-01-20', 0),
+('2023-2024', '第二学期', '2024-02-26', '2024-07-15', 1),
+('2024-2025', '第一学期', '2024-09-01', '2025-01-20', 0);
+
+-- 初始化课程表
+INSERT INTO courses (course_code, course_name, course_description, department_id, credit, course_hours, course_type, exam_type, created_by) VALUES
+('CS101', '计算机基础', '计算机基础知识与操作', 1, 3.0, 48, 'COMPULSORY', 'CLOSED_BOOK', 1),
+('CS102', 'C语言程序设计', 'C语言编程基础', 1, 4.0, 64, 'COMPULSORY', 'PRACTICAL', 1),
+('CS201', '数据结构', '常用数据结构与算法', 1, 4.0, 64, 'COMPULSORY', 'PRACTICAL', 1),
+('CS202', '数据库原理', '数据库系统原理与应用', 1, 3.0, 48, 'COMPULSORY', 'CLOSED_BOOK', 1),
+('CS301', '操作系统', '计算机操作系统原理', 1, 4.0, 64, 'COMPULSORY', 'CLOSED_BOOK', 1),
+('IE101', '信息系统分析', '信息系统分析与设计', 2, 3.0, 48, 'COMPULSORY', 'REPORT', 1),
+('EM101', '宏观经济学', '宏观经济学原理', 3, 3.0, 48, 'COMPULSORY', 'CLOSED_BOOK', 1),
+('HA101', '现代汉语', '现代汉语语法与词汇', 4, 2.0, 32, 'ELECTIVE', 'OPEN_BOOK', 1);
+
+-- 初始化用户表（管理员）
+INSERT INTO users (username, password_hash, email, phone, gender, status) VALUES
+('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVYITi', 'admin@lucky-sms.com', '13800138000', 'M', 'ACTIVE');
+
+-- 为管理员分配角色（管理员角色ID为1）
+INSERT INTO user_roles (user_id, role_id) VALUES (1, 1);
+
+-- 初始化教师表
+INSERT INTO teachers (user_id, department_id, title_id, hire_date, office_location, teacher_no, status_id) VALUES
+(1, 1, 4, '2020-09-01', '计算机楼A301', 'T2020001', 1);
+
+-- 初始化用户表（教师）
+INSERT INTO users (username, password_hash, email, phone, gender, status) VALUES
+('teacher1', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVYITi', 'teacher1@lucky-sms.com', '13800138001', 'M', 'ACTIVE'),
+('teacher2', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVYITi', 'teacher2@lucky-sms.com', '13800138002', 'F', 'ACTIVE');
+
+-- 为教师分配角色（教师角色ID为2）
+INSERT INTO user_roles (user_id, role_id) VALUES (2, 2), (3, 2);
+
+-- 初始化教师表
+INSERT INTO teachers (user_id, department_id, title_id, hire_date, office_location, teacher_no, status_id) VALUES
+(2, 1, 3, '2021-09-01', '计算机楼A302', 'T2021001', 1),
+(3, 2, 2, '2022-09-01', '信息楼B201', 'T2022001', 1);
+
+-- 初始化用户表（学生）
+INSERT INTO users (username, password_hash, email, phone, gender, status) VALUES
+('student1', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVYITi', 'student1@lucky-sms.com', '13800138003', 'M', 'ACTIVE'),
+('student2', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVYITi', 'student2@lucky-sms.com', '13800138004', 'F', 'ACTIVE'),
+('student3', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVYITi', 'student3@lucky-sms.com', '13800138005', 'M', 'ACTIVE');
+
+-- 为学生分配角色（学生角色ID为3）
+INSERT INTO user_roles (user_id, role_id) VALUES (4, 3), (5, 3), (6, 3);
+
+-- 初始化学生表
+INSERT INTO students (user_id, department_id, major_id, class_name, enrollment_year, education_years, student_no, status_id, emergency_contact, emergency_phone) VALUES
+(4, 1, 1, '计算机2101班', 2021, 4, '2021CS01001', 1, '张父', '13900138001'),
+(5, 1, 2, '软件工程2101班', 2021, 4, '2021CS02001', 1, '李母', '13900138002'),
+(6, 2, 4, '信管2101班', 2021, 4, '2021IE01001', 1, '王父', '13900138003');
+
+-- 初始化教师授课表
+INSERT INTO teaching_assignments (teacher_id, course_id, semester_id, classroom, schedule, max_students, current_students) VALUES
+(2, 1, 2, '计算机楼A101', '周一 8:00-9:40', 50, 30),
+(2, 2, 2, '计算机楼B201', '周二 10:00-11:40', 40, 35),
+(3, 6, 2, '信息楼C101', '周三 14:00-15:40', 45, 25),
+(1, 4, 2, '计算机楼A301', '周四 8:00-9:40', 40, 20);
+
+-- 初始化学生选课表
+INSERT INTO course_selections (student_id, assignment_id, status) VALUES
+(4, 1, 'SELECTED'),
+(4, 2, 'SELECTED'),
+(5, 2, 'SELECTED'),
+(5, 4, 'SELECTED'),
+(6, 3, 'SELECTED'),
+(6, 4, 'SELECTED');
+
+-- 初始化图书表
+INSERT INTO books (isbn, book_title, author, publisher, publish_year, category_id, location, total_copies, available_copies, created_by) VALUES
+('9787111213826', 'Java编程思想', 'Bruce Eckel', '机械工业出版社', 2007, 4, '计算机馆A区101', 5, 3, 1),
+('9787115279460', 'Python编程：从入门到实践', 'Eric Matthes', '人民邮电出版社', 2016, 4, '计算机馆A区102', 8, 5, 1),
+('9787302523905', '数据结构与算法分析', 'Mark Allen Weiss', '清华大学出版社', 2019, 5, '计算机馆A区103', 6, 4, 1),
+('9787111565839', '数据库系统概念', 'Abraham Silberschatz', '机械工业出版社', 2020, 5, '计算机馆A区104', 4, 2, 1),
+('9787040507215', '红楼梦', '曹雪芹', '高等教育出版社', 2019, 7, '文学馆B区201', 3, 2, 1),
+('9787040518952', '经济学原理', 'N. Gregory Mankiw', '高等教育出版社', 2020, 9, '经管馆C区301', 5, 3, 1);
+
+-- 初始化图书借阅表
+INSERT INTO book_borrowings (user_id, book_id, borrow_date, due_date, status_id, created_by) VALUES
+(4, 1, '2023-10-01', '2023-10-31', 2, 1),
+(5, 2, '2023-10-05', '2023-11-04', 1, 1),
+(6, 3, '2023-10-10', '2023-11-09', 1, 1);
+
+-- 初始化群组表
+INSERT INTO im_groups (group_name, owner_id, description, max_members) VALUES
+('计算机2101班群', 4, '计算机2101班学生交流群', 50),
+('软件工程2101班群', 5, '软件工程2101班学生交流群', 50),
+('信管2101班群', 6, '信管2101班学生交流群', 50),
+('教师交流群', 2, '教师之间交流群', 30);
+
+-- 添加群组成员
+INSERT INTO im_group_members (group_id, user_id, role) VALUES
+(1, 4, 'OWNER'),
+(1, 2, 'ADMIN'),
+(1, 5, 'MEMBER'),
+(2, 5, 'OWNER'),
+(2, 2, 'ADMIN'),
+(2, 4, 'MEMBER'),
+(3, 6, 'OWNER'),
+(3, 3, 'ADMIN'),
+(4, 2, 'OWNER'),
+(4, 1, 'ADMIN'),
+(4, 3, 'MEMBER');
