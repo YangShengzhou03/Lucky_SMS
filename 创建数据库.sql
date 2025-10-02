@@ -1141,6 +1141,48 @@ DELIMITER ;
 
 -- 数据库名称：Lucky_SMS
 
+-- 待办事项表
+CREATE TABLE todos (
+    id INT PRIMARY KEY AUTO_INCREMENT COMMENT '待办事项ID，主键，自增',
+    user_id INT NOT NULL COMMENT '用户ID，关联用户表',
+    text VARCHAR(500) NOT NULL COMMENT '待办事项内容',
+    completed BOOLEAN DEFAULT FALSE COMMENT '完成状态，默认未完成',
+    due_date DATE COMMENT '截止日期',
+    important BOOLEAN DEFAULT FALSE COMMENT '是否重要，默认不重要',
+    category VARCHAR(50) COMMENT '分类',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间，自动设置为当前时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间，记录更新时自动设置为当前时间',
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+) COMMENT '待办事项表，存储用户的待办事项信息';
+
+-- 公告表
+CREATE TABLE announcements (
+    id INT PRIMARY KEY AUTO_INCREMENT COMMENT '公告ID，主键，自增',
+    title VARCHAR(200) NOT NULL COMMENT '公告标题',
+    content TEXT COMMENT '公告内容',
+    date DATE NOT NULL COMMENT '公告日期',
+    department VARCHAR(100) COMMENT '发布部门',
+    type VARCHAR(50) COMMENT '公告类型',
+    priority VARCHAR(20) DEFAULT '普通' COMMENT '优先级，默认为普通',
+    created_by INT COMMENT '发布人ID，关联用户表',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间，自动设置为当前时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间，记录更新时自动设置为当前时间',
+    FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE SET NULL
+) COMMENT '公告表，存储系统公告和通知信息';
+
+-- 初始化待办事项表数据
+INSERT INTO todos (id, user_id, text, completed, due_date, important, category) VALUES
+(1, 3, '完成数据结构作业第三章', FALSE, '2025-06-24', TRUE, '作业'),
+(2, 3, '完成数据库原理作业第二章', FALSE, '2025-06-25', FALSE, '作业'),
+(3, 3, '完成数据结构作业第二章', FALSE, '2025-06-25', FALSE, '作业');
+
+-- 初始化公告表数据
+INSERT INTO announcements (title, content, date, department, type, priority, created_by) VALUES
+('期末考试安排通知', '各位同学请注意，期末考试将于下周一开始，请做好充分准备。考试时间为上午9:00-11:00，地点在各班教室。', '2025-06-15', '教务处', 'important', 'high', 1),
+('图书馆开放时间调整', '由于系统维护，图书馆本周三下午将临时关闭，请同学们合理安排借阅时间。', '2025-06-14', '图书馆', 'notice', 'medium', 1),
+('校园文化节活动预告', '我校将于下月举办校园文化节，欢迎各位同学积极参与各项活动。具体活动安排请关注后续通知。', '2025-06-13', '学生会', 'activity', 'medium', 2),
+('校园招聘信息', '多家知名企业将于下周来校招聘，欢迎大四同学参加。请准备好个人简历和相关材料。', '2025-06-12', '就业指导中心', 'info', 'low', 1);
+
 /*
   Lucky_SMS 学生管理系统数据库功能特点：
   
@@ -1180,6 +1222,16 @@ DELIMITER ;
   8. 数据变更日志
      - 记录重要数据变更历史
      - 支持数据追溯
+  
+  9. 待办事项管理
+     - 支持创建、更新和删除待办事项
+     - 可设置截止日期、重要程度和分类
+     - 与用户表关联，支持个人待办事项管理
+  
+  10. 公告管理
+      - 支持发布各类公告和通知
+      - 可设置公告类型、优先级和适用部门
+      - 记录发布人和发布时间，支持公告追溯
   
   使用说明：
   1. 执行此SQL文件将创建完整的Lucky_SMS数据库
