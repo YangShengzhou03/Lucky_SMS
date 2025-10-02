@@ -313,6 +313,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import service from '@/utils/request'
 import {
   Notebook, Calendar, List, Bell, ArrowRight, Plus,
   WarningFilled, Collection, User, DataLine,
@@ -395,6 +396,20 @@ const fetchData = async () => {
   error.value = null
 
   try {
+    // 使用axios获取数据
+    const res = await service.get('/teacher/home')
+    
+    if (res.code === 200) {
+      teacher.value = res.data.teacher || {}
+      announcements.value = res.data.announcements || []
+    } else {
+      throw new Error(res.message || '获取数据失败')
+    }
+  } catch (err) {
+    error.value = '获取数据失败，请稍后重试'
+    console.error('获取数据失败:', err)
+    
+    // 如果API请求失败，使用模拟数据作为后备
     teacher.value = {
       name: '张明华',
       id: 'T2023001',
@@ -496,10 +511,6 @@ const fetchData = async () => {
         content: '根据学校教学工作安排，将于第10-11周开展期中教学检查工作。'
       }
     ]
-
-  } catch (err) {
-    error.value = '获取数据失败，请稍后重试'
-    console.error('获取数据失败:', err)
   } finally {
     loading.value = false
   }

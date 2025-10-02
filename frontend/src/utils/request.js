@@ -1,10 +1,12 @@
 // src/utils/request.js
 import axios from 'axios';
+import router from '@/router';
+import { ElMessage } from 'element-plus';
 
 // 1. 创建实例，配置基础信息
 const service = axios.create({
-  baseURL: process.env.VUE_APP_BASE_API, // 基础地址（可从环境变量获取）
-  timeout: 5000, // 超时时间（毫秒）
+  baseURL: process.env.VUE_APP_BASE_API || 'http://localhost:8081/api/', // 基础地址（可从环境变量获取）
+  timeout: 10000, // 超时时间（毫秒）
   headers: {
     'Content-Type': 'application/json;charset=utf-8' // 默认请求头
   }
@@ -13,13 +15,13 @@ const service = axios.create({
 // 2. 请求拦截器（发送请求前处理）
 service.interceptors.request.use(
   (config) => {
-    // 示例1：添加token（如从localStorage获取）
+    // 添加token（如从localStorage获取）
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // 示例2：处理GET请求的缓存问题
+    // 处理GET请求的缓存问题
     if (config.method === 'get') {
       config.params = { ...config.params, t: Date.now() }; // 添加时间戳防缓存
     }
@@ -28,6 +30,7 @@ service.interceptors.request.use(
   },
   (error) => {
     // 请求错误（如参数错误）
+    console.error('请求错误:', error);
     return Promise.reject(error);
   }
 );
@@ -38,10 +41,19 @@ service.interceptors.response.use(
     // 只处理2xx状态码的响应
     const res = response.data;
     
-    // 示例：根据后端约定的code处理业务逻辑
+    // 根据后端约定的code处理业务逻辑
     if (res.code !== 200) { // 假设200为成功状态码
-      // 错误提示（可结合UI库的Message组件）
-      console.error(`错误码: ${res.code}, 信息: ${res.message}`);
+      // 错误提示
+      ElMessage.error(res.message || '请求失败');
+      
+      // 处理特定错误码，如token过期
+      if (res.code === 401) {
+        // 清除token
+        localStorage.removeItem('token');
+        // 跳转到登录页
+        router.push('/login');
+      }
+      
       return Promise.reject(new Error(res.message || '请求失败'));
     } else {
       return res; // 只返回data中的数据，简化调用
@@ -55,12 +67,14 @@ service.interceptors.response.use(
       // 服务器状态码处理
       switch (error.response.status) {
         case 401:
-          errorMsg = '登录过期效，请重新登录';
-          // 可在此处跳转登录页
-          // router.push('/login');
+          errorMsg = '登录过期，请重新登录';
+          // 清除token
+          localStorage.removeItem('token');
+          // 跳转到登录页
+          router.push('/login');
           break;
         case 403:
-          errorMsg = '没有权限权限访问';
+          errorMsg = '没有权限访问';
           break;
         case 404:
           errorMsg = '接口不存在';
@@ -71,9 +85,18 @@ service.interceptors.response.use(
         default:
           errorMsg = `请求错误: ${error.response.status}`;
       }
+    } else if (error.request) {
+      // 请求已发出但没有收到响应
+      errorMsg = '服务器无响应，请检查网络连接';
+    } else {
+      // 请求配置出错
+      errorMsg = '请求配置错误: ' + error.message;
     }
     
-    console.error(errorMsg);
+    // 显示错误信息
+    ElMessage.error(errorMsg);
+    console.error('响应错误:', error);
+    
     return Promise.reject(error);
   }
 );

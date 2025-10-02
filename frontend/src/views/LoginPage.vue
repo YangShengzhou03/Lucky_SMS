@@ -43,7 +43,7 @@
               <!-- 重置密码显示密码输入框 -->
               <el-form-item prop="password" class="form-item" v-if="isResetMode">
                 <el-input v-model="phoneForm.password" placeholder="设置新密码" size="large" :prefix-icon="Lock" clearable
-                  class="custom-input" />
+                  show-password class="custom-input" />
               </el-form-item>
 
               <!-- 登录时账密登录选项 -->
