@@ -1,4 +1,4 @@
-package com.yangshengzhou.lucky_sms.controller;
+package com.yangshengzhou.lucky_sms.controller.User;
 
 import com.yangshengzhou.lucky_sms.service.UserService;
 import com.yangshengzhou.lucky_sms.vo.LoginVO;

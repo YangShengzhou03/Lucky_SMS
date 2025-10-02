@@ -5,7 +5,7 @@ import { ElMessage } from 'element-plus';
 
 // 1. 创建实例，配置基础信息
 const service = axios.create({
-  baseURL: process.env.VUE_APP_BASE_API || 'http://localhost:8081/api/', // 基础地址（可从环境变量获取）
+  baseURL: process.env.VUE_APP_BASE_API || 'http://localhost:8081/api/', // 基础地址（从环境变量获取）
   timeout: 10000, // 超时时间（毫秒）
   headers: {
     'Content-Type': 'application/json;charset=utf-8' // 默认请求头
@@ -15,7 +15,7 @@ const service = axios.create({
 // 2. 请求拦截器（发送请求前处理）
 service.interceptors.request.use(
   (config) => {
-    // 添加token（如从localStorage获取）
+    // 添加token（从localStorage获取）
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
