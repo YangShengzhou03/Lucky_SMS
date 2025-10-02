@@ -42,7 +42,7 @@
 
               <!-- 重置密码显示密码输入框 -->
               <el-form-item prop="password" class="form-item" v-if="isResetMode">
-                <el-input v-model="phoneForm.password" placeholder="设置新密码" size="large" :prefix-icon="Lock" clearable
+                <el-input v-model="phoneForm.newPassword" placeholder="设置新密码" size="large" :prefix-icon="Lock" clearable
                   show-password class="custom-input" />
               </el-form-item>
 
@@ -180,8 +180,7 @@ const loginRules = reactive({
 const phoneForm = reactive({
   phone: '',
   captcha: '',
-  username: '', // 注册时使用
-  agreement: false // 注册时使用
+  newPassword: ''
 });
 
 const phoneRules = reactive({
@@ -347,30 +346,30 @@ const handleReset = async () => {
     await phoneFormRef.value.validate();
     loginLoading.value = true;
     
-    const registerData = new URLSearchParams();
-    registerData.append('username', phoneForm.username);
-    registerData.append('phone', phoneForm.phone);
-    registerData.append('captcha', phoneForm.captcha);
+    const resetData = new URLSearchParams();
+    resetData.append('phone', phoneForm.phone);
+    resetData.append('captcha', phoneForm.captcha);
+    resetData.append('newPassword', phoneForm.newPassword);
 
-    const res = await service.post('/register', registerData, {
+    const res = await service.post('/resetPassword', resetData, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     });
 
     if (res.code === 200) {
-      ElMessage.success('注册成功！');
-      // 注册成功后切换到登录模式
-      isResetMode.value = false;
-      // 清空表单
-      phoneForm.captcha = '';
-      phoneForm.username = '';
-      phoneForm.agreement = false;
+      // 成功后延迟一下切换到登录模式
+      setTimeout(() => {
+        isResetMode.value = false;
+        phoneForm.captcha = '';
+      }, 1500);
+
+      ElMessage.success('密码重置成功！');
     } else {
-      ElMessage.error('注册失败: ' + (res.message || '请稍后重试'));
+      ElMessage.error('密码重置失败: ' + (res.message || '请稍后重试'));
     }
   } catch (error) {
-    ElMessage.error('注册失败: ' + (error.message || '网络异常，请稍后重试'));
+    ElMessage.error('密码重置失败: ' + (error.message || '网络异常，请稍后重试'));
   } finally {
     loginLoading.value = false;
   }

@@ -3,29 +3,6 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.yangshengzhou.lucky_sms.mapper.UserMapper">
-
-    <!-- 登录查询：获取用户基础信息 + 角色 -->
-    <select id="login" parameterType="map" resultType="com.yangshengzhou.lucky_sms.vo.LoginVO">
-        SELECT
-            u.user_id,
-            u.username,
-            u.phone,
-            r.role_name  -- 角色名称（TEACHER/STUDENT）
-        FROM users u
-                 LEFT JOIN user_roles ur ON u.user_id = ur.user_id
-                 LEFT JOIN roles r ON ur.role_id = r.role_id
-        WHERE u.username = #{username}
-          AND u.password_hash = #{passwordHash}
-          AND u.status = 'ACTIVE'
-    </select>
-
-    <!-- 手机号是否已被使用 -->
-    <select id="isUsedPhone" parameterType="String" resultType="boolean">
-        SELECT COUNT(*) > 0
-        FROM users
-        WHERE phone = #{phone}
-    </select>
-
     <!-- 通过手机号返回用户 -->
     <select id="loginByPhone" parameterType="String" resultType="com.yangshengzhou.lucky_sms.vo.LoginVO">
         SELECT
@@ -44,6 +21,12 @@
     <insert id="registerByPhone" parameterType="String">
         INSERT INTO users (phone)
         VALUES (#{phone})
+    </insert>
+
+    <insert id="resetPasswordByPhone" parameterType="java.util.Map">
+        UPDATE users
+        SET password_hash = #{password}
+        WHERE phone = #{phone}
     </insert>
 
 </mapper>
