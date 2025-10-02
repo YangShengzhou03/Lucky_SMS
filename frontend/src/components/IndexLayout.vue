@@ -9,10 +9,7 @@
           </div>
           <div class="nav-actions">
             <el-button type="text" size="small" class="main-login-btn" @click="handleLogin">
-              <span class="btn-text">登录</span>
-            </el-button>
-            <el-button type="primary" size="small" class="main-register-btn" @click="handleRegister">
-              <span class="btn-text">注册</span>
+              <span class="btn-text">登录/注册</span>
             </el-button>
           </div>
         </div>
@@ -281,10 +278,6 @@ const handleScroll = () => {
 }
 
 const handleLogin = () => {
-  router.push('/login')
-}
-
-const handleRegister = () => {
   router.push('/login')
 }
 
