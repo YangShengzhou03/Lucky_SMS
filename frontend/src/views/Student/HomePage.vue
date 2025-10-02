@@ -2,8 +2,8 @@
   <div class="student-home" @mousemove="handleMouseMove">
     <div>
       <div class="welcome-section modern-card">
-        <h2>欢迎回来，<span class="username">{{ student?.name || '--' }}</span> 👋</h2>
-        <p class="subtitle">学号：{{ student?.id || '--' }} | 班级：{{ student?.className || '--' }}</p>
+        <h2>欢迎回来，<span class="username">{{ student?.username || '--' }}</span> 👋</h2>
+        <p class="subtitle">学号：{{ student?.student_no || '--' }} | 班级：{{ student?.class_name || '--' }}</p>
       </div>
       <div class="info-cards">
         <div class="modern-card score-card">
@@ -11,7 +11,7 @@
             <h3><el-icon>
                 <Trophy />
               </el-icon> 学业成绩</h3>
-            <div class="card-badge" v-if="student?.rank && student.rank <= 3">TOP {{ student.rank }}</div>
+            <div class="card-badge" v-if="student?.class_rank && student.class_rank <= 3">TOP {{ student.class_rank }}</div>
           </div>
           <div class="card-content">
             <div class="gpa">
@@ -22,7 +22,7 @@
               <el-progress :percentage="rankPercentage" :show-text="false" :stroke-width="8" color="#e6a23c" />
               <div class="progress-labels">
                 <span>班级排名</span>
-                <span>{{ student?.rank || '--' }} / {{ student?.classSize || '--' }}</span>
+                <span>{{ student?.class_rank || '--' }} / {{ student?.classSize || '--' }}</span>
               </div>
             </div>
           </div>
@@ -35,10 +35,10 @@
           </div>
           <div class="card-content">
             <div class="course-count">
-              <span class="highlight">{{ student?.courseCount || '--' }}</span> 门课程进行中
+              <span class="highlight">{{ student?.course_count || '--' }}</span> 门课程进行中
             </div>
             <div class="next-course">
-              <div class="course-time">{{ formatCourseTime(student?.nextCourse?.time || '--') }}</div>
+              <div class="course-time">{{ student?.nextCourse ? formatCourseTime(student?.nextCourse?.time) : '--' }}</div>
               <div class="course-name">{{ student?.nextCourse?.name || '暂无课程' }}</div>
               <div class="course-location">{{ student?.nextCourse?.location || '待定教室' }}</div>
             </div>
@@ -55,14 +55,14 @@
           </div>
           <div class="card-content">
             <div class="todo-list">
-              <template v-if="student?.todos?.length">
+              <template v-if="student?.todos && student.todos.length">
                 <div class="todo-item" v-for="item in filteredTodos" :key="item.id"
                   :class="{ 'urgent': isUrgent(item.dueDate), 'completed': item.completed }">
                   <el-checkbox v-model="item.completed" @change="updateTodo(item)" />
                   <div class="todo-content">
                     <span>{{ item.text }}</span>
                     <div class="todo-meta">
-                      <el-tag size="mini" :type="getDueTagType(item.dueDate)" effect="plain">
+                      <el-tag size="small" :type="getDueTagType(item.dueDate)" effect="plain">
                         {{ item.dueDate }}
                       </el-tag>
                       <el-icon v-if="item.important" color="#F56C6C">
@@ -137,16 +137,16 @@ const loading = ref(true)
 const error = ref(null)
 
 const pendingCount = computed(() => {
-  return student.value?.todos?.filter(todo => !todo.completed).length || 0
+  return student.value?.todos ? student.value.todos.filter(todo => !todo.completed).length : 0
 })
 
 const filteredTodos = computed(() => {
-  return student.value?.todos?.slice(0, 4) || []
+  return student.value?.todos ? student.value.todos.filter(todo => !todo.completed).slice(0, 4) : []
 })
 
 const rankPercentage = computed(() => {
-  if (student.value?.rank && student.value?.classSize) {
-    return (1 - (student.value.rank - 1) / student.value.classSize) * 100
+  if (student.value?.class_rank && student.value?.classSize) {
+    return (1 - (student.value.class_rank - 1) / student.value.classSize) * 100
   }
   return 0
 })
@@ -228,53 +228,18 @@ const fetchData = async () => {
     
     // 如果API请求失败，使用模拟数据作为后备
     student.value = {
-      name: '张三',
-      id: '20230001',
-      className: '计算机科学与技术2023级1班',
-      gpa: '3.75',
-      rank: 5,
-      classSize: 30,
-      courseCount: 6,
-      nextCourse: {
-        name: '数据结构与算法',
-        time: '14:00-15:30',
-        location: '逸夫楼305'
-      },
-      todos: [
-        { id: 1, text: '完成数据结构作业', dueDate: '明天', completed: false, important: true },
-        { id: 2, text: '准备英语听力测试', dueDate: '3天', completed: false, important: false },
-        { id: 3, text: '提交实验报告', dueDate: '5天', completed: true, important: false },
-        { id: 4, text: '复习线性代数', dueDate: '7天', completed: false, important: true },
-        { id: 5, text: '参加编程竞赛', dueDate: '10天', completed: false, important: true }
-      ]
+      username: '张三',
+      student_no: '2025CS0002',
+      class_name: '示例班级',
+      gpa: '4.00',
+      class_rank: '23',
+      classSize: '2',
+      course_count: '0',
+      nextCourse: null,
+      todos: null
     }
 
-    announcements.value = [
-      {
-        id: 1,
-        title: '关于2023-2024学年期末考试安排的通知',
-        date: '2023-12-01',
-        department: '教务处',
-        type: 'important',
-        content: '本学期期末考试将于12月20日开始，请同学们提前做好准备。'
-      },
-      {
-        id: 2,
-        title: '2023年度校园文化节活动预告',
-        date: '2023-11-25',
-        department: '学生会',
-        type: 'activity',
-        content: '校园文化节将于12月10日至15日举行，欢迎广大同学积极参与。'
-      },
-      {
-        id: 3,
-        title: '关于调整作息时间的通知',
-        date: '2023-11-20',
-        department: '教务处',
-        type: 'notice',
-        content: '根据学校安排，自2023年12月1日起，学校作息时间将进行调整。'
-      }
-    ]
+    announcements.value = []
   } finally {
     loading.value = false
   }

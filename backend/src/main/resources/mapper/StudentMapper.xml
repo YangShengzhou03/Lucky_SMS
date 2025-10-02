@@ -3,17 +3,37 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.yangshengzhou.lucky_sms.mapper.student.StudentMapper">
-    <!-- 通过uid返回学生信息 -->
-    <select id="selectStudentById" parameterType="Integer" resultType="com.yangshengzhou.lucky_sms.vo.student.StudentVO">
+    <!-- 1. 定义显式映射规则：column 对应 SQL 列名，property 对应 StudentVO 属性名 -->
+    <resultMap id="StudentVOMap" type="com.yangshengzhou.lucky_sms.vo.student.StudentVO">
+        <result column="username" property="username"/>
+        <result column="student_no" property="student_no"/>
+        <result column="gpa" property="gpa"/>
+        <result column="class_rank" property="class_rank"/>
+        <result column="classSize" property="classSize"/>
+        <result column="class_name" property="class_name"/>
+        <result column="course_count" property="course_count"/>
+    </resultMap>
+
+    <!-- 2. 使用 resultMap 替换 resultType -->
+    <select id="selectStudentById" parameterType="Integer" resultMap="StudentVOMap">
         SELECT
-            u.username
+            u.username,
+            s.student_no AS student_no,
+            s.gpa,
+            s.class_rank,
+            (SELECT COUNT(*) FROM students WHERE class_id = s.class_id) AS classSize,
+            ci.class_name AS class_name,
+            (
+                SELECT COUNT(*)
+                FROM course_selections cs
+                         INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
+                WHERE cs.student_id = s.student_id AND cs.`STATUS` = 'SELECTED'
+            ) AS course_count
         FROM
             users u
-                INNER JOIN students s ON u.user_id = s.user_id  -- 显式指定连接条件，更清晰
-                INNER JOIN course_selections c ON s.student_id = c.student_id
+                INNER JOIN students s ON u.user_id = s.user_id
+                LEFT JOIN class_info ci ON s.class_id = ci.class_id
         WHERE
             u.user_id = #{userId}
-        GROUP BY
-            u.username, s.student_no, s.gpa, s.class_rank  -- 非聚合字段需分组
     </select>
 </mapper>
