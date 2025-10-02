@@ -8,8 +8,8 @@
             <span class="logo-badge">PRO</span>
           </div>
           <div class="nav-actions">
-            <el-button type="text" size="small" class="main-login-btn" @click="handleLogin">
-              <span class="btn-text">登录/注册</span>
+            <el-button type="text" size="large" class="main-login-btn" @click="handleLogin">
+              <span class="btn-text">登录 / 注册</span>
             </el-button>
           </div>
         </div>
