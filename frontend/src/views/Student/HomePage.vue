@@ -11,7 +11,8 @@
             <h3><el-icon>
                 <Trophy />
               </el-icon> 学业成绩</h3>
-            <div class="card-badge" v-if="student?.class_rank && student.class_rank <= 3">TOP {{ student.class_rank }}</div>
+            <div class="card-badge" v-if="student?.class_rank && student.class_rank <= 3">TOP {{ student.class_rank }}
+            </div>
           </div>
           <div class="card-content">
             <div class="gpa">
@@ -38,7 +39,8 @@
               <span class="highlight">{{ student?.course_count || '--' }}</span> 门课程进行中
             </div>
             <div class="next-course">
-              <div class="course-time">{{ student?.nextCourse ? formatCourseTime(student?.nextCourse?.time) : '--' }}</div>
+              <div class="course-time">{{ student?.nextCourse ? formatCourseTime(student?.nextCourse?.time) : '--' }}
+              </div>
               <div class="course-name">{{ student?.nextCourse?.name || '暂无课程' }}</div>
               <div class="course-location">{{ student?.nextCourse?.location || '待定教室' }}</div>
             </div>
@@ -225,7 +227,7 @@ const fetchData = async () => {
     const res = await service.get('/student/home')
 
     console.log(res)
-    
+
     if (res.code === 200) {
       student.value = res.data.student || {}
       announcements.value = res.data.announcements || []
@@ -235,7 +237,7 @@ const fetchData = async () => {
   } catch (err) {
     error.value = '获取数据失败，请稍后重试'
     console.error('获取数据失败:', err)
-    
+
     // 如果API请求失败，使用模拟数据作为后备
     student.value = {
       username: '张三',
@@ -244,12 +246,38 @@ const fetchData = async () => {
       gpa: '4.00',
       class_rank: '23',
       classSize: '2',
-      course_count: '0',
-      nextCourse: null,
-      todos: null
+      course_count: '1',
+      nextCourse: {
+        "id": "CS301",
+        "name": "数据结构与算法",
+        "time": "08:00-09:40",
+        "location": "计算机楼A305",
+        "teacher": "李教授",
+        "day": "周一"
+      },
+      todos: [
+        {
+          "id": "todo1",
+          "text": "完成数据结构作业第三章",
+          "completed": false,
+          "dueDate": "明天",
+          "important": true,
+          "category": "作业"
+        },
+      ]
     }
 
-    announcements.value = []
+    announcements.value = [
+      {
+        "id": "ann5",
+        "title": "校园招聘信息",
+        "content": "多家知名企业将于下周来校招聘，欢迎大四同学参加...",
+        "date": "2023-12-11",
+        "department": "就业指导中心",
+        "type": "info",
+        "priority": "low"
+      }
+    ]
   } finally {
     loading.value = false
   }
@@ -748,31 +776,31 @@ onUnmounted(() => {
   text-align: center;
   padding: 40px 20px;
   color: var(--text-secondary);
-  
+
   .empty-icon {
     margin-bottom: 16px;
     opacity: 0.6;
-    
+
     .el-icon {
       font-size: 48px;
       color: #909399;
     }
   }
-  
+
   .empty-title {
     font-size: 16px;
     font-weight: 500;
     margin: 0 0 8px;
     color: var(--text-primary);
   }
-  
+
   .empty-desc {
     font-size: 14px;
     margin: 0 0 20px;
     color: var(--text-secondary);
     line-height: 1.5;
   }
-  
+
   .empty-button {
     padding: 10px 20px;
     border-radius: 8px;
@@ -781,7 +809,7 @@ onUnmounted(() => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    
+
     &:hover {
       transform: translateY(-2px);
     }
@@ -791,7 +819,7 @@ onUnmounted(() => {
 .empty-todos {
   .empty-button {
     box-shadow: 0 4px 12px rgba(64, 158, 255, 0.2);
-    
+
     &:hover {
       box-shadow: 0 6px 16px rgba(64, 158, 255, 0.3);
     }
@@ -803,7 +831,7 @@ onUnmounted(() => {
     color: #409eff;
     border: 1px solid #409eff;
     background-color: rgba(64, 158, 255, 0.1);
-    
+
     &:hover {
       background-color: rgba(64, 158, 255, 0.2);
       border-color: #66b1ff;
