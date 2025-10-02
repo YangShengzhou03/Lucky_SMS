@@ -8,10 +8,10 @@ USE Lucky_SMS;
 -- 用户表：存储系统所有用户的基础信息
 CREATE TABLE users (
     user_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '用户ID（主键）',
-    username VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名（全局唯一）',
+    username VARCHAR(50) UNIQUE COMMENT '用户名（全局唯一）',
     password_hash VARCHAR(255) COMMENT '加密后的密码',
     email VARCHAR(100) UNIQUE COMMENT '电子邮箱',
-    phone VARCHAR(20) UNIQUE NOT NULL COMMENT '手机号码（可选）',
+    phone VARCHAR(20) UNIQUE NOT NULL COMMENT '手机号码（不得为空）',
     gender ENUM('M', 'F', 'O') DEFAULT 'O' COMMENT '性别（M-男，F-女，O-其他）',
     birth_date DATE COMMENT '出生日期',
     avatar_url VARCHAR(255) COMMENT '头像URL',
@@ -201,102 +201,83 @@ CREATE TABLE courses (
 -- 学期表
 CREATE TABLE semesters (
     semester_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '学期ID（主键）',
-    academic_year VARCHAR(10) NOT NULL COMMENT '学年，例如：2023-2024',
-    semester_name VARCHAR(50) NOT NULL COMMENT '学期名称',
+    academic_year VARCHAR(9) NOT NULL COMMENT '学年（如2023-2024）',
+    semester_name VARCHAR(10) NOT NULL COMMENT '学期名称（如第一学期、第二学期）',
     start_date DATE NOT NULL COMMENT '开始日期',
     end_date DATE NOT NULL COMMENT '结束日期',
-    is_current TINYINT(1) DEFAULT 0 COMMENT '是否当前学期',
-    UNIQUE KEY unique_semester (academic_year, semester_name)
-) COMMENT = '学期表-定义学校学期';
+    is_current TINYINT(1) DEFAULT 0 COMMENT '是否当前学期（0-否，1-是）',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_academic_year (academic_year),
+    INDEX idx_is_current (is_current)
+) COMMENT = '学期表-定义学期信息';
 
--- 教师授课表
+-- 教师授课表（补充级联操作）
 CREATE TABLE teaching_assignments (
-    assignment_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '授课记录ID（主键）',
+    assignment_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '授课ID（主键）',
     teacher_id INT NOT NULL COMMENT '教师ID（外键）',
     course_id INT NOT NULL COMMENT '课程ID（外键）',
     semester_id INT NOT NULL COMMENT '学期ID（外键）',
-    classroom VARCHAR(20) COMMENT '教室',
+    classroom VARCHAR(50) COMMENT '教室',
     schedule VARCHAR(100) COMMENT '上课时间安排',
-    max_students SMALLINT NOT NULL COMMENT '最大选课人数',
-    current_students SMALLINT DEFAULT 0 COMMENT '当前选课人数',
+    max_students INT DEFAULT 0 COMMENT '最大学生数',
+    current_students INT DEFAULT 0 COMMENT '当前学生数',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     FOREIGN KEY (teacher_id) REFERENCES teachers(teacher_id) ON DELETE CASCADE,
     FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE,
-    FOREIGN KEY (semester_id) REFERENCES semesters(semester_id) ON UPDATE CASCADE,
-    UNIQUE KEY unique_teaching_assignment (teacher_id, course_id, semester_id),
-    INDEX idx_teacher_semester (teacher_id, semester_id)
-) COMMENT = '教师授课表-记录教师授课任务';
+    FOREIGN KEY (semester_id) REFERENCES semesters(semester_id) ON DELETE CASCADE,
+    INDEX idx_teacher_course (teacher_id, course_id),
+    INDEX idx_semester_course (semester_id, course_id)
+) COMMENT = '教师授课表-记录教师授课安排';
 
--- 学生选课表（级联操作）
+-- 学生选课表（补充级联操作）
 CREATE TABLE course_selections (
-    selection_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '选课记录ID（主键）',
+    selection_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '选课ID（主键）',
     student_id INT NOT NULL COMMENT '学生ID（外键）',
-    assignment_id INT NOT NULL COMMENT '授课记录ID（外键）',
-    selection_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '选课日期',
-    status ENUM('SELECTED', 'DROPPED', 'COMPLETED') DEFAULT 'SELECTED' COMMENT '选课状态',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    assignment_id INT NOT NULL COMMENT '授课ID（外键）',
+    selection_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '选课时间',
+    status ENUM('SELECTED', 'DROPPED', 'COMPLETED') DEFAULT 'SELECTED' COMMENT '选课状态（SELECTED-已选，DROPPED-已退，COMPLETED-已完成）',
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
     FOREIGN KEY (assignment_id) REFERENCES teaching_assignments(assignment_id) ON DELETE CASCADE,
-    UNIQUE KEY unique_course_selection (student_id, assignment_id)
+    UNIQUE KEY unique_student_assignment (student_id, assignment_id)
 ) COMMENT = '学生选课表-记录学生选课信息';
 
--- 学生成绩表（级联操作）
+-- 成绩表（补充级联操作）
 CREATE TABLE course_grades (
     grade_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '成绩ID（主键）',
     student_id INT NOT NULL COMMENT '学生ID（外键）',
-    assignment_id INT NOT NULL COMMENT '授课记录ID（外键）',
-    usual_grade DECIMAL(5,2) COMMENT '平时成绩',
-    exam_grade DECIMAL(5,2) COMMENT '考试成绩',
-    final_grade DECIMAL(5,2) COMMENT '最终成绩',
-    gpa_grade DECIMAL(3,2) COMMENT '绩点成绩',
-    grade_date DATE COMMENT '成绩录入日期',
-    remark VARCHAR(255) COMMENT '备注',
-    created_by INT NOT NULL COMMENT '录入教师ID（外键）',
+    assignment_id INT NOT NULL COMMENT '授课ID（外键）',
+    usual_score DECIMAL(5,2) COMMENT '平时成绩',
+    final_grade DECIMAL(5,2) COMMENT '期末成绩',
+    gpa_grade DECIMAL(3,2) COMMENT '绩点',
     review_status_id INT NOT NULL DEFAULT 1 COMMENT '审核状态（外键）',
+    review_time TIMESTAMP NULL COMMENT '审核时间',
     reviewer_id INT COMMENT '审核人ID（外键）',
-    review_date DATE COMMENT '审核日期',
-    review_comment VARCHAR(255) COMMENT '审核意见',
+    review_comment TEXT COMMENT '审核意见',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
     FOREIGN KEY (assignment_id) REFERENCES teaching_assignments(assignment_id) ON DELETE CASCADE,
-    FOREIGN KEY (created_by) REFERENCES teachers(teacher_id) ON UPDATE CASCADE,
     FOREIGN KEY (review_status_id) REFERENCES grade_review_statuses(status_id) ON UPDATE CASCADE,
     FOREIGN KEY (reviewer_id) REFERENCES teachers(teacher_id) ON UPDATE SET NULL,
-    UNIQUE KEY unique_student_grade (student_id, assignment_id)
-) COMMENT = '学生成绩表-记录学生课程成绩';
+    UNIQUE KEY unique_student_assignment_grade (student_id, assignment_id),
+    INDEX idx_student_grade (student_id),
+    INDEX idx_assignment_grade (assignment_id)
+) COMMENT = '成绩表-记录学生课程成绩';
 
--- 考勤记录表（级联操作）
-CREATE TABLE attendances (
-    attendance_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '考勤记录ID（主键）',
-    assignment_id INT NOT NULL COMMENT '授课记录ID（外键）',
-    student_id INT NOT NULL COMMENT '学生ID（外键）',
-    date DATE NOT NULL COMMENT '考勤日期',
-    status ENUM('PRESENT', 'ABSENT', 'LATE', 'EARLY_LEAVE', 'SICK', 'PERSONAL') DEFAULT 'PRESENT' COMMENT '考勤状态',
-    remark VARCHAR(255) COMMENT '备注',
-    recorded_by INT NOT NULL COMMENT '记录人ID（外键）',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    FOREIGN KEY (assignment_id) REFERENCES teaching_assignments(assignment_id) ON DELETE CASCADE,
-    FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
-    FOREIGN KEY (recorded_by) REFERENCES teachers(teacher_id) ON UPDATE CASCADE,
-    UNIQUE KEY unique_attendance (assignment_id, student_id, date)
-) COMMENT = '考勤记录表-记录学生考勤信息';
-
--- 图书表（级联操作）
+-- 图书表
 CREATE TABLE books (
     book_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '图书ID（主键）',
-    isbn VARCHAR(20) UNIQUE NOT NULL COMMENT 'ISBN编号（全局唯一）',
-    book_title VARCHAR(200) NOT NULL COMMENT '图书标题',
+    isbn VARCHAR(20) UNIQUE NOT NULL COMMENT '国际标准书号（ISBN）',
+    book_title VARCHAR(255) NOT NULL COMMENT '书名',
     author VARCHAR(100) NOT NULL COMMENT '作者',
     publisher VARCHAR(100) NOT NULL COMMENT '出版社',
-    publish_year YEAR COMMENT '出版年份',
-    category_id INT NOT NULL COMMENT '分类ID（外键）',
+    publish_year INT COMMENT '出版年份',
+    category_id INT NOT NULL COMMENT '图书分类ID（外键）',
     location VARCHAR(50) NOT NULL COMMENT '馆藏位置',
-    total_copies INT NOT NULL DEFAULT 1 COMMENT '总馆藏数量',
-    available_copies INT NOT NULL DEFAULT 1 COMMENT '可用数量',
+    total_copies INT NOT NULL DEFAULT 1 COMMENT '总册数',
+    available_copies INT NOT NULL DEFAULT 1 COMMENT '可借册数',
     created_by INT NOT NULL COMMENT '创建人ID（外键）',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -375,102 +356,6 @@ CREATE TABLE course_prerequisites (
     FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE,
     FOREIGN KEY (prerequisite_course_id) REFERENCES courses(course_id) ON DELETE CASCADE
 ) COMMENT = '课程先修关系表-定义课程先修关系';
-
-
-/*
-优化后的WebSocket聊天功能相关表
-使用im_前缀(Instant Messaging)避免表名冲突
-*/
-
--- 1. 即时通讯群组表：存储群聊基本信息
-CREATE TABLE im_groups (
-    group_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '群ID（主键）',
-    group_name VARCHAR(100) NOT NULL COMMENT '群名称',
-    owner_id INT NOT NULL COMMENT '群主ID（外键，关联用户表）',
-    avatar_url VARCHAR(255) COMMENT '群头像URL',
-    description TEXT COMMENT '群描述',
-    status ENUM('ACTIVE', 'ARCHIVED') DEFAULT 'ACTIVE' COMMENT '群状态（ACTIVE-活跃，ARCHIVED-已归档）',
-    max_members INT DEFAULT 200 COMMENT '最大成员数',
-    can_invite ENUM('ALL', 'ADMIN_ONLY') DEFAULT 'ALL' COMMENT '谁可以邀请成员',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '群创建时间',
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '群信息更新时间',
-    FOREIGN KEY (owner_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE RESTRICT,
-    INDEX idx_group_owner (owner_id) COMMENT '通过群主查询群聊'
-) COMMENT = '即时通讯群组表-存储群聊的基本信息';
-
--- 2. 群成员表：管理用户与群聊的关联关系
-CREATE TABLE im_group_members (
-    group_id INT NOT NULL COMMENT '群ID（外键）',
-    user_id INT NOT NULL COMMENT '用户ID（外键）',
-    role ENUM('OWNER', 'ADMIN', 'MEMBER') NOT NULL COMMENT '成员角色（OWNER-群主，ADMIN-管理员，MEMBER-普通成员）',
-    join_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '加入时间',
-    is_muted TINYINT(1) DEFAULT 0 COMMENT '是否静音（0-否，1-是）',
-    is_quit TINYINT(1) DEFAULT 0 COMMENT '是否退出（0-否，1-是）',
-    quit_time TIMESTAMP NULL COMMENT '退出时间',
-    PRIMARY KEY (group_id, user_id),
-    FOREIGN KEY (group_id) REFERENCES im_groups(group_id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    INDEX idx_user_groups (user_id) COMMENT '查询用户加入的所有群'
-) COMMENT = '群成员表-管理用户与群聊的关联关系';
-
--- 3. 会话表：统一管理单聊和群聊的会话
-CREATE TABLE im_conversations (
-    conversation_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '会话ID（主键）',
-    conversation_type ENUM('PERSONAL', 'GROUP') NOT NULL COMMENT '会话类型（PERSONAL-单聊，GROUP-群聊）',
-    group_id INT COMMENT '群聊ID（外键，仅群聊时非空）',
-    
-    -- 单聊时使用（存储排序后的用户ID确保唯一性）
-    user_small_id INT COMMENT '较小用户ID',
-    user_large_id INT COMMENT '较大用户ID',
-    
-    last_message_id INT COMMENT '最后一条消息ID（用于快速获取最新消息）',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '会话创建时间',
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间（最后一条消息时间）',
-    
-    -- 外键关联
-    FOREIGN KEY (group_id) REFERENCES im_groups(group_id) ON DELETE CASCADE,
-    FOREIGN KEY (user_small_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (user_large_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    
-    -- 约束：确保单聊用户ID的顺序，避免重复会话
-    CONSTRAINT chk_user_ids CHECK (
-        (conversation_type = 'GROUP' AND group_id IS NOT NULL AND user_small_id IS NULL AND user_large_id IS NULL) OR
-        (conversation_type = 'PERSONAL' AND group_id IS NULL AND user_small_id IS NOT NULL AND user_large_id IS NOT NULL AND user_small_id < user_large_id)
-    ),
-    UNIQUE KEY uk_personal_conversation (user_small_id, user_large_id) COMMENT '单聊会话唯一约束',
-    UNIQUE KEY uk_group_conversation (group_id) COMMENT '群聊会话唯一约束（一个群对应一个会话）'
-) COMMENT = '会话表-管理单聊和群聊的会话信息';
-
--- 4. 消息表：存储所有聊天消息（单聊和群聊）
-CREATE TABLE im_messages (
-    message_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '消息ID（主键）',
-    conversation_id INT NOT NULL COMMENT '所属会话ID（外键）',
-    sender_id INT NOT NULL COMMENT '发送者ID（外键）',
-    content TEXT NOT NULL COMMENT '消息内容（文本或文件URL）',
-    message_type ENUM('TEXT', 'IMAGE', 'FILE', 'SYSTEM', 'VOICE') DEFAULT 'TEXT' COMMENT '消息类型，新增语音类型',
-    send_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '发送时间',
-    is_withdrawn TINYINT(1) DEFAULT 0 COMMENT '是否撤回（0-未撤回，1-已撤回）',
-    withdraw_time TIMESTAMP NULL COMMENT '撤回时间',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间（如撤回时）',
-    FOREIGN KEY (conversation_id) REFERENCES im_conversations(conversation_id) ON DELETE CASCADE,
-    FOREIGN KEY (sender_id) REFERENCES users(user_id) ON UPDATE CASCADE,
-    INDEX idx_conversation_time (conversation_id, send_time) COMMENT '按会话和时间查询历史消息',
-    INDEX idx_sender_conversation (sender_id, conversation_id) COMMENT '查询用户在特定会话中的消息'
-) COMMENT = '消息表-存储所有聊天消息记录';
-
--- 5. 消息阅读状态表：记录每个用户对每条消息的阅读状态
-CREATE TABLE im_message_read_status (
-    message_id INT NOT NULL COMMENT '消息ID（外键）',
-    user_id INT NOT NULL COMMENT '用户ID（外键）',
-    is_read TINYINT(1) DEFAULT 0 COMMENT '是否已读（0-未读，1-已读）',
-    read_at TIMESTAMP NULL COMMENT '阅读时间',
-    PRIMARY KEY (message_id, user_id),
-    FOREIGN KEY (message_id) REFERENCES im_messages(message_id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    INDEX idx_user_read_status (user_id, is_read) COMMENT '查询用户的未读消息',
-    INDEX idx_message_read (message_id, is_read) COMMENT '查询消息的阅读情况'
-) COMMENT = '消息阅读状态表-记录每个用户对消息的阅读状态';
 
 
 /*
@@ -643,6 +528,17 @@ CREATE TRIGGER update_current_students_after_insert
 AFTER INSERT ON course_selections
 FOR EACH ROW
 BEGIN
+    DECLARE error_msg VARCHAR(255);
+    
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 error_msg = MESSAGE_TEXT;
+        -- 记录错误到系统日志表（如果存在）
+        INSERT INTO system_config (config_key, config_value, config_type, description)
+        VALUES ('TRIGGER_ERROR', CONCAT('update_current_students_after_insert: ', error_msg), 'STRING', '触发器错误日志')
+        ON DUPLICATE KEY UPDATE config_value = CONCAT('update_current_students_after_insert: ', error_msg);
+    END;
+    
     IF NEW.status = 'SELECTED' THEN
         UPDATE teaching_assignments 
         SET current_students = current_students + 1 
@@ -657,181 +553,22 @@ CREATE TRIGGER update_current_students_after_update
 AFTER UPDATE ON course_selections
 FOR EACH ROW
 BEGIN
+    DECLARE error_msg VARCHAR(255);
+    
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 error_msg = MESSAGE_TEXT;
+        -- 记录错误到系统日志表（如果存在）
+        INSERT INTO system_config (config_key, config_value, config_type, description)
+        VALUES ('TRIGGER_ERROR', CONCAT('update_current_students_after_update: ', error_msg), 'STRING', '触发器错误日志')
+        ON DUPLICATE KEY UPDATE config_value = CONCAT('update_current_students_after_update: ', error_msg);
+    END;
+    
     IF OLD.status = 'SELECTED' AND NEW.status = 'DROPPED' THEN
         UPDATE teaching_assignments 
         SET current_students = current_students - 1 
         WHERE assignment_id = NEW.assignment_id;
     END IF;
-END$$
-DELIMITER ;
-
--- 群聊创建后自动创建会话触发器
-DELIMITER $$
-CREATE TRIGGER create_group_conversation_after_group_insert
-AFTER INSERT ON im_groups
-FOR EACH ROW
-BEGIN
-    -- 群聊创建后自动生成对应的会话记录
-    INSERT INTO im_conversations (conversation_type, group_id)
-    VALUES ('GROUP', NEW.group_id);
-    
-    -- 自动将群主加入群成员表
-    INSERT INTO im_group_members (group_id, user_id, role)
-    VALUES (NEW.group_id, NEW.owner_id, 'OWNER');
-END$$
-DELIMITER ;
-
--- 消息发送后更新会话最后一条消息触发器
-DELIMITER $$
-CREATE TRIGGER update_conversation_last_message_after_insert
-AFTER INSERT ON im_messages
-FOR EACH ROW
-BEGIN
-    -- 更新会话的最后一条消息ID和时间
-    UPDATE im_conversations
-    SET last_message_id = NEW.message_id, updated_at = NEW.send_time
-    WHERE conversation_id = NEW.conversation_id;
-    
-    -- 对于群聊，自动为所有群成员创建未读记录
-    IF EXISTS (SELECT 1 FROM im_conversations WHERE conversation_id = NEW.conversation_id AND conversation_type = 'GROUP') THEN
-        INSERT INTO im_message_read_status (message_id, user_id, is_read)
-        SELECT NEW.message_id, user_id, 0
-        FROM im_group_members
-        WHERE group_id = (SELECT group_id FROM im_conversations WHERE conversation_id = NEW.conversation_id)
-          AND is_quit = 0
-          AND user_id != NEW.sender_id;  -- 发送者自己不需要未读记录
-    ELSE
-        -- 对于单聊，为接收方创建未读记录
-        INSERT INTO im_message_read_status (message_id, user_id, is_read)
-        SELECT NEW.message_id, 
-               CASE WHEN user_small_id = NEW.sender_id THEN user_large_id ELSE user_small_id END, 
-               0
-        FROM im_conversations
-        WHERE conversation_id = NEW.conversation_id;
-    END IF;
-END$$
-DELIMITER ;
-
--- 群主转让存储过程
-DELIMITER $$
-CREATE PROCEDURE transfer_group_ownership(IN p_group_id INT, IN p_old_owner_id INT, IN p_new_owner_id INT)
-BEGIN
-    -- 检查原群主是否为当前群主
-    IF NOT EXISTS (SELECT 1 FROM im_groups WHERE group_id = p_group_id AND owner_id = p_old_owner_id) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '原群主ID不正确';
-    END IF;
-    
-    -- 检查新群主是否为群成员
-    IF NOT EXISTS (SELECT 1 FROM im_group_members WHERE group_id = p_group_id AND user_id = p_new_owner_id AND is_quit = 0) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '新群主不是群成员';
-    END IF;
-    
-    -- 更新群主ID
-    UPDATE im_groups SET owner_id = p_new_owner_id WHERE group_id = p_group_id;
-    
-    -- 更新成员角色：原群主变为管理员，新群主变为群主
-    UPDATE im_group_members SET role = 'ADMIN' WHERE group_id = p_group_id AND user_id = p_old_owner_id;
-    UPDATE im_group_members SET role = 'OWNER' WHERE group_id = p_group_id AND user_id = p_new_owner_id;
-END$$
-DELIMITER ;
-
--- 加入群聊前检查成员数量限制的触发器
-DELIMITER $$
-CREATE TRIGGER check_group_member_limit_before_insert
-BEFORE INSERT ON im_group_members
-FOR EACH ROW
-BEGIN
-    DECLARE current_member_count INT;
-    DECLARE max_members_limit INT;
-    
-    -- 获取当前群成员数量（排除已退出的）
-    SELECT COUNT(*) INTO current_member_count
-    FROM im_group_members
-    WHERE group_id = NEW.group_id AND is_quit = 0;
-    
-    -- 获取群的最大成员限制
-    SELECT max_members INTO max_members_limit
-    FROM im_groups
-    WHERE group_id = NEW.group_id;
-    
-    -- 检查是否超过最大成员数
-    IF current_member_count >= max_members_limit THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '群成员数量已达上限';
-    END IF;
-END$$
-DELIMITER ;
-
--- 消息撤回时的触发器
-DELIMITER $$
-CREATE TRIGGER handle_message_withdrawal
-BEFORE UPDATE ON im_messages
-FOR EACH ROW
-BEGIN
-    -- 当消息被撤回时
-    IF OLD.is_withdrawn = 0 AND NEW.is_withdrawn = 1 THEN
-        SET NEW.withdraw_time = CURRENT_TIMESTAMP;
-        
-        -- 删除相关的已读状态记录
-        DELETE FROM im_message_read_status WHERE message_id = OLD.message_id;
-    END IF;
-END$$
-DELIMITER ;
-
--- 用户聊天会话存储过程（替代原视图，解决变量问题）
-DELIMITER $$
-CREATE PROCEDURE get_user_im_conversations(IN current_user_id INT)
-BEGIN
-    SELECT 
-        c.conversation_id,
-        c.conversation_type,
-        -- 单聊显示对方用户名，群聊显示群名称
-        CASE 
-            WHEN c.conversation_type = 'PERSONAL' THEN 
-                IF(u1.user_id = current_user_id, u2.username, u1.username)
-            ELSE 
-                g.group_name 
-        END AS conversation_name,
-        -- 单聊显示对方头像，群聊显示群头像
-        CASE 
-            WHEN c.conversation_type = 'PERSONAL' THEN 
-                IF(u1.user_id = current_user_id, u2.avatar_url, u1.avatar_url)
-            ELSE 
-                g.avatar_url 
-        END AS conversation_avatar,
-        -- 对方用户ID（仅单聊）
-        CASE 
-            WHEN c.conversation_type = 'PERSONAL' THEN 
-                IF(u1.user_id = current_user_id, u2.user_id, u1.user_id)
-            ELSE 
-                NULL 
-        END AS other_user_id,
-        c.group_id,
-        c.last_message_id,
-        m.content AS last_message_content,
-        m.send_time AS last_message_time,
-        m.sender_id AS last_message_sender,
-        -- 未读消息数量
-        (SELECT COUNT(*) FROM im_message_read_status 
-         WHERE conversation_id = c.conversation_id 
-           AND user_id = current_user_id 
-           AND is_read = 0) AS unread_count,
-        c.updated_at AS last_active_time
-    FROM 
-        im_conversations c
-    LEFT JOIN 
-        im_groups g ON c.group_id = g.group_id
-    LEFT JOIN 
-        users u1 ON c.user_small_id = u1.user_id
-    LEFT JOIN 
-        users u2 ON c.user_large_id = u2.user_id
-    LEFT JOIN 
-        im_messages m ON c.last_message_id = m.message_id
-    WHERE 
-        -- 筛选当前用户参与的会话
-        (c.conversation_type = 'GROUP' AND EXISTS (
-            SELECT 1 FROM im_group_members gm WHERE gm.group_id = c.group_id AND gm.user_id = current_user_id AND gm.is_quit = 0
-        )) OR
-        (c.conversation_type = 'PERSONAL' AND (current_user_id = c.user_small_id OR current_user_id = c.user_large_id));
 END$$
 DELIMITER ;
 
@@ -873,7 +610,7 @@ SELECT
 FROM 
     courses c
 JOIN 
-    teaching_assignments ta ON c.course_id = ta.course_id
+    teaching_assignments ta ON c.course_id = c.course_id
 JOIN 
     semesters s ON ta.semester_id = s.semester_id
 LEFT JOIN 
@@ -941,34 +678,13 @@ LEFT JOIN
 GROUP BY 
     t.teacher_id, t.teacher_no, u.username, d.department_name, tt.title_name;
 
--- 群成员列表视图
-CREATE OR REPLACE VIEW im_group_member_list AS
-SELECT 
-    gm.group_id,
-    g.group_name,
-    gm.user_id,
-    u.username,
-    u.avatar_url,
-    gm.role,
-    gm.join_time,
-    gm.is_muted,
-    gm.is_quit,
-    gm.quit_time
-FROM 
-    im_group_members gm
-JOIN 
-    im_groups g ON gm.group_id = g.group_id
-JOIN 
-    users u ON gm.user_id = u.user_id;
-
 
 /*
 初始化数据
 */
 
 -- 初始化系统配置
-INSERT INTO system_config (config_key, config_value, config_type, description)
-VALUES 
+INSERT INTO system_config (config_key, config_value, config_type, description) VALUES
 ('student_id_format', 'YYYY{dept}{major}####', 'STRING', '学号格式：入学年份+学院代码+专业代码+4位序号'),
 ('teacher_id_format', 'YY{dept}####', 'STRING', '教师编号格式：入职年份后两位+学院代码+4位序号'),
 ('max_borrow_days', '30', 'NUMBER', '图书最大借阅天数'),
@@ -977,10 +693,7 @@ VALUES
 ('gpa_scale', '4.0', 'NUMBER', '绩点满分值'),
 ('gpa_calculation_method', 'weighted_average', 'STRING', '绩点计算方法：加权平均'),
 ('max_renew_count', '2', 'NUMBER', '图书最大续借次数'),
-('password_expiration_days', '90', 'NUMBER', '密码过期天数'),
--- 聊天相关配置
-('max_group_members', '200', 'NUMBER', '群聊最大成员数'),
-('message_retention_days', '90', 'NUMBER', '消息保留天数');
+('password_expiration_days', '90', 'NUMBER', '密码过期天数');
 
 -- 初始化角色数据
 INSERT INTO roles (role_name, description) VALUES
@@ -990,7 +703,7 @@ INSERT INTO roles (role_name, description) VALUES
 ('LIBRARIAN', '图书管理员'),
 ('ASSISTANT', '助教');
 
--- 初始化权限数据（包含聊天相关权限）
+-- 初始化权限数据（移除聊天相关权限）
 INSERT INTO permissions (permission_name, description, module) VALUES
 -- 用户管理模块
 ('CREATE_USER', '创建用户', '用户管理'),
@@ -1022,27 +735,22 @@ INSERT INTO permissions (permission_name, description, module) VALUES
 ('RETURN_BOOK', '归还图书', '图书馆管理'),
 ('RENEW_BOOK', '续借图书', '图书馆管理'),
 -- 系统分析模块
-('VIEW_STATISTICS', '查看统计数据', '系统分析'),
--- 聊天模块权限
-('SEND_MESSAGE', '发送消息', '聊天功能'),
-('CREATE_GROUP', '创建群聊', '聊天功能'),
-('MANAGE_GROUP', '管理群聊（踢人、改权限等）', '聊天功能'),
-('WITHDRAW_MESSAGE', '撤回消息', '聊天功能');
+('VIEW_STATISTICS', '查看统计数据', '系统分析');
 
--- 初始化角色-权限映射（包含新增的聊天权限）
+-- 初始化角色-权限映射（移除聊天相关权限）
 INSERT INTO role_permissions (role_id, permission_id) VALUES
--- 管理员（1）：所有权限（1-26）
+-- 管理员（1）：所有权限（1-22）
 (1,1), (1,2), (1,3), (1,4), (1,5), (1,6), (1,7), (1,8),
 (1,9), (1,10), (1,11), (1,12), (1,13), (1,14), (1,15), (1,16),
-(1,17), (1,18), (1,19), (1,20), (1,21), (1,22), (1,23), (1,24), (1,25), (1,26),
--- 教师（2）：课程+成绩+统计+基础聊天权限
-(2,12), (2,13), (2,14), (2,15), (2,16), (2,22), (2,23), (2,24), (2,26),
--- 学生（3）：查看课程+成绩+借阅+基础聊天权限
-(3,12), (3,16), (3,20), (3,23), (3,26),
--- 图书管理员（4）：图书管理+借阅+基础聊天权限
-(4,17), (4,18), (4,19), (4,20), (4,21), (4,23), (4,26),
--- 助教（5）：查看课程+录入成绩+基础聊天权限
-(5,12), (5,13), (5,16), (5,23), (5,26);
+(1,17), (1,18), (1,19), (1,20), (1,21), (1,22),
+-- 教师（2）：课程+成绩+统计权限
+(2,12), (2,13), (2,14), (2,15), (2,16), (2,22),
+-- 学生（3）：查看课程+成绩+借阅权限
+(3,12), (3,16), (3,20),
+-- 图书管理员（4）：图书管理+借阅权限
+(4,17), (4,18), (4,19), (4,20), (4,21),
+-- 助教（5）：查看课程+录入成绩权限
+(5,12), (5,13), (5,16);
 
 -- 初始化学生状态
 INSERT INTO student_statuses (status_name, description) VALUES
@@ -1119,17 +827,6 @@ INSERT INTO semesters (academic_year, semester_name, start_date, end_date, is_cu
 ('2023-2024', '第二学期', '2024-02-26', '2024-07-15', 1),
 ('2024-2025', '第一学期', '2024-09-01', '2025-01-20', 0);
 
--- 初始化课程表
-INSERT INTO courses (course_code, course_name, course_description, department_id, credit, course_hours, course_type, exam_type, created_by) VALUES
-('CS101', '计算机基础', '计算机基础知识与操作', 1, 3.0, 48, 'COMPULSORY', 'CLOSED_BOOK', 1),
-('CS102', 'C语言程序设计', 'C语言编程基础', 1, 4.0, 64, 'COMPULSORY', 'PRACTICAL', 1),
-('CS201', '数据结构', '常用数据结构与算法', 1, 4.0, 64, 'COMPULSORY', 'PRACTICAL', 1),
-('CS202', '数据库原理', '数据库系统原理与应用', 1, 3.0, 48, 'COMPULSORY', 'CLOSED_BOOK', 1),
-('CS301', '操作系统', '计算机操作系统原理', 1, 4.0, 64, 'COMPULSORY', 'CLOSED_BOOK', 1),
-('IE101', '信息系统分析', '信息系统分析与设计', 2, 3.0, 48, 'COMPULSORY', 'REPORT', 1),
-('EM101', '宏观经济学', '宏观经济学原理', 3, 3.0, 48, 'COMPULSORY', 'CLOSED_BOOK', 1),
-('HA101', '现代汉语', '现代汉语语法与词汇', 4, 2.0, 32, 'ELECTIVE', 'OPEN_BOOK', 1);
-
 -- 初始化用户表（管理员）
 INSERT INTO users (username, password_hash, email, phone, gender, status) VALUES
 ('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVYITi', 'admin@lucky-sms.com', '13800138000', 'M', 'ACTIVE');
@@ -1137,7 +834,7 @@ INSERT INTO users (username, password_hash, email, phone, gender, status) VALUES
 -- 为管理员分配角色（管理员角色ID为1）
 INSERT INTO user_roles (user_id, role_id) VALUES (1, 1);
 
--- 初始化教师表
+-- 初始化教师表（管理员也作为教师）
 INSERT INTO teachers (user_id, department_id, title_id, hire_date, office_location, teacher_no, status_id) VALUES
 (1, 1, 4, '2020-09-01', '计算机楼A301', 'T2020001', 1);
 
@@ -1153,6 +850,17 @@ INSERT INTO user_roles (user_id, role_id) VALUES (2, 2), (3, 2);
 INSERT INTO teachers (user_id, department_id, title_id, hire_date, office_location, teacher_no, status_id) VALUES
 (2, 1, 3, '2021-09-01', '计算机楼A302', 'T2021001', 1),
 (3, 2, 2, '2022-09-01', '信息楼B201', 'T2022001', 1);
+
+-- 初始化课程表（现在教师记录已存在）
+INSERT INTO courses (course_code, course_name, course_description, department_id, credit, course_hours, course_type, exam_type, created_by) VALUES
+('CS101', '计算机基础', '计算机基础知识与操作', 1, 3.0, 48, 'COMPULSORY', 'CLOSED_BOOK', 1),
+('CS102', 'C语言程序设计', 'C语言编程基础', 1, 4.0, 64, 'COMPULSORY', 'PRACTICAL', 1),
+('CS201', '数据结构', '常用数据结构与算法', 1, 4.0, 64, 'COMPULSORY', 'PRACTICAL', 1),
+('CS202', '数据库原理', '数据库系统原理与应用', 1, 3.0, 48, 'COMPULSORY', 'CLOSED_BOOK', 1),
+('CS301', '操作系统', '计算机操作系统原理', 1, 4.0, 64, 'COMPULSORY', 'CLOSED_BOOK', 1),
+('IE101', '信息系统分析', '信息系统分析与设计', 2, 3.0, 48, 'COMPULSORY', 'REPORT', 1),
+('EM101', '宏观经济学', '宏观经济学原理', 3, 3.0, 48, 'COMPULSORY', 'CLOSED_BOOK', 1),
+('HA101', '现代汉语', '现代汉语语法与词汇', 4, 2.0, 32, 'ELECTIVE', 'OPEN_BOOK', 1);
 
 -- 初始化用户表（学生）
 INSERT INTO users (username, password_hash, email, phone, gender, status) VALUES
@@ -1176,47 +884,41 @@ INSERT INTO teaching_assignments (teacher_id, course_id, semester_id, classroom,
 (3, 6, 2, '信息楼C101', '周三 14:00-15:40', 45, 25),
 (1, 4, 2, '计算机楼A301', '周四 8:00-9:40', 40, 20);
 
--- 初始化学生选课表
-INSERT INTO course_selections (student_id, assignment_id, status) VALUES
-(4, 1, 'SELECTED'),
-(4, 2, 'SELECTED'),
-(5, 2, 'SELECTED'),
-(5, 4, 'SELECTED'),
-(6, 3, 'SELECTED'),
-(6, 4, 'SELECTED');
+-- 初始化学生选课表（使用子查询获取正确的ID）
+INSERT INTO course_selections (student_id, assignment_id, status)
+SELECT s.student_id, ta.assignment_id, 'SELECTED'
+FROM students s
+CROSS JOIN teaching_assignments ta
+WHERE s.student_no IN ('2021CS01001', '2021CS02001', '2021IE01001')
+AND ta.assignment_id IN (
+    SELECT assignment_id 
+    FROM teaching_assignments 
+    WHERE (teacher_id = 2 AND course_id IN (1, 2)) 
+       OR (teacher_id = 3 AND course_id = 6) 
+       OR (teacher_id = 1 AND course_id = 4)
+)
+AND (
+    (s.student_no = '2021CS01001' AND ta.course_id IN (1, 2)) OR
+    (s.student_no = '2021CS02001' AND ta.course_id IN (2, 4)) OR
+    (s.student_no = '2021IE01001' AND ta.course_id IN (6, 4))
+);
 
 -- 初始化图书表
-INSERT INTO books (isbn, book_title, author, publisher, publish_year, category_id, location, total_copies, available_copies, created_by) VALUES
-('9787111213826', 'Java编程思想', 'Bruce Eckel', '机械工业出版社', 2007, 4, '计算机馆A区101', 5, 3, 1),
-('9787115279460', 'Python编程：从入门到实践', 'Eric Matthes', '人民邮电出版社', 2016, 4, '计算机馆A区102', 8, 5, 1),
-('9787302523905', '数据结构与算法分析', 'Mark Allen Weiss', '清华大学出版社', 2019, 5, '计算机馆A区103', 6, 4, 1),
-('9787111565839', '数据库系统概念', 'Abraham Silberschatz', '机械工业出版社', 2020, 5, '计算机馆A区104', 4, 2, 1),
-('9787040507215', '红楼梦', '曹雪芹', '高等教育出版社', 2019, 7, '文学馆B区201', 3, 2, 1),
-('9787040518952', '经济学原理', 'N. Gregory Mankiw', '高等教育出版社', 2020, 9, '经管馆C区301', 5, 3, 1);
+INSERT INTO books (isbn, book_title, author, publisher, publish_year, category_id, location, total_copies, available_copies, created_by)
+SELECT 
+    b.isbn, b.book_title, b.author, b.publisher, b.publish_year, b.category_id, b.location, b.total_copies, b.available_copies,
+    (SELECT user_id FROM users WHERE username = 'admin' LIMIT 1) AS created_by
+FROM (
+    SELECT '9787111213826' AS isbn, 'Java编程思想' AS book_title, 'Bruce Eckel' AS author, '机械工业出版社' AS publisher, 2007 AS publish_year, 4 AS category_id, '计算机馆A区101' AS location, 5 AS total_copies, 3 AS available_copies
+    UNION ALL SELECT '9787115279460', 'Python编程：从入门到实践', 'Eric Matthes', '人民邮电出版社', 2016, 4, '计算机馆A区102', 8, 5
+    UNION ALL SELECT '9787302523905', '数据结构与算法分析', 'Mark Allen Weiss', '清华大学出版社', 2019, 5, '计算机馆A区103', 6, 4
+    UNION ALL SELECT '9787111565839', '数据库系统概念', 'Abraham Silberschatz', '机械工业出版社', 2020, 5, '计算机馆A区104', 4, 2
+    UNION ALL SELECT '9787040507215', '红楼梦', '曹雪芹', '高等教育出版社', 2019, 7, '文学馆B区201', 3, 2
+    UNION ALL SELECT '9787040518952', '经济学原理', 'N. Gregory Mankiw', '高等教育出版社', 2020, 9, '经管馆C区301', 5, 3
+) AS b;
 
 -- 初始化图书借阅表
 INSERT INTO book_borrowings (user_id, book_id, borrow_date, due_date, status_id, created_by) VALUES
 (4, 1, '2023-10-01', '2023-10-31', 2, 1),
 (5, 2, '2023-10-05', '2023-11-04', 1, 1),
 (6, 3, '2023-10-10', '2023-11-09', 1, 1);
-
--- 初始化群组表
-INSERT INTO im_groups (group_name, owner_id, description, max_members) VALUES
-('计算机2101班群', 4, '计算机2101班学生交流群', 50),
-('软件工程2101班群', 5, '软件工程2101班学生交流群', 50),
-('信管2101班群', 6, '信管2101班学生交流群', 50),
-('教师交流群', 2, '教师之间交流群', 30);
-
--- 添加群组成员
-INSERT INTO im_group_members (group_id, user_id, role) VALUES
-(1, 4, 'OWNER'),
-(1, 2, 'ADMIN'),
-(1, 5, 'MEMBER'),
-(2, 5, 'OWNER'),
-(2, 2, 'ADMIN'),
-(2, 4, 'MEMBER'),
-(3, 6, 'OWNER'),
-(3, 3, 'ADMIN'),
-(4, 2, 'OWNER'),
-(4, 1, 'ADMIN'),
-(4, 3, 'MEMBER');
