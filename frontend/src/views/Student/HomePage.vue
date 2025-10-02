@@ -73,8 +73,12 @@
                 </div>
               </template>
               <div v-else class="empty-todos">
-                <p>暂无待办事项</p>
-                <el-button type="primary" size="small" @click="addFirstTodo">
+                <div class="empty-icon">
+                  <el-icon size="48">
+                    <Document />
+                  </el-icon>
+                </div>
+                <el-button type="primary" @click="addFirstTodo" class="empty-button">
                   <el-icon>
                     <Plus />
                   </el-icon> 添加第一个待办事项
@@ -112,8 +116,14 @@
               </div>
             </template>
             <div v-else class="empty-announcements">
-              <p>暂无公告</p>
-              <el-link type="primary" :underline="false">查看历史公告</el-link>
+              <div class="empty-icon">
+                <el-icon size="48">
+                  <Bell />
+                </el-icon>
+              </div>
+              <el-link type="primary" :underline="false" class="empty-button">
+                查看历史公告
+              </el-link>
             </div>
           </div>
         </el-scrollbar>
@@ -127,7 +137,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import service from '@/utils/request'
 import {
   Trophy, Notebook, List, ArrowRight, StarFilled, Bell,
-  Plus
+  Plus, Document
 } from '@element-plus/icons-vue'
 import { ElMessage, ElButton, ElLink } from 'element-plus'
 
@@ -198,7 +208,7 @@ const getAnnouncementType = (type) => {
 }
 
 const addFirstTodo = () => {
-  ElMessage.info('跳转到添加待办事项页面')
+  ElMessage.info('功能正在建设中')
 }
 
 const handleMouseMove = (e) => {
@@ -736,9 +746,70 @@ onUnmounted(() => {
 .empty-todos,
 .empty-announcements {
   text-align: center;
-  padding: 20px;
+  padding: 40px 20px;
   color: var(--text-secondary);
-  font-size: 14px;
+  
+  .empty-icon {
+    margin-bottom: 16px;
+    opacity: 0.6;
+    
+    .el-icon {
+      font-size: 48px;
+      color: #909399;
+    }
+  }
+  
+  .empty-title {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0 0 8px;
+    color: var(--text-primary);
+  }
+  
+  .empty-desc {
+    font-size: 14px;
+    margin: 0 0 20px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  
+  .empty-button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+}
+
+.empty-todos {
+  .empty-button {
+    box-shadow: 0 4px 12px rgba(64, 158, 255, 0.2);
+    
+    &:hover {
+      box-shadow: 0 6px 16px rgba(64, 158, 255, 0.3);
+    }
+  }
+}
+
+.empty-announcements {
+  .empty-button {
+    color: #409eff;
+    border: 1px solid #409eff;
+    background-color: rgba(64, 158, 255, 0.1);
+    
+    &:hover {
+      background-color: rgba(64, 158, 255, 0.2);
+      border-color: #66b1ff;
+      color: #66b1ff;
+    }
+  }
 }
 
 @media (max-width: 768px) {
