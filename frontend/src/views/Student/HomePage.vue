@@ -310,7 +310,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   transition: background-color 0.3s ease;
-  padding: 20px;
+  padding: 0 15px;
   --mouse-x: 0;
   --mouse-y: 0;
 }
@@ -322,14 +322,15 @@ onUnmounted(() => {
   transition: all 0.3s ease;
   overflow: hidden;
   z-index: 1;
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
 
   .card-content {
     position: relative;
     z-index: 2;
   }
+
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
 
   .dark & {
     background: rgba(30, 41, 59, 0.9);
@@ -338,7 +339,14 @@ onUnmounted(() => {
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    border-color: rgba(199, 210, 254, 0.8);
+  }
+
+  .dark &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    border-color: rgba(99, 102, 241, 0.5);
   }
 
   &::before {
@@ -357,8 +365,35 @@ onUnmounted(() => {
     pointer-events: none;
   }
 
-  &:hover::before {
-    opacity: 1;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .progress-indicator {
+      background-color: rgba(64, 158, 255, 0.1);
+      color: #409eff;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 14px;
+    }
   }
 }
 
@@ -436,6 +471,7 @@ onUnmounted(() => {
   }
 }
 
+/* 以下其他样式保持不变 */
 .score-card {
   .gpa {
     .value {
@@ -631,7 +667,7 @@ onUnmounted(() => {
       background: rgba(245, 247, 250, 0.4);
       border-radius: 8px;
       padding: 16px;
-      margin: 0 -12px;
+      margin: 0 -16px;
 
       .dark & {
         background: rgba(40, 45, 55, 0.6);
@@ -722,6 +758,7 @@ onUnmounted(() => {
 
     .el-icon {
       margin-right: 10px;
+      font-size: 20px;
     }
   }
 
