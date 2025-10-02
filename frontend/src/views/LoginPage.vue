@@ -22,7 +22,7 @@
               :model="phoneForm" 
               :rules="phoneRules" 
               class="login-form"
-              @keyup.enter="isResetMode ? handleRegister() : handlePhoneLogin()"
+              @keyup.enter="isResetMode ? handleReset() : handlePhoneLogin()"
             >
               <el-form-item prop="phone" class="form-item">
                 <el-input v-model="phoneForm.phone" placeholder="输入手机号" size="large" :prefix-icon="Phone" clearable
@@ -53,7 +53,7 @@
                 </el-link>
               </el-form-item>
 
-              <el-button type="primary" size="large" class="login-btn" @click="isResetMode ? handleRegister() : handlePhoneLogin()" 
+              <el-button type="primary" size="large" class="login-btn" @click="isResetMode ? handleReset() : handlePhoneLogin()" 
                 :loading="loginLoading">
                 <span v-if="!loginLoading">{{ isResetMode ? '重置密码' : '登录/注册' }}</span>
                 <span v-else>{{ '请稍等' }}</span>
@@ -339,8 +339,8 @@ const handlePhoneLogin = async () => {
   }
 };
 
-// 注册
-const handleRegister = async () => {
+// 重置密码
+const handleReset = async () => {
   if (!phoneFormRef.value) return;
   
   try {
