@@ -16,9 +16,31 @@ public class UserService {
     @Resource
     private UserMapper userMapper;
 
-    public LoginVO login(String username, String keyhash) {
+    public LoginVO loginByPhone(String phone) {
+        LoginVO loginVO = userMapper.loginByPhone(phone);
+
+        if (loginVO == null) {
+            // 用户不存在，需要注册
+            int rowNum = userMapper.registerByPhone(phone);
+            if (rowNum == 0) {
+                throw new RuntimeException("注册失败");
+            }
+        }
+        loginVO = userMapper.loginByPhone(phone);
+
+        // 4. 生成令牌
+        String token = UUID.randomUUID().toString();
+        loginVO.setToken(token);
+
+        // 5. 手机号脱敏（直接操作VO中的phone字段）
+        loginVO.setPhone(desensitizePhone(loginVO.getPhone()));
+
+        return loginVO;
+    }
+
+    public LoginVO login(String username, String passwordHash) {
         // 1. 参数校验
-        if (Objects.equals(username, "") || Objects.equals(keyhash, "")) {
+        if (Objects.equals(username, "") || Objects.equals(passwordHash, "")) {
             // 如果传到后端的任意一个为空则抛出错误
             throw new IllegalArgumentException("手机号或密码不能为空");
         }
@@ -26,7 +48,7 @@ public class UserService {
         // 2. 调用Mapper查询（直接返回包含角色的LoginVO）
         Map<String, Object> params = new HashMap<>();
         params.put("username", username);
-        params.put("passwordHash", keyhash); // 注意参数名与mapper的XML一致
+        params.put("passwordHash", passwordHash); // 注意参数名与mapper的XML一致
         LoginVO loginVO = userMapper.login(params);
 
         // 3. 处理登录结果

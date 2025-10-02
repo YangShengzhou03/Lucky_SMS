@@ -15,4 +15,10 @@ public interface UserMapper {
 
     // 通过用户名和手机号新建用户
     RegisterVO register(Map<String, Object> params);
+
+    // 通过手机号查找用户
+    LoginVO loginByPhone(String phone);
+
+    // 通过手机号注册用户
+    int registerByPhone(String phone);
 }
