@@ -40,9 +40,9 @@
                 </div>
               </el-form-item>
 
-              <!-- 注册时显示用户名输入框 -->
-              <el-form-item prop="username" class="form-item" v-if="isReSetMode">
-                <el-input v-model="phoneForm.username" placeholder="设置用户名" size="large" :prefix-icon="User" clearable
+              <!-- 重置密码显示密码输入框 -->
+              <el-form-item prop="password" class="form-item" v-if="isReSetMode">
+                <el-input v-model="phoneForm.password" placeholder="设置新密码" size="large" :prefix-icon="Lock" clearable
                   class="custom-input" />
               </el-form-item>
 
@@ -72,8 +72,14 @@
               <!-- 手机号登录模式下显示账号密码登录入口 -->
               <div class="alternative-login" v-if="!isReSetMode">
                 <el-divider>其他登录方式</el-divider>
-                <icon Wechat class="social-icon"></icon>
-                <icon>QQ</icon>
+                <div class="social-icons">
+                  <el-button type="default" circle class="social-icon">
+                    <el-icon><ChatDotRound /></el-icon>
+                  </el-button>
+                  <el-button type="default" circle class="social-icon">
+                    <el-icon><Iphone /></el-icon>
+                  </el-button>
+                </div>
               </div>
             </el-form>
 
