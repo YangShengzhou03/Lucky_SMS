@@ -14,10 +14,10 @@
         <module>backend</module>
     </modules>
 
-    <!-- 统一管理依赖版本（子模块已继承 Spring Boot，此处可留空） -->
+    <!-- 统一管理依赖版本 -->
     <dependencyManagement>
         <dependencies>
-            <!-- 若有公共依赖，可在此定义 -->
+            <!-- 父类依赖，在此定义 -->
         </dependencies>
     </dependencyManagement>
 </project>
