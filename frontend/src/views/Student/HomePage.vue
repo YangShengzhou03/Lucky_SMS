@@ -213,6 +213,8 @@ const fetchData = async () => {
   try {
     // 使用axios获取数据
     const res = await service.get('/student/home')
+
+    console.log(res)
     
     if (res.code === 200) {
       student.value = res.data.student || {}

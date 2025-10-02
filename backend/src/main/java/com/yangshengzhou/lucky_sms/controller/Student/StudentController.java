@@ -26,7 +26,7 @@ public class StudentController {
             String authorization = request.getHeader("Authorization");
             if (authorization == null || !authorization.startsWith("Bearer ")) {
                 result.put("code", 401);
-                result.put("msg", "请携带有效的 Token（格式：Bearer <token>）");
+                result.put("message", "请携带有效的 Token（格式：Bearer <token>）");
                 return result;
             }
 
@@ -36,7 +36,7 @@ public class StudentController {
             // 3. 验证 Token 有效性
             if (!jwtUtil.validateToken(token)) {
                 result.put("code", 401);
-                result.put("msg", "Token 无效或已过期");
+                result.put("message", "Token 无效或已过期");
                 return result;
             }
 
@@ -45,16 +45,16 @@ public class StudentController {
 
             // 5. 业务逻辑处理（例如根据 userId 和 name 返回数据）
             result.put("code", 200);
-            result.put("msg", "请求成功");
+            result.put("message", "请求成功");
             result.put("data", new HashMap<String, Object>() {{
                 put("userId", userId);       // Token 解析出的用户 ID
                 put("message", "欢迎回来，用户 " + userId);
             }});
 
         } catch (Exception e) {
-            // 捕获异常（如 Token 格式错误、解析失败等）
             result.put("code", 500);
-            result.put("msg", "服务器处理失败：" + e.getMessage());
+            result.put("message", e.getMessage());
+            result.put("data", null);
         }
 
         return result;
