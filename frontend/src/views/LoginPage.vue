@@ -313,9 +313,19 @@ const handlePhoneLogin = async () => {
   if (!phoneFormRef.value) return;
   
   try {
-    await phoneFormRef.value.validate();
-    loginLoading.value = true;
+    // 使用 validate 方法的回调形式来处理验证结果
+    const isValid = await new Promise((resolve) => {
+      phoneFormRef.value.validate((valid) => {
+        resolve(valid);
+      });
+    });
     
+    if (!isValid) {
+      ElMessage.error('请填写完整的表单信息');
+      return;
+    }
+    
+    loginLoading.value = true;
     const loginData = new URLSearchParams();
     loginData.append('phone', phoneForm.phone);
     loginData.append('captcha', phoneForm.captcha);
@@ -343,7 +353,17 @@ const handleReset = async () => {
   if (!phoneFormRef.value) return;
   
   try {
-    await phoneFormRef.value.validate();
+    const isValid = await new Promise((resolve) => {
+      phoneFormRef.value.validate((valid) => {
+        resolve(valid);
+      });
+    });
+    
+    if (!isValid) {
+      ElMessage.error('请填写完整的表单信息');
+      return;
+    }
+    
     loginLoading.value = true;
     
     const resetData = new URLSearchParams();
