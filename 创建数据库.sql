@@ -703,7 +703,7 @@ INSERT INTO roles (role_name, description) VALUES
 ('LIBRARIAN', '图书管理员'),
 ('ASSISTANT', '助教');
 
--- 初始化权限数据（移除聊天相关权限）
+-- 初始化权限数据
 INSERT INTO permissions (permission_name, description, module) VALUES
 -- 用户管理模块
 ('CREATE_USER', '创建用户', '用户管理'),
@@ -829,7 +829,7 @@ INSERT INTO semesters (academic_year, semester_name, start_date, end_date, is_cu
 
 -- 初始化用户表（管理员）
 INSERT INTO users (username, password_hash, email, phone, gender, status) VALUES
-('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVYITi', 'admin@lucky-sms.com', '13800138000', 'M', 'ACTIVE');
+('admin', '123456', 'admin@lucky-sms.com', '13800138000', 'M', 'ACTIVE');
 
 -- 为管理员分配角色（管理员角色ID为1）
 INSERT INTO user_roles (user_id, role_id) VALUES (1, 1);
@@ -840,8 +840,8 @@ INSERT INTO teachers (user_id, department_id, title_id, hire_date, office_locati
 
 -- 初始化用户表（教师）
 INSERT INTO users (username, password_hash, email, phone, gender, status) VALUES
-('teacher1', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVYITi', 'teacher1@lucky-sms.com', '13800138001', 'M', 'ACTIVE'),
-('teacher2', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVYITi', 'teacher2@lucky-sms.com', '13800138002', 'F', 'ACTIVE');
+('teacher1', '123456', 'teacher1@lucky-sms.com', '13800138001', 'M', 'ACTIVE'),
+('teacher2', '123456', 'teacher2@lucky-sms.com', '13800138002', 'F', 'ACTIVE');
 
 -- 为教师分配角色（教师角色ID为2）
 INSERT INTO user_roles (user_id, role_id) VALUES (2, 2), (3, 2);
@@ -864,9 +864,9 @@ INSERT INTO courses (course_code, course_name, course_description, department_id
 
 -- 初始化用户表（学生）
 INSERT INTO users (username, password_hash, email, phone, gender, status) VALUES
-('student1', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVYITi', 'student1@lucky-sms.com', '13800138003', 'M', 'ACTIVE'),
-('student2', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVYITi', 'student2@lucky-sms.com', '13800138004', 'F', 'ACTIVE'),
-('student3', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVYITi', 'student3@lucky-sms.com', '13800138005', 'M', 'ACTIVE');
+('student1', '123456', 'student1@lucky-sms.com', '13800138003', 'M', 'ACTIVE'),
+('student2', '123456', 'student2@lucky-sms.com', '13800138004', 'F', 'ACTIVE'),
+('student3', '123456', 'student3@lucky-sms.com', '13800138005', 'M', 'ACTIVE');
 
 -- 为学生分配角色（学生角色ID为3）
 INSERT INTO user_roles (user_id, role_id) VALUES (4, 3), (5, 3), (6, 3);
@@ -922,3 +922,23 @@ INSERT INTO book_borrowings (user_id, book_id, borrow_date, due_date, status_id,
 (4, 1, '2023-10-01', '2023-10-31', 2, 1),
 (5, 2, '2023-10-05', '2023-11-04', 1, 1),
 (6, 3, '2023-10-10', '2023-11-09', 1, 1);
+
+-- 用户角色分配触发器：当插入新用户时自动分配学生角色
+DELIMITER $$
+CREATE TRIGGER assign_student_role_after_user_insert
+AFTER INSERT ON users
+FOR EACH ROW
+BEGIN
+    -- 检查用户是否已经拥有学生角色（角色ID为3）
+    DECLARE role_count INT;
+    
+    SELECT COUNT(*) INTO role_count 
+    FROM user_roles 
+    WHERE user_id = NEW.user_id AND role_id = 3;
+    
+    -- 如果用户没有学生角色，则分配
+    IF role_count = 0 THEN
+        INSERT INTO user_roles (user_id, role_id) VALUES (NEW.user_id, 3);
+    END IF;
+END$$
+DELIMITER ;

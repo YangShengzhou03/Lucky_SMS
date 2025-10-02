@@ -264,13 +264,13 @@ const sendCaptcha = async () => {
 const handleLoginSuccess = (role) => {
   ElMessage.success('登录成功！');
   switch (role) {
-    case 'admin':
+    case 'ADMIN':
       router.push('/admin');
       break;
-    case 'student':
+    case 'STUDENT':
       router.push('/student');
       break;
-    case 'teacher':
+    case 'TEACHER':
       router.push('/teacher');
       break;
     default:
