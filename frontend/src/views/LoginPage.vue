@@ -11,8 +11,8 @@
         <transition name="fade">
           <div class="form-content" v-if="!showQRCode">
             <div class="card-header">
-              <h2 class="welcome-text">{{ isReSetMode ? '重置密码' : '欢迎回来' }}</h2>
-              <p class="login-subtitle">{{ isReSetMode ? '重置您的密码' : 'Lucky SMS学生管理系统' }}</p>
+              <h2 class="welcome-text">{{ isResetMode ? '重置密码' : '欢迎回来' }}</h2>
+              <p class="login-subtitle">{{ isResetMode ? '重置您的密码' : 'Lucky SMS学生管理系统' }}</p>
             </div>
 
             <!-- 手机号登录/注册表单 -->
@@ -22,7 +22,7 @@
               :model="phoneForm" 
               :rules="phoneRules" 
               class="login-form"
-              @keyup.enter="isReSetMode ? handleRegister() : handlePhoneLogin()"
+              @keyup.enter="isResetMode ? handleRegister() : handlePhoneLogin()"
             >
               <el-form-item prop="phone" class="form-item">
                 <el-input v-model="phoneForm.phone" placeholder="输入手机号" size="large" :prefix-icon="Phone" clearable
@@ -41,36 +41,26 @@
               </el-form-item>
 
               <!-- 重置密码显示密码输入框 -->
-              <el-form-item prop="password" class="form-item" v-if="isReSetMode">
+              <el-form-item prop="password" class="form-item" v-if="isResetMode">
                 <el-input v-model="phoneForm.password" placeholder="设置新密码" size="large" :prefix-icon="Lock" clearable
                   class="custom-input" />
               </el-form-item>
 
               <!-- 登录时账密登录选项 -->
-              <el-form-item class="form-item" v-if="!isReSetMode">
+              <el-form-item class="form-item" v-if="!isResetMode">
                 <el-link type="primary" @click="loginMode = 'account'" :underline="false" class="alternative-link">
                   使用账号密码登录
                 </el-link>
               </el-form-item>
 
-              <el-button type="primary" size="large" class="login-btn" @click="isReSetMode ? handleRegister() : handlePhoneLogin()" 
+              <el-button type="primary" size="large" class="login-btn" @click="isResetMode ? handleRegister() : handlePhoneLogin()" 
                 :loading="loginLoading">
-                <span v-if="!loginLoading">{{ isReSetMode ? '重置密码' : '登录/注册' }}</span>
+                <span v-if="!loginLoading">{{ isResetMode ? '重置密码' : '登录/注册' }}</span>
                 <span v-else>{{ '请稍等' }}</span>
               </el-button>
 
-              <!-- 注册时显示用户协议 -->
-              <el-form-item prop="agreement" class="form-item agreement-item" v-if="!isReSetMode">
-                <el-checkbox v-model="phoneForm.agreement">
-                  我已阅读并同意
-                  <el-link type="primary" :underline="false">《用户协议》</el-link>
-                  和
-                  <el-link type="primary" :underline="false">《隐私政策》</el-link>
-                </el-checkbox>
-              </el-form-item>
-
               <!-- 手机号登录模式下显示账号密码登录入口 -->
-              <div class="alternative-login" v-if="!isReSetMode">
+              <div class="alternative-login" v-if="!isResetMode">
                 <el-divider>其他登录方式</el-divider>
                 <div class="social-icons">
                   <el-button type="default" circle class="social-icon">
@@ -106,7 +96,7 @@
                 <el-link type="primary" @click="loginMode = 'phone'" :underline="false" class="register-text">
                   立即注册
                 </el-link>
-                <el-link type="primary" :underline="false" class="forgot-password" @click="isReSetMode = true; loginMode = 'phone'">
+                <el-link type="primary" :underline="false" class="forgot-password" @click="isResetMode = true; loginMode = 'phone'">
                   忘记密码?
                 </el-link>
               </div>
@@ -147,7 +137,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import service from '@/utils/request';
 import {
@@ -155,10 +145,11 @@ import {
 } from '@element-plus/icons-vue';
 
 const router = useRouter();
+const route = useRoute();
 const showQRCode = ref(false);
 const loginLoading = ref(false);
 const loginMode = ref('phone'); // 'phone' 或 'account'
-const isReSetMode = ref(false); // 是否处于注册模式
+const isResetMode = ref(false); // 是否处于注册模式
 
 // 验证码倒计时
 const captchaCooldown = ref(0);
@@ -370,7 +361,7 @@ const handleRegister = async () => {
     if (res.code === 200) {
       ElMessage.success('注册成功！');
       // 注册成功后切换到登录模式
-      isReSetMode.value = false;
+      isResetMode.value = false;
       // 清空表单
       phoneForm.captcha = '';
       phoneForm.username = '';
@@ -386,6 +377,12 @@ const handleRegister = async () => {
 };
 
 onMounted(() => {
+  // 确保在页面刷新时，如果当前路径是/login，则显示登录页面
+  if (route.path === '/login') {
+    // 这里可以添加任何需要在登录页面加载时执行的逻辑
+    // 例如，检查用户是否已经登录，如果已登录则重定向到相应页面
+  }
+  
   if (window.particlesJS) {
     window.particlesJS('login-particles', {
       particles: {

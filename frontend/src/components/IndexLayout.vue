@@ -173,7 +173,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import {
   Position, MostlyCloudy, Lock, ArrowUp, Check,
   Location, Phone, Message, ChatDotRound,
@@ -184,14 +184,7 @@ import { useRoute, useRouter } from 'vue-router';
 const router = useRouter()
 const route = useRoute();
 const showBackToTop = ref(false)
-const isHomePage = ref(true);
-
-watch(
-  () => route.path,
-  (newPath) => {
-    isHomePage.value = newPath === '/';
-  }
-);
+const isHomePage = computed(() => route.path === '/');
 
 const features = [
   {
