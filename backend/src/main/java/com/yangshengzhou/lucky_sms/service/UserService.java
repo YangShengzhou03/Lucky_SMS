@@ -2,6 +2,7 @@ package com.yangshengzhou.lucky_sms.service;
 
 import com.yangshengzhou.lucky_sms.mapper.UserMapper;
 import com.yangshengzhou.lucky_sms.vo.LoginVO;
+import com.yangshengzhou.lucky_sms.vo.RegisterVO;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -43,7 +44,40 @@ public class UserService {
         return loginVO;
     }
 
-    // 手机号脱敏
+    public RegisterVO register(String username, String phone) {
+        // 参数校验
+        if (Objects.equals(username, "") || Objects.equals(phone, "")) {
+            throw new IllegalArgumentException("用户名或手机号不能为空");
+        }
+
+        // 判断该手机号是否已被使用
+        boolean isUsedPhone = userMapper.isUsedPhone(phone);
+        if (isUsedPhone) {
+            throw new RuntimeException("该手机号已被注册");
+        }
+
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("username", username);
+        params.put("phone", phone);
+        
+        // 插入用户记录
+        RegisterVO registerVO = userMapper.register(params);
+        
+        // 创建返回对象
+        registerVO.setUsername(username);
+        registerVO.setPhone(phone);
+        
+        // 生成令牌
+        String token = UUID.randomUUID().toString();
+        registerVO.setToken(token);
+
+        // 手机号脱敏
+        registerVO.setPhone(desensitizePhone(registerVO.getPhone()));
+
+        return registerVO;
+    }
+
+    // 手机号脱敏方法
     private String desensitizePhone(String phone) {
         if (phone == null || phone.length() != 11) {
             return phone;

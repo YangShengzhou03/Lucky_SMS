@@ -19,4 +19,16 @@
           AND u.status = 'ACTIVE'
     </select>
 
+    <!-- 手机号是否已被使用 -->
+    <select id="isUsedPhone" parameterType="String" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM users
+        WHERE phone = #{phone}
+    </select>
+
+    <!-- 注册用户：新建一条用户表记录 -->
+    <insert id="register" parameterType="map" useGeneratedKeys="true" keyProperty="userId">
+        INSERT INTO users(username, phone) VALUES (#{username}, #{phone})
+    </insert>
+
 </mapper>
