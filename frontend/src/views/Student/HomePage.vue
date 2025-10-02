@@ -1,13 +1,6 @@
 <template>
   <div class="student-home" @mousemove="handleMouseMove">
-    <div v-if="error" class="error-container">
-      <el-icon class="error-icon">
-        <WarningFilled />
-      </el-icon>
-      <div class="error-message">{{ error }}</div>
-      <el-button type="primary" @click="fetchData">重试</el-button>
-    </div>
-    <div v-else>
+    <div>
       <div class="welcome-section modern-card">
         <h2>欢迎回来，<span class="username">{{ student?.name || '--' }}</span> 👋</h2>
         <p class="subtitle">学号：{{ student?.id || '--' }} | 班级：{{ student?.class || '--' }}</p>
@@ -134,7 +127,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import service from '@/utils/request'
 import {
   Trophy, Notebook, List, ArrowRight, StarFilled, Bell,
-  WarningFilled, Plus
+  Plus
 } from '@element-plus/icons-vue'
 import { ElMessage, ElButton, ElLink } from 'element-plus'
 
