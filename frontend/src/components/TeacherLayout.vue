@@ -196,7 +196,7 @@ const setPageLoading = (loading, errorMsg = '') => {
 }
 
 const showSidebar = computed(() => {
-  return !['/login', '/register'].includes(route.path)
+  return !['/login'].includes(route.path)
 })
 
 const activeMenuIndex = computed(() => {

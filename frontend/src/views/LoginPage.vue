@@ -11,12 +11,103 @@
         <transition name="fade">
           <div class="form-content" v-if="!showQRCode">
             <div class="card-header">
-              <h2 class="welcome-text">欢迎回来</h2>
-              <p class="login-subtitle">登录Lucky SMS学生管理系统</p>
+              <h2 class="welcome-text">{{ isRegisterMode ? '创建账户' : '欢迎回来' }}</h2>
+              <p class="login-subtitle">{{ isRegisterMode ? '加入Lucky SMS学生管理系统' : '登录Lucky SMS学生管理系统' }}</p>
             </div>
 
-            <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" class="login-form"
-              @keyup.enter="handleLogin">
+            <!-- 登录方式切换 -->
+            <div class="login-mode-switch" v-if="!isRegisterMode">
+              <div class="mode-tabs">
+                <div 
+                  class="mode-tab" 
+                  :class="{ active: loginMode === 'phone' }" 
+                  @click="loginMode = 'phone'"
+                >
+                  手机号登录
+                </div>
+                <div 
+                  class="mode-tab" 
+                  :class="{ active: loginMode === 'account' }" 
+                  @click="loginMode = 'account'"
+                >
+                  账号密码登录
+                </div>
+              </div>
+            </div>
+
+            <!-- 手机号登录/注册表单 -->
+            <el-form 
+              v-if="loginMode === 'phone'" 
+              ref="phoneFormRef" 
+              :model="phoneForm" 
+              :rules="phoneRules" 
+              class="login-form"
+              @keyup.enter="isRegisterMode ? handleRegister() : handlePhoneLogin()"
+            >
+              <el-form-item prop="phone" class="form-item">
+                <el-input v-model="phoneForm.phone" placeholder="输入手机号" size="large" :prefix-icon="Phone" clearable
+                  class="custom-input" maxlength="11" />
+              </el-form-item>
+
+              <el-form-item prop="captcha" class="form-item">
+                <div class="captcha-container">
+                  <el-input v-model="phoneForm.captcha" placeholder="输入验证码" size="large" :prefix-icon="Key"
+                    class="custom-input captcha-input" maxlength="6" />
+                  <el-button type="primary" size="large" class="captcha-btn" :disabled="captchaCooldown > 0"
+                    @click="sendCaptcha">
+                    {{ captchaBtnText }}
+                  </el-button>
+                </div>
+              </el-form-item>
+
+              <!-- 注册时显示用户名输入框 -->
+              <el-form-item prop="username" class="form-item" v-if="isRegisterMode">
+                <el-input v-model="phoneForm.username" placeholder="设置用户名" size="large" :prefix-icon="User" clearable
+                  class="custom-input" />
+              </el-form-item>
+
+              <!-- 注册时显示用户协议 -->
+              <el-form-item prop="agreement" class="form-item agreement-item" v-if="isRegisterMode">
+                <el-checkbox v-model="phoneForm.agreement">
+                  我已阅读并同意
+                  <el-link type="primary" :underline="false">《用户协议》</el-link>
+                  和
+                  <el-link type="primary" :underline="false">《隐私政策》</el-link>
+                </el-checkbox>
+              </el-form-item>
+
+              <el-button type="primary" size="large" class="login-btn" @click="isRegisterMode ? handleRegister() : handlePhoneLogin()" 
+                :loading="loginLoading">
+                <span v-if="!loginLoading">{{ isRegisterMode ? '立即注册' : '登录' }}</span>
+                <span v-else>{{ isRegisterMode ? '注册中...' : '登录中...' }}</span>
+              </el-button>
+
+              <!-- 切换登录/注册 -->
+              <div class="register-link">
+                {{ isRegisterMode ? '已有账号?' : '没有账号?' }}
+                <el-link type="primary" @click="toggleRegisterMode" :underline="false" class="register-text">
+                  {{ isRegisterMode ? '立即登录' : '立即注册' }}
+                </el-link>
+              </div>
+
+              <!-- 手机号登录模式下显示账号密码登录入口 -->
+              <div class="alternative-login" v-if="!isRegisterMode">
+                <el-divider>其他登录方式</el-divider>
+                <el-link type="primary" @click="loginMode = 'account'" :underline="false" class="alternative-link">
+                  使用账号密码登录
+                </el-link>
+              </div>
+            </el-form>
+
+            <!-- 账号密码登录表单 -->
+            <el-form 
+              v-if="loginMode === 'account'" 
+              ref="loginFormRef" 
+              :model="loginForm" 
+              :rules="loginRules" 
+              class="login-form"
+              @keyup.enter="handleLogin"
+            >
               <el-form-item prop="username" class="form-item">
                 <el-input v-model="loginForm.username" placeholder="输入用户名" size="large" :prefix-icon="User" clearable
                   class="custom-input" />
@@ -29,7 +120,7 @@
 
               <div class="login-options">
                 <el-checkbox v-model="loginForm.remember">记住我</el-checkbox>
-                <el-link type="primary" :underline="false" class="forgot-password">
+                <el-link type="primary" :underline="false" class="forgot-password" @click="showForgotPassword = true">
                   忘记密码?
                 </el-link>
               </div>
@@ -39,10 +130,19 @@
                 <span v-else>登录中...</span>
               </el-button>
 
+              <!-- 切换登录/注册 -->
               <div class="register-link">
                 没有账号?
-                <el-link type="primary" @click="$router.push('/register')" :underline="false" class="register-text">
+                <el-link type="primary" @click="isRegisterMode = true; loginMode = 'phone'" :underline="false" class="register-text">
                   立即注册
+                </el-link>
+              </div>
+
+              <!-- 账号密码登录模式下显示手机号登录入口 -->
+              <div class="alternative-login">
+                <el-divider>其他登录方式</el-divider>
+                <el-link type="primary" @click="loginMode = 'phone'" :underline="false" class="alternative-link">
+                  使用手机号登录
                 </el-link>
               </div>
             </el-form>
@@ -72,22 +172,74 @@
         </transition>
       </div>
     </div>
+
+    <!-- 忘记密码对话框 -->
+    <el-dialog v-model="showForgotPassword" title="忘记密码" width="400px" center>
+      <el-form ref="forgotPasswordFormRef" :model="forgotPasswordForm" :rules="forgotPasswordRules">
+        <el-form-item prop="phone" label="手机号">
+          <el-input v-model="forgotPasswordForm.phone" placeholder="请输入注册手机号" maxlength="11" />
+        </el-form-item>
+        <el-form-item prop="captcha" label="验证码">
+          <div class="captcha-container">
+            <el-input v-model="forgotPasswordForm.captcha" placeholder="请输入验证码" maxlength="6" />
+            <el-button type="primary" :disabled="forgotPasswordCooldown > 0" @click="sendForgotPasswordCaptcha">
+              {{ forgotPasswordBtnText }}
+            </el-button>
+          </div>
+        </el-form-item>
+        <el-form-item prop="newPassword" label="新密码">
+          <el-input v-model="forgotPasswordForm.newPassword" placeholder="请输入新密码" show-password />
+        </el-form-item>
+        <el-form-item prop="confirmPassword" label="确认密码">
+          <el-input v-model="forgotPasswordForm.confirmPassword" placeholder="请再次输入新密码" show-password />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="showForgotPassword = false">取消</el-button>
+          <el-button type="primary" @click="handleResetPassword" :loading="resetPasswordLoading">
+            重置密码
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import service from '@/utils/request';
 import {
-  User, Lock, ArrowLeft
+  User, Lock, ArrowLeft, Phone, Key
 } from '@element-plus/icons-vue';
 
 const router = useRouter();
 const showQRCode = ref(false);
 const loginLoading = ref(false);
+const loginMode = ref('phone'); // 'phone' 或 'account'
+const isRegisterMode = ref(false); // 是否处于注册模式
 
+// 忘记密码相关
+const showForgotPassword = ref(false);
+const resetPasswordLoading = ref(false);
+const forgotPasswordCooldown = ref(0);
+let forgotPasswordTimer = null;
+
+// 验证码倒计时
+const captchaCooldown = ref(0);
+let captchaTimer = null;
+
+const captchaBtnText = computed(() =>
+  captchaCooldown.value > 0 ? `${captchaCooldown.value}秒后重试` : '获取验证码'
+);
+
+const forgotPasswordBtnText = computed(() =>
+  forgotPasswordCooldown.value > 0 ? `${forgotPasswordCooldown.value}秒后重试` : '获取验证码'
+);
+
+// 账号密码登录表单
 const loginForm = reactive({
   username: '',
   password: '',
@@ -104,30 +256,162 @@ const loginRules = reactive({
   ]
 });
 
+// 手机号登录/注册表单
+const phoneForm = reactive({
+  phone: '',
+  captcha: '',
+  username: '', // 注册时使用
+  agreement: false // 注册时使用
+});
+
+const phoneRules = reactive({
+  phone: [
+    { required: true, message: '请输入手机号', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur' }
+  ],
+  captcha: [
+    { required: true, message: '请输入验证码', trigger: 'blur' },
+    { len: 6, message: '验证码长度为6位', trigger: 'blur' }
+  ],
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { min: 3, max: 20, message: '用户名长度在3-20个字符之间', trigger: 'blur' },
+    { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含字母、数字和下划线', trigger: 'blur' }
+  ],
+  agreement: [
+    {
+      validator: (rule, value, callback) => {
+        if (!value) callback(new Error('请同意用户协议和隐私政策'));
+        else callback();
+      },
+      trigger: 'change'
+    }
+  ]
+});
+
+// 忘记密码表单
+const forgotPasswordForm = reactive({
+  phone: '',
+  captcha: '',
+  newPassword: '',
+  confirmPassword: ''
+});
+
+const forgotPasswordRules = reactive({
+  phone: [
+    { required: true, message: '请输入手机号', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur' }
+  ],
+  captcha: [
+    { required: true, message: '请输入验证码', trigger: 'blur' },
+    { len: 6, message: '验证码长度为6位', trigger: 'blur' }
+  ],
+  newPassword: [
+    { required: true, message: '请输入新密码', trigger: 'blur' },
+    { min: 6, max: 20, message: '密码长度在6-20个字符之间', trigger: 'blur' }
+  ],
+  confirmPassword: [
+    { required: true, message: '请再次输入新密码', trigger: 'blur' },
+    {
+      validator: (rule, value, callback) => {
+        if (value !== forgotPasswordForm.newPassword) {
+          callback(new Error('两次输入的密码不一致'));
+        } else {
+          callback();
+        }
+      },
+      trigger: 'blur'
+    }
+  ]
+});
+
+// 表单引用
+const loginFormRef = ref(null);
+const phoneFormRef = ref(null);
+const forgotPasswordFormRef = ref(null);
+
+// 切换二维码登录
 const toggleQRCode = () => {
   showQRCode.value = !showQRCode.value;
 };
 
-const handleLogin = async () => {
-  loginLoading.value = true;
-  try {
-    // 1. 转换字段名（保持原逻辑）
-    const loginData = new URLSearchParams();
-    loginData.append('username', loginForm.username); // 前端username对应后端username
-    loginData.append('keyhash', loginForm.password); // 前端password对应后端keyhash
+// 切换注册/登录模式
+const toggleRegisterMode = () => {
+  isRegisterMode.value = !isRegisterMode.value;
+  // 重置表单
+  phoneForm.captcha = '';
+  phoneForm.username = '';
+  phoneForm.agreement = false;
+};
 
-    // 2. 去掉.then()，用await直接接收响应（符合async/await语法）
-    // 注意：service.post成功后返回的是后端的 { code, msg, data }（来自request.js封装）
+// 发送验证码（手机号登录/注册）
+const sendCaptcha = () => {
+  const phoneValid = phoneRules.phone.every(rule => {
+    if (rule.required && !phoneForm.phone) {
+      ElMessage.warning(rule.message);
+      return false;
+    }
+    if (rule.pattern && !rule.pattern.test(phoneForm.phone)) {
+      ElMessage.warning(rule.message);
+      return false;
+    }
+    return true;
+  });
+  if (!phoneValid) return;
+
+  captchaCooldown.value = 60;
+  captchaTimer = setInterval(() => {
+    captchaCooldown.value--;
+    if (captchaCooldown.value <= 0) clearInterval(captchaTimer);
+  }, 1000);
+
+  ElMessage.success(`验证码已发送至 ${phoneForm.phone}`);
+};
+
+// 发送验证码（忘记密码）
+const sendForgotPasswordCaptcha = () => {
+  const phoneValid = forgotPasswordRules.phone.every(rule => {
+    if (rule.required && !forgotPasswordForm.phone) {
+      ElMessage.warning(rule.message);
+      return false;
+    }
+    if (rule.pattern && !rule.pattern.test(forgotPasswordForm.phone)) {
+      ElMessage.warning(rule.message);
+      return false;
+    }
+    return true;
+  });
+  if (!phoneValid) return;
+
+  forgotPasswordCooldown.value = 60;
+  forgotPasswordTimer = setInterval(() => {
+    forgotPasswordCooldown.value--;
+    if (forgotPasswordCooldown.value <= 0) clearInterval(forgotPasswordTimer);
+  }, 1000);
+
+  ElMessage.success(`验证码已发送至 ${forgotPasswordForm.phone}`);
+};
+
+// 账号密码登录
+const handleLogin = async () => {
+  if (!loginFormRef.value) return;
+  
+  try {
+    await loginFormRef.value.validate();
+    loginLoading.value = true;
+    
+    const loginData = new URLSearchParams();
+    loginData.append('username', loginForm.username);
+    loginData.append('keyhash', loginForm.password);
+
     const res = await service.post('/login', loginData, {
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded' // 表单传参必备
+        'Content-Type': 'application/x-www-form-urlencoded'
       }
     });
 
-    // 3. 直接判断res.code（无需多取一层data）
     if (res.code === 200) {
       ElMessage.success('登录成功！');
-      // 4. 读取角色（res.data才是后端返回的业务数据）
       const role = res.data?.role; 
       if (role === 'admin') {
         router.push('/admin');
@@ -139,16 +423,126 @@ const handleLogin = async () => {
         ElMessage.error('登录失败: 角色未定义');
       }
     } else {
-      // 5. 错误信息读取res.msg（而非Response.message）
       ElMessage.error('登录失败: ' + (res.message || '用户名或密码错误'));
     }
-
   } catch (error) {
-    // 6. catch捕获网络错误或后端500等异常（error.message来自request.js封装）
     ElMessage.error('登录失败: ' + (error.message || '网络异常，请稍后重试'));
   } finally {
-    // 7. 无论成功/失败，都关闭loading
     loginLoading.value = false;
+  }
+};
+
+// 手机号登录
+const handlePhoneLogin = async () => {
+  if (!phoneFormRef.value) return;
+  
+  try {
+    await phoneFormRef.value.validate();
+    loginLoading.value = true;
+    
+    const loginData = new URLSearchParams();
+    loginData.append('phone', phoneForm.phone);
+    loginData.append('captcha', phoneForm.captcha);
+
+    const res = await service.post('/login/phone', loginData, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+
+    if (res.code === 200) {
+      ElMessage.success('登录成功！');
+      const role = res.data?.role; 
+      if (role === 'admin') {
+        router.push('/admin');
+      } else if (role === 'student') {
+        router.push('/student');
+      } else if (role === 'teacher') {
+        router.push('/teacher');
+      } else {
+        ElMessage.error('登录失败: 角色未定义');
+      }
+    } else {
+      ElMessage.error('登录失败: ' + (res.message || '手机号或验证码错误'));
+    }
+  } catch (error) {
+    ElMessage.error('登录失败: ' + (error.message || '网络异常，请稍后重试'));
+  } finally {
+    loginLoading.value = false;
+  }
+};
+
+// 注册
+const handleRegister = async () => {
+  if (!phoneFormRef.value) return;
+  
+  try {
+    await phoneFormRef.value.validate();
+    loginLoading.value = true;
+    
+    const registerData = new URLSearchParams();
+    registerData.append('username', phoneForm.username);
+    registerData.append('phone', phoneForm.phone);
+    registerData.append('captcha', phoneForm.captcha);
+
+    const res = await service.post('/register', registerData, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+
+    if (res.code === 200) {
+      ElMessage.success('注册成功！');
+      // 注册成功后切换到登录模式
+      isRegisterMode.value = false;
+      // 清空表单
+      phoneForm.captcha = '';
+      phoneForm.username = '';
+      phoneForm.agreement = false;
+    } else {
+      ElMessage.error('注册失败: ' + (res.message || '请稍后重试'));
+    }
+  } catch (error) {
+    ElMessage.error('注册失败: ' + (error.message || '网络异常，请稍后重试'));
+  } finally {
+    loginLoading.value = false;
+  }
+};
+
+// 重置密码
+const handleResetPassword = async () => {
+  if (!forgotPasswordFormRef.value) return;
+  
+  try {
+    await forgotPasswordFormRef.value.validate();
+    resetPasswordLoading.value = true;
+    
+    const resetData = new URLSearchParams();
+    resetData.append('phone', forgotPasswordForm.phone);
+    resetData.append('captcha', forgotPasswordForm.captcha);
+    resetData.append('newPassword', forgotPasswordForm.newPassword);
+
+    const res = await service.post('/reset-password', resetData, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+
+    if (res.code === 200) {
+      ElMessage.success('密码重置成功！');
+      showForgotPassword.value = false;
+      // 清空表单
+      forgotPasswordForm.phone = '';
+      forgotPasswordForm.captcha = '';
+      forgotPasswordForm.newPassword = '';
+      forgotPasswordForm.confirmPassword = '';
+    } else {
+      ElMessage.error('密码重置失败: ' + (res.message || '请稍后重试'));
+    }
+  } catch (error) {
+    ElMessage.error('密码重置失败: ' + (error.message || '网络异常，请稍后重试'));
+  } finally {
+    resetPasswordLoading.value = false;
   }
 };
 
@@ -186,6 +580,11 @@ onMounted(() => {
       }
     });
   }
+});
+
+onUnmounted(() => {
+  if (captchaTimer) clearInterval(captchaTimer);
+  if (forgotPasswordTimer) clearInterval(forgotPasswordTimer);
 });
 </script>
 
@@ -287,6 +686,35 @@ onMounted(() => {
   color: #64748b;
 }
 
+.login-mode-switch {
+  margin-bottom: 24px;
+}
+
+.mode-tabs {
+  display: flex;
+  border-radius: 10px;
+  background: #f1f5f9;
+  padding: 4px;
+}
+
+.mode-tab {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.mode-tab.active {
+  background: white;
+  color: #3b82f6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
 .login-form {
   margin-top: 10px;
 }
@@ -312,6 +740,32 @@ onMounted(() => {
 
 .custom-input :deep(.el-input__wrapper.is-focus) {
   box-shadow: 0 0 0 1px #3b82f6 inset, 0 4px 8px rgba(59, 130, 246, 0.2);
+}
+
+.captcha-container {
+  display: flex;
+  gap: 10px;
+}
+
+.captcha-input {
+  flex: 1;
+}
+
+.captcha-btn {
+  flex-shrink: 0;
+  width: 120px;
+  padding: 0;
+}
+
+.captcha-btn:disabled {
+  background: #e2e8f0 !important;
+  color: #94a3b8 !important;
+  cursor: not-allowed;
+}
+
+.agreement-item :deep(.el-checkbox__label) {
+  font-size: 14px;
+  color: #64748b;
 }
 
 .login-options {
@@ -364,6 +818,16 @@ onMounted(() => {
 
 .register-text:hover {
   transform: translateX(2px);
+}
+
+.alternative-login {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.alternative-link {
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .qr-content {
@@ -444,6 +908,23 @@ onMounted(() => {
   opacity: 0;
 }
 
+/* 忘记密码对话框样式 */
+:deep(.el-dialog) {
+  border-radius: 12px;
+}
+
+:deep(.el-dialog__header) {
+  padding-top: 20px;
+}
+
+:deep(.el-dialog__body) {
+  padding: 20px 30px 30px;
+}
+
+:deep(.el-form-item__label) {
+  font-weight: 500;
+}
+
 @media (max-width: 480px) {
   .login-card {
     padding: 30px 20px;
@@ -458,6 +939,16 @@ onMounted(() => {
   .qr-corner {
     width: 32px;
     height: 32px;
+  }
+
+  .captcha-container {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .captcha-btn {
+    width: 100%;
+    padding: 12px 0;
   }
 }
 </style>

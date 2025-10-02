@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 import IndexLayout from '@/components/IndexLayout.vue';
 import StudentLayout from '@/components/StudentLayout.vue';
 import LoginPage from '@/views/LoginPage.vue';
-import RegisterPage from '@/views/RegisterPage.vue';
 import StudentHome from '@/views/Student/HomePage.vue';
 import StudentStatus from '@/views/Student/StatusPage.vue';
 import StudentGrades from '@/views/Student/GradesPage.vue';
@@ -26,8 +25,8 @@ const routes = [
     component: IndexLayout,
     children: [
       { path: '', name: 'Home', meta: { title: 'Lucky-SMS' } },
-      { path: '/login', name: 'Login', component: LoginPage, meta: { title: '登录' } },
-      { path: '/register', name: 'Register', component: RegisterPage, meta: { title: '注册' } }
+      { path: '/login', name: 'Login', component: LoginPage, meta: { title: '登录' } }
+      // 注册功能已整合到登录页面中，移除独立的注册页面路由
     ]
   },
 

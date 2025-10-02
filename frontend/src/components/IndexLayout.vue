@@ -285,7 +285,7 @@ const handleLogin = () => {
 }
 
 const handleRegister = () => {
-  router.push('/register')
+  router.push('/login')
 }
 
 onMounted(() => {

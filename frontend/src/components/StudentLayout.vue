@@ -190,7 +190,7 @@ const setPageLoading = (loading, errorMsg = '') => {
 }
 
 const showSidebar = computed(() => {
-  return !['/login', '/register'].includes(route.path)
+  return !['/login'].includes(route.path)
 })
 
 const activeMenuIndex = computed(() => {
@@ -217,8 +217,7 @@ watch(route, (newRoute) => {
       '/student/library': '图书借阅',
       '/student/course': '选课系统',
       '/student/settings': '系统设置',
-      '/login': '登录',
-      '/register': '注册'
+      '/login': '登录'
     }
     currentPageName.value = pageTitles[newRoute.path] || '首页'
     setPageLoading(false)
