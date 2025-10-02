@@ -288,7 +288,7 @@
             :class="{ active: activeTab === 'qr' }"
             @click="activeTab = 'qr'"
           >
-            <el-icon><QrCode /></el-icon>
+            <el-icon><Grid /></el-icon>
             <span>扫码添加</span>
           </div>
           <div 
@@ -392,7 +392,7 @@
           <div class="qr-section">
             <div class="qr-container">
               <div class="qr-placeholder">
-                <el-icon><QrCode /></el-icon>
+                <el-icon><Grid /></el-icon>
                 <p>二维码功能开发中</p>
               </div>
             </div>
@@ -812,7 +812,7 @@ import {
   Check,
   Plus,
   Download,
-  QrCode,
+  Grid,
   Phone
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'

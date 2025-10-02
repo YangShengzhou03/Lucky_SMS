@@ -34,7 +34,7 @@
                   <el-input v-model="phoneForm.captcha" placeholder="输入验证码" size="large" :prefix-icon="Key"
                     class="custom-input captcha-input" maxlength="6" />
                   <el-button type="primary" size="large" class="captcha-btn" :disabled="captchaCooldown > 0"
-                    @click="sendCaptcha" :loading="captchaCooldown > 0">
+                    @click="sendCaptcha">
                     {{ captchaBtnText }}
                   </el-button>
                 </div>

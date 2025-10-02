@@ -261,7 +261,7 @@
       <div class="card-header">
         <h3>
           <el-icon>
-            <History />
+            <Timer />
           </el-icon>
           历史教学计划
         </h3>
@@ -306,7 +306,7 @@ import {
   Notebook,
   Calendar,
   Document,
-  History,
+  Timer,
   Search,
   Plus,
   Edit,
@@ -1081,4 +1081,4 @@ onMounted(() => {
     }
   }
 }
-</style>  
+</style>
