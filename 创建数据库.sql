@@ -8,8 +8,8 @@ USE Lucky_SMS;
 -- 用户表：存储系统所有用户的基础信息
 CREATE TABLE users (
     user_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '用户ID（主键）',
-    username VARCHAR(50) UNIQUE COMMENT '用户名（全局唯一）',
-    password_hash VARCHAR(255) COMMENT '加密后的密码',
+    username VARCHAR(50) UNIQUE NOT NULL COMMENT '用户名（全局唯一）',
+    password_hash VARCHAR(255) NOT NULL COMMENT '加密后的密码',
     email VARCHAR(100) UNIQUE COMMENT '电子邮箱',
     phone VARCHAR(20) UNIQUE NOT NULL COMMENT '手机号码（不得为空）',
     gender ENUM('M', 'F', 'O') DEFAULT 'O' COMMENT '性别（M-男，F-女，O-其他）',
@@ -138,6 +138,21 @@ CREATE TABLE majors (
     FOREIGN KEY (department_id) REFERENCES departments(department_id) ON DELETE CASCADE ON UPDATE CASCADE
 ) COMMENT = '专业表-定义学院下的专业';
 
+-- 班级表（级联操作）
+CREATE TABLE class_info (
+    class_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '班级ID（主键）',
+    class_name VARCHAR(50) UNIQUE NOT NULL COMMENT '班级名称（全局唯一）',
+    major_id INT NOT NULL COMMENT '所属专业ID（外键）',
+    enrollment_year YEAR NOT NULL COMMENT '入学年份',
+    class_advisor_id INT COMMENT '班主任ID（外键，关联用户表）',
+    classroom VARCHAR(50) COMMENT '固定教室',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    FOREIGN KEY (major_id) REFERENCES majors(major_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (class_advisor_id) REFERENCES users(user_id) ON UPDATE SET NULL ON DELETE SET NULL,
+    INDEX idx_class_name (class_name)
+) COMMENT = '班级表-定义专业下的班级信息';
+
 -- 教师表（级联操作）
 CREATE TABLE teachers (
     teacher_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '教师ID（主键）',
@@ -161,7 +176,7 @@ CREATE TABLE students (
     user_id INT UNIQUE NOT NULL COMMENT '用户ID（外键）',
     department_id INT NOT NULL COMMENT '学院ID（外键）',
     major_id INT NOT NULL COMMENT '专业ID（外键）',
-    class_name VARCHAR(50) NOT NULL COMMENT '班级名称',
+    class_id INT NOT NULL COMMENT '班级ID（外键）',
     enrollment_year YEAR NOT NULL COMMENT '入学年份',
     education_years TINYINT NOT NULL DEFAULT 4 COMMENT '学制（年）',
     student_no VARCHAR(20) UNIQUE NOT NULL COMMENT '学号（全局唯一）',
@@ -174,6 +189,7 @@ CREATE TABLE students (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (department_id) REFERENCES departments(department_id) ON UPDATE CASCADE,
     FOREIGN KEY (major_id) REFERENCES majors(major_id) ON UPDATE CASCADE,
+    FOREIGN KEY (class_id) REFERENCES class_info(class_id) ON UPDATE CASCADE,
     FOREIGN KEY (status_id) REFERENCES student_statuses(status_id) ON UPDATE CASCADE,
     INDEX idx_student_no (student_no),
     INDEX idx_enrollment_year (enrollment_year)
@@ -186,16 +202,18 @@ CREATE TABLE courses (
     course_name VARCHAR(100) NOT NULL COMMENT '课程名称',
     course_description TEXT COMMENT '课程描述',
     department_id INT NOT NULL COMMENT '所属学院ID（外键）',
-    credit DECIMAL(2,1) NOT NULL COMMENT '学分',
-    course_hours TINYINT NOT NULL COMMENT '课时',
+    credit DECIMAL(2,1) NOT NULL COMMENT '学分（必须大于0）',
+    course_hours TINYINT NOT NULL COMMENT '课时（必须大于0）',
     course_type ENUM('COMPULSORY', 'ELECTIVE') NOT NULL COMMENT '课程类型（必修/选修）',
     exam_type ENUM('CLOSED_BOOK', 'OPEN_BOOK', 'REPORT', 'PRACTICAL') COMMENT '考试类型',
     created_by INT NOT NULL COMMENT '创建人ID（外键）',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     FOREIGN KEY (department_id) REFERENCES departments(department_id) ON UPDATE CASCADE,
-    FOREIGN KEY (created_by) REFERENCES teachers(teacher_id) ON UPDATE CASCADE,
-    INDEX idx_course_name (course_name)
+    FOREIGN KEY (created_by) REFERENCES users(user_id) ON UPDATE CASCADE,
+    INDEX idx_course_name (course_name),
+    CONSTRAINT chk_credit CHECK (credit > 0),
+    CONSTRAINT chk_course_hours CHECK (course_hours > 0)
 ) COMMENT = '课程表-存储课程基本信息';
 
 -- 学期表
@@ -204,12 +222,14 @@ CREATE TABLE semesters (
     academic_year VARCHAR(9) NOT NULL COMMENT '学年（如2023-2024）',
     semester_name VARCHAR(10) NOT NULL COMMENT '学期名称（如第一学期、第二学期）',
     start_date DATE NOT NULL COMMENT '开始日期',
-    end_date DATE NOT NULL COMMENT '结束日期',
+    end_date DATE NOT NULL COMMENT '结束日期（必须晚于开始日期）',
     is_current TINYINT(1) DEFAULT 0 COMMENT '是否当前学期（0-否，1-是）',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_academic_year (academic_year),
-    INDEX idx_is_current (is_current)
+    INDEX idx_is_current (is_current),
+    CONSTRAINT chk_end_date CHECK (end_date > start_date),
+    CONSTRAINT chk_is_current CHECK (is_current IN (0, 1))
 ) COMMENT = '学期表-定义学期信息';
 
 -- 教师授课表（补充级联操作）
@@ -224,11 +244,14 @@ CREATE TABLE teaching_assignments (
     current_students INT DEFAULT 0 COMMENT '当前学生数',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    FOREIGN KEY (teacher_id) REFERENCES teachers(teacher_id) ON DELETE CASCADE,
+    FOREIGN KEY (teacher_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE,
     FOREIGN KEY (semester_id) REFERENCES semesters(semester_id) ON DELETE CASCADE,
     INDEX idx_teacher_course (teacher_id, course_id),
-    INDEX idx_semester_course (semester_id, course_id)
+    INDEX idx_semester_course (semester_id, course_id),
+    CONSTRAINT chk_max_students CHECK (max_students >= 0),
+    CONSTRAINT chk_current_students CHECK (current_students >= 0),
+    CONSTRAINT chk_student_capacity CHECK (current_students <= max_students OR max_students = 0)
 ) COMMENT = '教师授课表-记录教师授课安排';
 
 -- 学生选课表（补充级联操作）
@@ -248,9 +271,9 @@ CREATE TABLE course_grades (
     grade_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '成绩ID（主键）',
     student_id INT NOT NULL COMMENT '学生ID（外键）',
     assignment_id INT NOT NULL COMMENT '授课ID（外键）',
-    usual_score DECIMAL(5,2) COMMENT '平时成绩',
-    final_grade DECIMAL(5,2) COMMENT '期末成绩',
-    gpa_grade DECIMAL(3,2) COMMENT '绩点',
+    usual_score DECIMAL(5,2) COMMENT '平时成绩（0-100）',
+    final_grade DECIMAL(5,2) COMMENT '期末成绩（0-100）',
+    gpa_grade DECIMAL(3,2) COMMENT '绩点（0-4.0）',
     review_status_id INT NOT NULL DEFAULT 1 COMMENT '审核状态（外键）',
     review_time TIMESTAMP NULL COMMENT '审核时间',
     reviewer_id INT COMMENT '审核人ID（外键）',
@@ -260,10 +283,13 @@ CREATE TABLE course_grades (
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
     FOREIGN KEY (assignment_id) REFERENCES teaching_assignments(assignment_id) ON DELETE CASCADE,
     FOREIGN KEY (review_status_id) REFERENCES grade_review_statuses(status_id) ON UPDATE CASCADE,
-    FOREIGN KEY (reviewer_id) REFERENCES teachers(teacher_id) ON UPDATE SET NULL,
+    FOREIGN KEY (reviewer_id) REFERENCES users(user_id) ON UPDATE SET NULL,
     UNIQUE KEY unique_student_assignment_grade (student_id, assignment_id),
     INDEX idx_student_grade (student_id),
-    INDEX idx_assignment_grade (assignment_id)
+    INDEX idx_assignment_grade (assignment_id),
+    CONSTRAINT chk_usual_score CHECK (usual_score IS NULL OR (usual_score >= 0 AND usual_score <= 100)),
+    CONSTRAINT chk_final_grade CHECK (final_grade IS NULL OR (final_grade >= 0 AND final_grade <= 100)),
+    CONSTRAINT chk_gpa_grade CHECK (gpa_grade IS NULL OR (gpa_grade >= 0 AND gpa_grade <= 4.0))
 ) COMMENT = '成绩表-记录学生课程成绩';
 
 -- 图书表
@@ -273,7 +299,7 @@ CREATE TABLE books (
     book_title VARCHAR(255) NOT NULL COMMENT '书名',
     author VARCHAR(100) NOT NULL COMMENT '作者',
     publisher VARCHAR(100) NOT NULL COMMENT '出版社',
-    publish_year INT COMMENT '出版年份',
+    publish_year INT COMMENT '出版年份（1800年之后）',
     category_id INT NOT NULL COMMENT '图书分类ID（外键）',
     location VARCHAR(50) NOT NULL COMMENT '馆藏位置',
     total_copies INT NOT NULL DEFAULT 1 COMMENT '总册数',
@@ -283,7 +309,11 @@ CREATE TABLE books (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     FOREIGN KEY (category_id) REFERENCES book_categories(category_id) ON UPDATE CASCADE,
     FOREIGN KEY (created_by) REFERENCES users(user_id) ON UPDATE CASCADE,
-    INDEX idx_book_title (book_title)
+    INDEX idx_book_title (book_title),
+    CONSTRAINT chk_publish_year CHECK (publish_year IS NULL OR publish_year > 1800),
+    CONSTRAINT chk_total_copies CHECK (total_copies > 0),
+    CONSTRAINT chk_available_copies CHECK (available_copies >= 0),
+    CONSTRAINT chk_available_vs_total CHECK (available_copies <= total_copies)
 ) COMMENT = '图书表-记录图书馆藏书信息';
 
 -- 图书预约表
@@ -307,8 +337,8 @@ CREATE TABLE book_borrowings (
     user_id INT NOT NULL COMMENT '借阅用户ID（外键）',
     book_id INT NOT NULL COMMENT '图书ID（外键）',
     borrow_date DATE NOT NULL COMMENT '借阅日期',
-    due_date DATE NOT NULL COMMENT '应归还日期',
-    return_date DATE COMMENT '实际归还日期',
+    due_date DATE NOT NULL COMMENT '应归还日期（必须晚于借阅日期）',
+    return_date DATE COMMENT '实际归还日期（不能早于借阅日期）',
     fine DECIMAL(5,2) DEFAULT 0 COMMENT '罚款金额',
     status_id INT NOT NULL DEFAULT 1 COMMENT '借阅状态（外键）',
     renew_count TINYINT DEFAULT 0 COMMENT '续借次数',
@@ -321,7 +351,12 @@ CREATE TABLE book_borrowings (
     FOREIGN KEY (book_id) REFERENCES books(book_id) ON UPDATE CASCADE,
     FOREIGN KEY (status_id) REFERENCES book_borrow_statuses(status_id) ON UPDATE CASCADE,
     FOREIGN KEY (created_by) REFERENCES users(user_id) ON UPDATE CASCADE,
-    INDEX idx_due_date (due_date)
+    INDEX idx_due_date (due_date),
+    CONSTRAINT chk_due_date CHECK (due_date > borrow_date),
+    CONSTRAINT chk_return_date CHECK (return_date IS NULL OR return_date >= borrow_date),
+    CONSTRAINT chk_fine CHECK (fine >= 0),
+    CONSTRAINT chk_renew_count CHECK (renew_count >= 0),
+    CONSTRAINT chk_compensation CHECK (compensation >= 0)
 ) COMMENT = '图书借阅表-记录图书借阅信息';
 
 -- 数据变更日志表（补充级联操作）
@@ -362,26 +397,112 @@ CREATE TABLE course_prerequisites (
 业务逻辑（存储过程与触发器）
 */
 
--- 存储过程：更新班级排名
+-- 更新班级排名的存储过程
 DELIMITER $$
-CREATE PROCEDURE update_class_ranking(IN p_student_id INT)
+CREATE PROCEDURE update_class_ranking()
 BEGIN
-    DECLARE class_name_val VARCHAR(50);
+    -- 创建临时表存储每个学生的平均绩点
+    CREATE TEMPORARY TABLE IF NOT EXISTS temp_student_gpa AS
+    SELECT 
+        s.student_id,
+        s.class_id,
+        COALESCE(calculate_gpa(s.student_id), 0) AS gpa
+    FROM 
+        students s;
     
-    -- 获取学生所在班级
-    SELECT class_name INTO class_name_val FROM students WHERE student_id = p_student_id;
-    
-    -- 直接通过窗口函数计算排名并更新
+    -- 更新学生表中的班级排名
     UPDATE students s
     JOIN (
         SELECT 
             student_id,
-            ROW_NUMBER() OVER (PARTITION BY s.class_name ORDER BY s.gpa DESC, s.total_credits DESC) AS new_rank
-        FROM students
-        WHERE class_name = class_name_val AND status_id = 1  -- 仅在读学生
+            class_id,
+            gpa,
+            RANK() OVER (PARTITION BY class_id ORDER BY gpa DESC) AS class_rank
+        FROM 
+            temp_student_gpa
     ) AS ranked ON s.student_id = ranked.student_id
-    SET s.class_rank = ranked.new_rank
-    WHERE s.class_name = class_name_val;
+    SET s.class_rank = ranked.class_rank;
+    
+    -- 删除临时表
+    DROP TEMPORARY TABLE IF EXISTS temp_student_gpa;
+END$$
+DELIMITER ;
+
+-- 检查学生毕业状态的存储过程
+DELIMITER $$
+CREATE PROCEDURE check_student_graduation_status(IN student_id_param INT)
+BEGIN
+    DECLARE total_credits DECIMAL(5,2);
+    DECLARE required_credits DECIMAL(5,2);
+    DECLARE gpa DECIMAL(3,2);
+    DECLARE min_gpa DECIMAL(3,2);
+    DECLARE graduation_status VARCHAR(20);
+    
+    -- 获取学生已修总学分
+    SELECT SUM(c.credit) INTO total_credits
+    FROM course_grades cg
+    JOIN teaching_assignments ta ON cg.assignment_id = ta.assignment_id
+    JOIN courses c ON ta.course_id = c.course_id
+    JOIN course_selections cs ON cg.assignment_id = cs.assignment_id AND cg.student_id = cs.student_id
+    WHERE cg.student_id = student_id_param
+    AND cg.final_grade IS NOT NULL
+    AND cs.status = 'COMPLETED'
+    AND cg.review_status_id = 2;  -- 已通过审核
+    
+    -- 获取毕业要求学分
+    SELECT CAST(config_value AS DECIMAL(5,2)) INTO required_credits
+    FROM system_config
+    WHERE config_key = 'graduation_credits';
+    
+    -- 获取学生GPA
+    SELECT calculate_gpa(student_id_param) INTO gpa;
+    
+    -- 获取毕业要求最低GPA
+    SELECT CAST(config_value AS DECIMAL(3,2)) INTO min_gpa
+    FROM system_config
+    WHERE config_key = 'min_graduation_gpa';
+    
+    -- 判断毕业状态
+    IF total_credits >= required_credits AND gpa >= min_gpa THEN
+        SET graduation_status = 'ELIGIBLE';
+    ELSE
+        SET graduation_status = 'NOT_ELIGIBLE';
+    END IF;
+    
+    -- 输出结果
+    SELECT 
+        student_id_param AS student_id,
+        COALESCE(total_credits, 0) AS total_credits,
+        required_credits AS required_credits,
+        gpa AS current_gpa,
+        min_gpa AS min_required_gpa,
+        graduation_status;
+END$$
+DELIMITER ;
+
+-- 自动更新学生班级的存储过程（学年升级）
+DELIMITER $$
+CREATE PROCEDURE update_student_classes()
+BEGIN
+    DECLARE current_year INT;
+    DECLARE next_year INT;
+    
+    -- 获取当前年份
+    SELECT YEAR(CURRENT_DATE) INTO current_year;
+    SET next_year = current_year + 1;
+    
+    -- 更新学生班级（学年升级）
+    UPDATE students s
+    JOIN class_info ci ON s.class_id = ci.class_id
+    JOIN class_info new_ci ON new_ci.major_id = ci.major_id 
+        AND new_ci.enrollment_year = ci.enrollment_year + 1
+    SET s.class_id = new_ci.class_id
+    WHERE ci.enrollment_year < current_year - 3  -- 假设4年制，第4年不升级
+    AND EXISTS (
+        SELECT 1 FROM class_info 
+        WHERE major_id = ci.major_id 
+        AND enrollment_year = ci.enrollment_year + 1
+    );
 END$$
 DELIMITER ;
 
@@ -418,6 +539,58 @@ BEGIN
     ELSE
         RETURN ROUND(total_weighted_gpa / total_credits, 2);
     END IF;
+END$$
+DELIMITER ;
+
+-- 图书逾期罚款计算函数
+DELIMITER $$
+CREATE FUNCTION calculate_overdue_fine(borrowing_id INT) RETURNS DECIMAL(5,2)
+DETERMINISTIC
+BEGIN
+    DECLARE days_overdue INT;
+    DECLARE fine_per_day DECIMAL(5,2);
+    DECLARE total_fine DECIMAL(5,2);
+    
+    -- 获取逾期天数
+    SELECT DATEDIFF(CURRENT_DATE, due_date) INTO days_overdue
+    FROM book_borrowings
+    WHERE borrowing_id = borrowing_id
+    AND return_date IS NULL
+    AND status_id IN (1, 3);  -- 已借出或已逾期
+    
+    -- 获取每日罚款金额
+    SELECT CAST(config_value AS DECIMAL(5,2)) INTO fine_per_day
+    FROM system_config
+    WHERE config_key = 'fine_per_day';
+    
+    -- 计算总罚款
+    IF days_overdue > 0 AND fine_per_day IS NOT NULL THEN
+        SET total_fine = days_overdue * fine_per_day;
+    ELSE
+        SET total_fine = 0.00;
+    END IF;
+    
+    RETURN total_fine;
+END$$
+DELIMITER ;
+
+-- 更新逾期图书状态的存储过程
+DELIMITER $$
+CREATE PROCEDURE update_overdue_books()
+BEGIN
+    -- 更新逾期图书状态
+    UPDATE book_borrowings
+    SET status_id = 3  -- 已逾期
+    WHERE due_date < CURRENT_DATE
+    AND return_date IS NULL
+    AND status_id = 1;  -- 已借出
+    
+    -- 更新逾期图书罚款
+    UPDATE book_borrowings
+    SET fine = calculate_overdue_fine(borrowing_id)
+    WHERE due_date < CURRENT_DATE
+    AND return_date IS NULL
+    AND status_id IN (1, 3);  -- 已借出或已逾期
 END$$
 DELIMITER ;
 
@@ -579,9 +752,9 @@ AFTER INSERT ON students
 FOR EACH ROW
 BEGIN
     -- 如果新学生没有指定班级，则自动加入示例班级
-    IF NEW.class_name IS NULL OR NEW.class_name = '' THEN
+    IF NEW.class_id IS NULL THEN
         UPDATE students 
-        SET class_name = '示例班级' 
+        SET class_id = 1  -- 示例班级ID
         WHERE student_id = NEW.student_id;
     END IF;
 END$$
@@ -595,18 +768,21 @@ DELIMITER ;
 -- 班级排名视图
 CREATE OR REPLACE VIEW class_ranking AS
 SELECT 
-    s.class_name,
+    ci.class_name,
+    s.class_id,
     s.student_id,
     s.student_no,
     u.username,
     s.gpa,
-    RANK() OVER (PARTITION BY s.class_name ORDER BY s.gpa DESC) AS `class_rank`
+    RANK() OVER (PARTITION BY s.class_id ORDER BY s.gpa DESC) AS `class_rank`
 FROM 
     students s
 JOIN 
     users u ON s.user_id = u.user_id
 JOIN 
     student_statuses ss ON s.status_id = ss.status_id
+JOIN 
+    class_info ci ON s.class_id = ci.class_id
 WHERE 
     ss.status_name = 'ACTIVE';
 
@@ -643,7 +819,7 @@ SELECT
     u.username,
     d.department_name,
     m.major_name,
-    s.class_name,
+    ci.class_name,
     COUNT(cs.selection_id) AS total_courses,
     SUM(CASE WHEN cs.status = 'COMPLETED' THEN 1 ELSE 0 END) AS completed_courses,
     SUM(CASE WHEN cs.status = 'COMPLETED' THEN c.credit ELSE 0 END) AS total_credits,
@@ -656,6 +832,8 @@ JOIN
     departments d ON s.department_id = d.department_id
 JOIN 
     majors m ON s.major_id = m.major_id
+JOIN 
+    class_info ci ON s.class_id = ci.class_id
 LEFT JOIN 
     course_selections cs ON s.student_id = cs.student_id
 LEFT JOIN 
@@ -667,7 +845,7 @@ LEFT JOIN
 WHERE
     cg.review_status_id = 2  -- 仅包含已审核通过的成绩
 GROUP BY 
-    s.student_id, s.student_no, u.username, d.department_name, m.major_name, s.class_name;
+    s.student_id, s.student_no, u.username, d.department_name, m.major_name, ci.class_name;
 
 -- 教师授课统计视图
 CREATE OR REPLACE VIEW teacher_course_stats AS
@@ -702,13 +880,14 @@ GROUP BY
 INSERT INTO system_config (config_key, config_value, config_type, description) VALUES
 ('student_id_format', 'YYYY{dept}{major}####', 'STRING', '学号格式：入学年份+学院代码+专业代码+4位序号'),
 ('teacher_id_format', 'YY{dept}####', 'STRING', '教师编号格式：入职年份后两位+学院代码+4位序号'),
-('max_borrow_days', '30', 'NUMBER', '图书最大借阅天数'),
-('fine_per_day', '1.00', 'NUMBER', '图书逾期每日罚款金额'),
-('semester_course_limit', '5', 'NUMBER', '学生每学期最多选课数量'),
-('gpa_scale', '4.0', 'NUMBER', '绩点满分值'),
-('gpa_calculation_method', 'weighted_average', 'STRING', '绩点计算方法：加权平均'),
-('max_renew_count', '2', 'NUMBER', '图书最大续借次数'),
-('password_expiration_days', '90', 'NUMBER', '密码过期天数');
+('max_books_per_student', '5', 'NUMBER', '每个学生最多可借图书数量'),
+('max_borrow_days', '30', 'NUMBER', '图书最长借阅天数'),
+('max_renew_times', '2', 'NUMBER', '图书最大续借次数'),
+('fine_per_day', '0.5', 'NUMBER', '图书逾期每日罚款金额'),
+('graduation_credits', '160', 'NUMBER', '毕业要求总学分'),
+('min_graduation_gpa', '2.0', 'NUMBER', '毕业最低GPA要求'),
+('max_course_selection', '8', 'NUMBER', '学生每学期最多选课数量'),
+('auto_approve_threshold', '85', 'NUMBER', '成绩自动审核通过的分数阈值');
 
 -- 初始化角色数据（只保留三种角色）
 INSERT INTO roles (role_name, description) VALUES
@@ -806,6 +985,10 @@ INSERT INTO departments (department_name, department_code) VALUES
 INSERT INTO majors (major_name, department_id, major_code) VALUES
 ('示例专业', 1, 'EX01');
 
+-- 初始化班级表（只保留一个示例班级）
+INSERT INTO class_info (class_name, major_id, enrollment_year, classroom) VALUES
+('示例班级', 1, 2021, '示例教室A201');
+
 -- 初始化图书分类表（只保留一个示例分类）
 INSERT INTO book_categories (category_name, parent_id) VALUES
 ('示例分类', NULL),
@@ -848,9 +1031,9 @@ INSERT INTO users (username, password_hash, email, phone, gender, status) VALUES
 -- 为学生分配角色（学生角色ID为3）
 INSERT INTO user_roles (user_id, role_id) VALUES (3, 3);
 
--- 初始化学生表（使用示例班级）
-INSERT INTO students (user_id, department_id, major_id, class_name, enrollment_year, education_years, student_no, status_id, emergency_contact, emergency_phone) VALUES
-(3, 1, 1, '示例班级', 2021, 4, '2021CS01001', 1, '张父', '13900138001');
+-- 初始化学生表（使用示例班级ID）
+INSERT INTO students (user_id, department_id, major_id, class_id, enrollment_year, education_years, student_no, status_id, emergency_contact, emergency_phone) VALUES
+(3, 1, 1, 1, 2021, 4, '2021CS01001', 1, '张父', '13900138001');
 
 -- 初始化教师授课表
 INSERT INTO teaching_assignments (teacher_id, course_id, semester_id, classroom, schedule, max_students, current_students) VALUES
@@ -877,22 +1060,133 @@ FROM (
 INSERT INTO book_borrowings (user_id, book_id, borrow_date, due_date, status_id, created_by) VALUES
 (3, 1, '2023-10-01', '2023-10-31', 2, 1);
 
--- 用户角色分配触发器：当插入新用户时自动分配学生角色
+-- 用户角色自动关联触发器：当插入新用户时根据角色自动在学生表或教师表中创建对应记录
 DELIMITER $$
-CREATE TRIGGER assign_student_role_after_user_insert
+CREATE TRIGGER auto_create_role_record_after_user_insert
 AFTER INSERT ON users
 FOR EACH ROW
 BEGIN
-    -- 检查用户是否已经拥有学生角色（角色ID为3）
-    DECLARE role_count INT;
+    DECLARE user_role_id INT;
+    DECLARE has_student_record INT;
+    DECLARE has_teacher_record INT;
+    DECLARE next_seq INT;
     
-    SELECT COUNT(*) INTO role_count 
+    -- 获取用户的角色ID
+    SELECT role_id INTO user_role_id 
     FROM user_roles 
-    WHERE user_id = NEW.user_id AND role_id = 3;
+    WHERE user_id = NEW.user_id 
+    LIMIT 1;
     
-    -- 如果用户没有学生角色，则分配
-    IF role_count = 0 THEN
-        INSERT INTO user_roles (user_id, role_id) VALUES (NEW.user_id, 3);
+    -- 如果用户没有分配角色，则默认为学生角色
+    IF user_role_id IS NULL THEN
+        SET user_role_id = 3; -- 学生角色ID
+        INSERT INTO user_roles (user_id, role_id) VALUES (NEW.user_id, user_role_id);
+    END IF;
+    
+    -- 检查用户是否已有学生记录
+    SELECT COUNT(*) INTO has_student_record 
+    FROM students 
+    WHERE user_id = NEW.user_id;
+    
+    -- 检查用户是否已有教师记录
+    SELECT COUNT(*) INTO has_teacher_record 
+    FROM teachers 
+    WHERE user_id = NEW.user_id;
+    
+    -- 根据角色创建对应记录
+    IF user_role_id = 3 AND has_student_record = 0 THEN
+        -- 为学生角色创建学生记录
+        -- 获取下一个序号
+        SELECT COALESCE(MAX(student_id), 0) + 1 INTO next_seq FROM students;
+        INSERT INTO students (user_id, department_id, major_id, class_id, enrollment_year, education_years, student_no, status_id)
+        VALUES (NEW.user_id, 1, 1, 1, YEAR(CURRENT_DATE), 4, 
+                CONCAT(YEAR(CURRENT_DATE), 'CS', LPAD(next_seq, 4, '0')), 1);
+    ELSEIF user_role_id = 2 AND has_teacher_record = 0 THEN
+        -- 为教师角色创建教师记录
+        -- 获取下一个序号
+        SELECT COALESCE(MAX(teacher_id), 0) + 1 INTO next_seq FROM teachers;
+        INSERT INTO teachers (user_id, department_id, title_id, hire_date, teacher_no, status_id)
+        VALUES (NEW.user_id, 1, 2, CURRENT_DATE, 
+                CONCAT('T', RIGHT(YEAR(CURRENT_DATE), 2), 'EX', LPAD(next_seq, 3, '0')), 1);
     END IF;
 END$$
 DELIMITER ;
+
+-- 定期维护事件：每天凌晨执行逾期图书检查和班级排名更新
+DELIMITER $$
+CREATE EVENT IF NOT EXISTS daily_maintenance_event
+ON SCHEDULE EVERY 1 DAY
+STARTS CURRENT_DATE + INTERVAL 1 DAY
+DO
+BEGIN
+    -- 更新逾期图书状态和罚款
+    CALL update_overdue_books();
+    
+    -- 更新班级排名
+    CALL update_class_ranking();
+END$$
+DELIMITER ;
+
+-- 学期结束事件：自动更新学生班级（学年升级）
+DELIMITER $$
+CREATE EVENT IF NOT EXISTS semester_end_event
+ON SCHEDULE EVERY 1 YEAR
+STARTS CONCAT(YEAR(CURRENT_DATE), '-09-01')  -- 假设9月1日为新学年开始
+DO
+BEGIN
+    -- 更新学生班级（学年升级）
+    CALL update_student_classes();
+END$$
+DELIMITER ;
+
+-- 数据库名称：Lucky_SMS
+
+/*
+  Lucky_SMS 学生管理系统数据库功能特点：
+  
+  1. 完整的用户权限管理
+     - 三种角色：管理员、教师、学生
+     - 自动角色关联和记录创建
+  
+  2. 规范的学院-专业-班级三级结构
+     - 清晰的层级关系和外键约束
+     - 支持班级排名和学年升级
+  
+  3. 完善的课程管理
+     - 课程信息、授课安排、选课管理
+     - 成绩录入、审核和绩点计算
+     - 支持课程先修关系
+  
+  4. 图书借阅管理
+     - 图书信息、分类、借阅记录
+     - 逾期自动计算罚款
+     - 续借和损坏赔偿管理
+  
+  5. 数据完整性保障
+     - 全面的外键约束和级联操作
+     - 丰富的检查约束确保数据有效性
+     - 触发器自动维护数据一致性
+  
+  6. 自动化维护
+     - 定期事件自动执行维护任务
+     - 逾期图书状态更新
+     - 班级排名自动计算
+     - 学年自动升级
+  
+  7. 灵活的系统配置
+     - 可配置的系统参数
+     - 支持业务规则调整
+  
+  8. 数据变更日志
+     - 记录重要数据变更历史
+     - 支持数据追溯
+  
+  使用说明：
+  1. 执行此SQL文件将创建完整的Lucky_SMS数据库
+  2. 包含示例数据，便于测试和开发
+  3. 可根据实际需求调整系统配置参数
+  4. 定期执行维护存储过程保持数据一致性
+  
+  创建日期：2025年
+  版本：1.0
+*/

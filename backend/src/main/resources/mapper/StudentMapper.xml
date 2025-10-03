@@ -6,10 +6,14 @@
     <!-- 通过uid返回学生信息 -->
     <select id="selectStudentById" parameterType="Integer" resultType="com.yangshengzhou.lucky_sms.vo.student.StudentVO">
         SELECT
-            username
+            u.username
         FROM
-            users
+            users u
+                INNER JOIN students s ON u.user_id = s.user_id  -- 显式指定连接条件，更清晰
+                INNER JOIN course_selections c ON s.student_id = c.student_id
         WHERE
-            user_id = #{userId}
+            u.user_id = #{userId}
+        GROUP BY
+            u.username, s.student_no, s.class_name, s.gpa, s.class_rank  -- 非聚合字段需分组
     </select>
 </mapper>
