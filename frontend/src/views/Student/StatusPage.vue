@@ -1,7 +1,13 @@
 <template>
   <div class="status-dashboard" :class="{ 'dark': isDarkMode }" @mousemove="handleMouseMove">
+    <!-- 加载状态 -->
+    <div v-if="loading" class="loading-container">
+      <el-icon class="is-loading"><loading /></el-icon>
+      <p>正在加载学籍状态数据...</p>
+    </div>
+    
     <!-- 主要内容区域 -->
-    <main class="dashboard-content">
+    <main v-else class="dashboard-content">
       <!-- 学籍状态卡片 -->
       <div class="status-card modern-card" ref="statusCard">
         <div class="card-header">
@@ -107,6 +113,8 @@
 import { ref, computed, onMounted, onUnmounted, nextTick, watch, inject } from 'vue'
 import { Calendar, School } from '@element-plus/icons-vue'
 import Chart from 'chart.js/auto'
+import service from '@/utils/request'
+import { ElMessage } from 'element-plus'
 
 // DOM 引用
 const statusCard = ref(null)
@@ -135,8 +143,176 @@ const credits = ref(68) // 已修学分
 const totalCredits = ref(140) // 总学分要求
 const attendanceRate = ref(96) // 出勤率
 const performanceLevel = ref('良好') // 学业等级
+const loading = ref(false) // 加载状态
+const error = ref(null) // 错误信息
+const academicHistory = ref([]) // 历史学业表现数据
 let creditChart = null // 学分进度图表实例
 let trendChart = null // 学业表现趋势图表实例
+
+// 获取学生状态数据
+const fetchStudentStatus = async () => {
+  loading.value = true
+  error.value = null
+  
+  try {
+    const response = await service.get('/student/status')
+    
+    if (response.code === 200) {
+      const data = response.data
+      
+      // 更新基本信息
+      status.value = data.academicStatus.status || 'normal'
+      credits.value = data.academicStatus.completedCredits || 0
+      totalCredits.value = data.academicStatus.totalCredits || 140
+      effectiveDate.value = data.basicInfo.enrollmentDate || '2022-09-01'
+      
+      // 计算预计毕业时间（假设学制为4年）
+      if (data.basicInfo.enrollmentDate) {
+        const enrollDate = new Date(data.basicInfo.enrollmentDate)
+        const gradDate = new Date(enrollDate)
+        gradDate.setFullYear(gradDate.getFullYear() + 4)
+        graduationDate.value = gradDate.toISOString().split('T')[0]
+      }
+      
+      // 根据GPA计算学业等级
+      const gpa = parseFloat(data.academicStatus.gpa || 0)
+      if (gpa >= 3.7) performanceLevel.value = '优秀'
+      else if (gpa >= 3.0) performanceLevel.value = '良好'
+      else if (gpa >= 2.0) performanceLevel.value = '中等'
+      else if (gpa >= 1.0) performanceLevel.value = '及格'
+      else performanceLevel.value = '不及格'
+      
+      // 模拟出勤率（实际应用中应该从后端获取）
+      attendanceRate.value = Math.min(95, Math.max(60, Math.round(gpa * 25 + Math.random() * 10)))
+      
+      // 保存历史数据用于趋势图（如果后端提供了历史数据）
+      if (data.academicHistory && data.academicHistory.length > 0) {
+        academicHistory.value = data.academicHistory
+        // 使用最新的历史数据中的出勤率
+        attendanceRate.value = data.academicHistory[data.academicHistory.length - 1].attendanceRate || attendanceRate.value
+      }
+      
+      // 重新初始化图表以更新数据
+      if (creditChart && creditChart.data && creditChart.data.datasets) {
+        creditChart.data.datasets[0].data = [credits.value, totalCredits.value - credits.value]
+        creditChart.update()
+      }
+      
+      if (trendChart && trendChart.data && trendChart.data.datasets) {
+        // 更新趋势图数据
+        const trendLabels = academicHistory.value.map(item => item.semester)
+        const trendData = academicHistory.value.map(item => item.attendanceRate)
+        
+        // 添加当前学期数据点
+        trendLabels.push('当前')
+        trendData.push(attendanceRate.value)
+        
+        trendChart.data.labels = trendLabels
+        trendChart.data.datasets[0].data = trendData
+        trendChart.update()
+      }
+    } else {
+      throw new Error(response.message || '获取数据失败')
+    }
+  } catch (err) {
+    error.value = '获取数据失败，使用模拟数据'
+    console.error('获取学生状态失败:', err)
+    ElMessage.warning('获取学籍状态失败，显示模拟数据')
+    
+    // 使用模拟数据作为后备 - 与后端API响应格式一致
+    const mockResponse = {
+      code: 200,
+      message: "获取成功",
+      data: {
+        basicInfo: {
+          id: "20220001",
+          name: "张三",
+          gender: "男",
+          birthDate: "2003-05-15",
+          idCard: "110101200305156789",
+          nation: "汉族",
+          politicalStatus: "共青团员",
+          enrollmentDate: "2022-09-01",
+          educationLevel: "本科",
+          major: "计算机科学与技术",
+          class: "计科2201班",
+          department: "信息工程学院",
+          advisor: "李教授",
+          phone: "13800138000",
+          email: "zhangsan@example.com",
+          address: "北京市海淀区XX路XX号"
+        },
+        academicStatus: {
+          status: "normal",
+          gpa: "3.65",
+          totalCredits: 140,
+          completedCredits: 68,
+          failedCourses: 2
+        },
+        // 添加历史学业表现数据，用于趋势图
+        academicHistory: [
+          { semester: "大一上", gpa: "3.2", attendanceRate: 92 },
+          { semester: "大一下", gpa: "3.35", attendanceRate: 94 }
+        ]
+      }
+    }
+    
+    // 处理模拟数据
+    const data = mockResponse.data
+    
+    // 更新基本信息
+    status.value = data.academicStatus.status || 'normal'
+    credits.value = data.academicStatus.completedCredits || 0
+    totalCredits.value = data.academicStatus.totalCredits || 140
+    effectiveDate.value = data.basicInfo.enrollmentDate || '2022-09-01'
+    
+    // 计算预计毕业时间（假设学制为4年）
+    if (data.basicInfo.enrollmentDate) {
+      const enrollDate = new Date(data.basicInfo.enrollmentDate)
+      const gradDate = new Date(enrollDate)
+      gradDate.setFullYear(gradDate.getFullYear() + 4)
+      graduationDate.value = gradDate.toISOString().split('T')[0]
+    }
+    
+    // 根据GPA计算学业等级
+    const gpa = parseFloat(data.academicStatus.gpa || 0)
+    if (gpa >= 3.7) performanceLevel.value = '优秀'
+    else if (gpa >= 3.0) performanceLevel.value = '良好'
+    else if (gpa >= 2.0) performanceLevel.value = '中等'
+    else if (gpa >= 1.0) performanceLevel.value = '及格'
+    else performanceLevel.value = '不及格'
+    
+    // 使用历史数据中的出勤率
+    attendanceRate.value = data.academicHistory && data.academicHistory.length > 0 
+      ? data.academicHistory[data.academicHistory.length - 1].attendanceRate 
+      : 96
+    
+    // 保存历史数据用于趋势图
+    academicHistory.value = data.academicHistory || []
+    
+    // 重新初始化图表以更新数据
+    if (creditChart && creditChart.data && creditChart.data.datasets) {
+      creditChart.data.datasets[0].data = [credits.value, totalCredits.value - credits.value]
+      creditChart.update()
+    }
+    
+    if (trendChart && trendChart.data && trendChart.data.datasets) {
+        // 更新趋势图数据
+        const trendLabels = academicHistory.value.map(item => item.semester)
+        const trendData = academicHistory.value.map(item => item.attendanceRate)
+        
+        // 添加当前学期数据点
+        trendLabels.push('当前')
+        trendData.push(attendanceRate.value)
+        
+        trendChart.data.labels = trendLabels
+        trendChart.data.datasets[0].data = trendData
+        trendChart.update()
+      }
+  } finally {
+    loading.value = false
+  }
+}
 
 // 鼠标移动事件处理 - 用于创建卡片的光影效果
 const handleMouseMove = (e) => {
@@ -198,8 +374,19 @@ const formatDate = (dateStr) => {
 // 初始化图表
 const initCharts = () => {
   nextTick(() => {
+    // 检查canvas元素是否存在
+    if (!creditDoughnutCanvas.value || !performanceTrendCanvas.value) {
+      console.error('Canvas elements not found')
+      return
+    }
+    
     // 学分环形图
     const creditCtx = creditDoughnutCanvas.value.getContext('2d')
+    if (!creditCtx) {
+      console.error('Failed to get credit chart context')
+      return
+    }
+    
     creditChart = new Chart(creditCtx, {
       type: 'doughnut',
       data: {
@@ -242,13 +429,26 @@ const initCharts = () => {
 
     // 学业表现趋势图
     const trendCtx = performanceTrendCanvas.value.getContext('2d')
+    if (!trendCtx) {
+      console.error('Failed to get trend chart context')
+      return
+    }
+    
+    // 准备趋势图数据
+    const trendLabels = academicHistory.value.map(item => item.semester)
+    const trendData = academicHistory.value.map(item => item.attendanceRate)
+    
+    // 添加当前学期数据点
+    trendLabels.push('当前')
+    trendData.push(attendanceRate.value)
+    
     trendChart = new Chart(trendCtx, {
       type: 'line',
       data: {
-        labels: ['大一上', '大一下', '大二上', '大二下', '大三上', '大三下', '当前'],
+        labels: trendLabels,
         datasets: [{
           label: '学业表现',
-          data: [80, 85, 88, 90, 92, 94, attendanceRate.value],
+          data: trendData,
           borderColor: '#409eff', // 线条颜色
           backgroundColor: isDarkMode.value
             ? 'rgba(64, 158, 255, 0.1)'
@@ -329,7 +529,12 @@ watch(isDarkMode, (newVal) => {
 })
 
 // 组件挂载时初始化数据和图表
-onMounted(() => {
+onMounted(async () => {
+  // 先获取学生状态数据
+  await fetchStudentStatus()
+  
+  // 等待DOM更新完成后初始化图表
+  await nextTick()
   initCharts()
 
   // 数字计数器动画 - 用于学分和出勤率的数字增长动画
@@ -658,5 +863,41 @@ onUnmounted(() => {
 .dark {
   --text-primary: #ffffff;
   --text-secondary: rgba(255, 255, 255, 0.7);
+}
+
+// 加载状态样式
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  
+  .el-icon {
+    font-size: 48px;
+    color: var(--el-color-primary);
+    animation: rotating 2s linear infinite;
+  }
+  
+  p {
+    margin-top: 20px;
+    color: var(--text-secondary);
+    font-size: 16px;
+  }
+}
+
+// 错误提示样式
+.error-container {
+  margin: 20px 0;
+}
+
+// 旋转动画
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
