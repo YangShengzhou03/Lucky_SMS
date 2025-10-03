@@ -3,7 +3,7 @@
     <div>
       <div class="welcome-section modern-card">
         <h2>欢迎回来，<span class="username">{{ student?.name || '--' }}</span> 👋</h2>
-        <p class="subtitle">学号：{{ student?.id || '--' }} | 班级：{{ student?.class || '--' }}</p>
+        <p class="subtitle">学号：{{ student?.id || '--' }} | 班级：{{ student?.className || '--' }}</p>
       </div>
       <div class="info-cards">
         <div class="modern-card score-card">
@@ -230,7 +230,7 @@ const fetchData = async () => {
     student.value = {
       name: '张三',
       id: '20230001',
-      class: '计算机科学与技术2023级1班',
+      className: '计算机科学与技术2023级1班',
       gpa: '3.75',
       rank: 5,
       classSize: 30,
