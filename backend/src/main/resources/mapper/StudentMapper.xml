@@ -73,11 +73,32 @@
         FROM announcements
     </select>
 
-    <!-- 选择出Status数据 -->
-    <select id="selectStatusById" parameterType="Integer" resultType="com.yangshengzhou.lucky_sms.vo.student.StatusVO">
-        SELECT
+    <!-- 1. 定义 Todos 的显式映射规则 -->
+    <resultMap id="BasicInfoMap" type="com.yangshengzhou.lucky_sms.pojo.BasicInfo">
+        <result column="status_name" property="status"/>
+        <result column="gpa" property="gpa"/>
+        <result column="total_credits" property="completedCredits"/>
+        <result column="enrollment_year" property="enrollmentDate"/>
+        <result column="expectedGraduationDate" property="expectedGraduationDate"/>
+    </resultMap>
 
-        FROM student_statuses, lucky_sms.students, lucky_sms.users
+    <!-- 选择出BasicInfo数据 -->
+    <select id="selectBasicInfoById" parameterType="Integer" resultMap="BasicInfoMap">
+        SELECT
+            status_name,
+            gpa,
+            total_credits,
+            enrollment_year,
+            enrollment_year + students.education_years AS expectedGraduationDate
+        FROM students
+                 INNER JOIN student_statuses ON students.status_id = student_statuses.status_id
+        WHERE user_id = #{userId}
     </select>
+
+<!--    &lt;!&ndash; 选择出AcademicHistoryList数据 &ndash;&gt;-->
+<!--    <select id="selectAcademicHistoryList" parameterType="Integer" resultType="com.yangshengzhou.lucky_sms.pojo.AcademicHistory">-->
+<!--        SELECT-->
+
+<!--    </select>-->
 
 </mapper>

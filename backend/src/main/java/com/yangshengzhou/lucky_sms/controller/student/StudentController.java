@@ -1,6 +1,7 @@
 package com.yangshengzhou.lucky_sms.controller.student;
 
 import com.yangshengzhou.lucky_sms.service.student.HomeService;
+import com.yangshengzhou.lucky_sms.service.student.StatusService;
 import com.yangshengzhou.lucky_sms.utils.JwtUtil;
 import com.yangshengzhou.lucky_sms.vo.student.HomeVO;
 import com.yangshengzhou.lucky_sms.vo.student.StatusVO;
@@ -20,6 +21,8 @@ public class StudentController {
 
     @Resource
     private HomeService homeService;
+    @Resource
+    private StatusService statusService;
 
     @GetMapping("/home")
     public HashMap<String, Object> studentHomeResult(
@@ -49,7 +52,7 @@ public class StudentController {
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
-            StatusVO statusDate = homeService.getStatusDate(userId);
+            StatusVO statusDate = statusService.getStatusDate(userId);
 
             studentStatusResult.put("code", 200);
             studentStatusResult.put("message", "请求成功");

@@ -3,7 +3,6 @@ package com.yangshengzhou.lucky_sms.service.student;
 import com.yangshengzhou.lucky_sms.mapper.student.StudentMapper;
 import com.yangshengzhou.lucky_sms.pojo.Announcement;
 import com.yangshengzhou.lucky_sms.vo.student.HomeVO;
-import com.yangshengzhou.lucky_sms.vo.student.StatusVO;
 import com.yangshengzhou.lucky_sms.vo.student.StudentVO;
 import com.yangshengzhou.lucky_sms.pojo.Todos;
 import org.springframework.stereotype.Service;
@@ -33,11 +32,5 @@ public class HomeService {
         homeVO.setAnnouncements(announcement);
 
         return homeVO;
-    }
-
-    public StatusVO getStatusDate(Integer userId) {
-        StatusVO statusVO = studentMapper.selectStatusById(userId);
-
-        return statusVO;
     }
 }

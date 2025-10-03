@@ -1,10 +1,12 @@
 package com.yangshengzhou.lucky_sms.pojo;
 
-public class AcademicStatus {
+public class BasicInfo {
     private String status;
     private String gpa;
     private String totalCredits;
     private String completedCredits;
+    public String enrollmentDate;
+    public String expectedGraduationDate;
 
     public String getStatus() {
         return status;
@@ -36,5 +38,21 @@ public class AcademicStatus {
 
     public void setCompletedCredits(String completedCredits) {
         this.completedCredits = completedCredits;
+    }
+
+    public String getEnrollmentDate() {
+        return enrollmentDate;
+    }
+
+    public void setEnrollmentDate(String enrollmentDate) {
+        this.enrollmentDate = enrollmentDate;
+    }
+
+    public String getExpectedGraduationDate() {
+        return expectedGraduationDate;
+    }
+
+    public void setExpectedGraduationDate(String expectedGraduationDate) {
+        this.expectedGraduationDate = expectedGraduationDate;
     }
 }

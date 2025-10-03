@@ -201,15 +201,13 @@ const fetchStudentStatus = async () => {
 const useMockData = () => {
   // 精简的模拟数据，只包含必要字段
   const mockData = {
-    academicStatus: {
+    basicInfo: {
       status: "normal",
       gpa: "3.65",
       totalCredits: 140,
-      completedCredits: 68
-    },
-    basicInfo: {
+      completedCredits: 68,
       enrollmentDate: "2022-09-01",
-      expectedGraduationDate: "2026-06-30" // 预计毕业时间放在基本信息中
+      expectedGraduationDate: "2026-06-30"
     },
     academicHistory: [
       { semester: "大一上", attendanceRate: 92 },
@@ -218,16 +216,16 @@ const useMockData = () => {
   }
   
   // 更新基本信息
-  status.value = mockData.academicStatus.status || 'normal'
-  credits.value = mockData.academicStatus.completedCredits || 0
-  totalCredits.value = mockData.academicStatus.totalCredits || 140
+  status.value = mockData.basicInfo.status || 'normal'
+  credits.value = mockData.basicInfo.completedCredits || 0
+  totalCredits.value = mockData.basicInfo.totalCredits || 140
   effectiveDate.value = mockData.basicInfo.enrollmentDate || '2022-09-01'
   
   // 使用后端传入的预计毕业时间
   graduationDate.value = mockData.basicInfo.expectedGraduationDate || ''
   
   // 根据GPA计算学业等级
-  const gpa = parseFloat(mockData.academicStatus.gpa || 0)
+  const gpa = parseFloat(mockData.basicInfo.gpa || 0)
   if (gpa >= 3.7) performanceLevel.value = '优秀'
   else if (gpa >= 3.0) performanceLevel.value = '良好'
   else if (gpa >= 2.0) performanceLevel.value = '中等'
