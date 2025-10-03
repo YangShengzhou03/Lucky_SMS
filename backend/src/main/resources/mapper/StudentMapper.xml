@@ -42,7 +42,7 @@
         <result column="id" property="id"/>
         <result column="text" property="text"/>
         <result column="completed" property="completed"/>
-        <result column="due_date" property="due_date"/> <!-- 明确 due_date 列与属性的映射 -->
+        <result column="due_date" property="dueDate"/>
         <result column="important" property="important"/>
         <result column="category" property="category"/>
     </resultMap>

@@ -6,7 +6,7 @@ public class Todos {
     private int id;
     private String text;
     private boolean completed;
-    private LocalDate due_date;
+    private LocalDate dueDate;
     private boolean important;
     private String category;
 
@@ -34,12 +34,12 @@ public class Todos {
         this.completed = completed;
     }
 
-    public LocalDate getDue_date() {
-        return due_date;
+    public LocalDate getDueDate() {
+        return dueDate;
     }
 
-    public void setDue_date(LocalDate due_date) {
-        this.due_date = due_date;
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
     }
 
     public boolean isImportant() {
