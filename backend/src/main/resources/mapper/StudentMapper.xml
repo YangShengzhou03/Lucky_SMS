@@ -36,4 +36,17 @@
         WHERE
             u.user_id = #{userId}
     </select>
+
+    <!-- 根据userId检索todos -->
+    <select id="selectTodosList" parameterType="Integer" resultType="com.yangshengzhou.lucky_sms.pojo.Todos">
+        SELECT
+            id,
+            text,
+            completed,
+            due_date,
+            important,
+            category
+        FROM todos
+        WHERE user_id = #{userId}
+    </select>
 </mapper>

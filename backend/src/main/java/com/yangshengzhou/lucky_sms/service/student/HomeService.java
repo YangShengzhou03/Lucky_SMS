@@ -4,6 +4,7 @@ import com.yangshengzhou.lucky_sms.mapper.student.StudentMapper;
 import com.yangshengzhou.lucky_sms.vo.student.Announcement;
 import com.yangshengzhou.lucky_sms.vo.student.HomeVO;
 import com.yangshengzhou.lucky_sms.vo.student.StudentVO;
+import com.yangshengzhou.lucky_sms.pojo.Todos;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -21,10 +22,14 @@ public class HomeService {
 
         StudentVO studentVO = studentMapper.selectStudentById(userid);
         List<Announcement> announcement = new ArrayList<>();
+        List<Todos> todos = studentMapper.selectTodosList(userid);
+        System.out.println(todos);
 
         if (studentVO == null) {
             throw new RuntimeException("获取用户数据失败");
         }
+
+        studentVO.setTodos(todos);
 
         /*
           模拟装填数据，实际应用应该上面返回

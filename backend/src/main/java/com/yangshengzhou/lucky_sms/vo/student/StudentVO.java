@@ -1,5 +1,7 @@
 package com.yangshengzhou.lucky_sms.vo.student;
 
+import com.yangshengzhou.lucky_sms.pojo.Todos;
+
 import java.util.HashMap;
 import java.util.List;
 
@@ -12,7 +14,7 @@ public class StudentVO {
     private String classSize;
     private String course_count;
     private HashMap<String, Object> nextCourse;
-    public List<HashMap<String, Object>> todos;
+    public List<Todos> todos;
 
     public String getUsername() {
         return username;
@@ -78,11 +80,11 @@ public class StudentVO {
         this.nextCourse = nextCourse;
     }
 
-    public List<HashMap<String, Object>> getTodos() {
+    public List<Todos> getTodos() {
         return todos;
     }
 
-    public void setTodos(List<HashMap<String, Object>> todos) {
+    public void setTodos(List<Todos> todos) {
         this.todos = todos;
     }
 }
