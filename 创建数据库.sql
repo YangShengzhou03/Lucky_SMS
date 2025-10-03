@@ -1000,7 +1000,7 @@ INSERT INTO semesters (academic_year, semester_name, start_date, end_date, is_cu
 
 -- 初始化用户表（管理员）
 INSERT INTO users (username, password_hash, email, phone, gender, status) VALUES
-('ADMIN01', '123456', 'admin@lucky-sms.com', '13800138000', 'M', 'ACTIVE');
+('ADMIN01', '123456', 'admin@lucky-sms.com', '13800000000', 'M', 'ACTIVE');
 
 -- 为管理员分配角色（管理员角色ID为1）
 INSERT INTO user_roles (user_id, role_id) VALUES (1, 1);
@@ -1011,7 +1011,7 @@ INSERT INTO teachers (user_id, department_id, title_id, hire_date, office_locati
 
 -- 初始化用户表（教师）
 INSERT INTO users (username, password_hash, email, phone, gender, status) VALUES
-('TEACHER01', '123456', 'teacher1@lucky-sms.com', '13800138001', 'M', 'ACTIVE');
+('TEACHER01', '123456', 'teacher1@lucky-sms.com', '13800000001', 'M', 'ACTIVE');
 
 -- 为教师分配角色（教师角色ID为2）
 INSERT INTO user_roles (user_id, role_id) VALUES (2, 2);
@@ -1026,14 +1026,14 @@ INSERT INTO courses (course_code, course_name, course_description, department_id
 
 -- 初始化用户表（学生）
 INSERT INTO users (username, password_hash, email, phone, gender, status) VALUES
-('STUDENT01', '123456', 'student1@lucky-sms.com', '13800138003', 'M', 'ACTIVE');
+('STUDENT01', '123456', 'student1@lucky-sms.com', '13800000002', 'M', 'ACTIVE');
 
 -- 为学生分配角色（学生角色ID为3）
 INSERT INTO user_roles (user_id, role_id) VALUES (3, 3);
 
 -- 初始化学生表（使用示例班级ID）
 INSERT INTO students (user_id, department_id, major_id, class_id, enrollment_year, education_years, student_no, status_id, emergency_contact, emergency_phone) VALUES
-(3, 1, 1, 1, 2021, 4, '2021CS01001', 1, '张父', '13900138001');
+(3, 1, 1, 1, 2021, 4, '2021CS01001', 1, '张爸爸', '13800000010');
 
 -- 初始化教师授课表
 INSERT INTO teaching_assignments (teacher_id, course_id, semester_id, classroom, schedule, max_students, current_students) VALUES
