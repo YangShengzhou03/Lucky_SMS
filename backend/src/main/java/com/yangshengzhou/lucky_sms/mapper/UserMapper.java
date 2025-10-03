@@ -1,6 +1,6 @@
 package com.yangshengzhou.lucky_sms.mapper;
 
-import com.yangshengzhou.lucky_sms.vo.LoginVO;
+import com.yangshengzhou.lucky_sms.vo.user.LoginVO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

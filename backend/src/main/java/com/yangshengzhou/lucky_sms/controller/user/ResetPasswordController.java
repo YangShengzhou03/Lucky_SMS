@@ -1,4 +1,4 @@
-package com.yangshengzhou.lucky_sms.controller.User;
+package com.yangshengzhou.lucky_sms.controller.user;
 
 import com.yangshengzhou.lucky_sms.service.UserService;
 import org.springframework.web.bind.annotation.PostMapping;

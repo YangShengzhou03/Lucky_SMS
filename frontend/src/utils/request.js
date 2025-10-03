@@ -17,7 +17,6 @@ service.interceptors.request.use(
   (config) => {
     // 添加token（从localStorage获取）
     const token = localStorage.getItem('token');
-    console.log(token)
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

@@ -1,4 +1,4 @@
-package com.yangshengzhou.lucky_sms.vo;
+package com.yangshengzhou.lucky_sms.vo.user;
 
 // VO 是返回给前端的date部分的数据封装类型
 // 登录成功返回给前端的

@@ -1,16 +1,19 @@
 package com.yangshengzhou.lucky_sms.service;
 
 import com.yangshengzhou.lucky_sms.mapper.UserMapper;
-import com.yangshengzhou.lucky_sms.vo.LoginVO;
+import com.yangshengzhou.lucky_sms.utils.JwtUtil;
+import com.yangshengzhou.lucky_sms.vo.user.LoginVO;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
-import java.util.UUID;
 
 @Service
 public class UserService {
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private JwtUtil jwtUtil;
 
     public LoginVO loginByPhone(String phone) {
         LoginVO loginVO = userMapper.loginByPhone(phone);
@@ -25,7 +28,7 @@ public class UserService {
         loginVO = userMapper.loginByPhone(phone);
 
         // 生成令牌
-        String token = UUID.randomUUID().toString();
+        String token = jwtUtil.generateToken(loginVO.getUid());
         loginVO.setToken(token);
 
         // 手机号脱敏（直接操作VO中的phone字段）
@@ -48,7 +51,7 @@ public class UserService {
         }
 
         // 令牌
-        String token = UUID.randomUUID().toString();
+        String token = jwtUtil.generateToken(loginVO.getUid());
         loginVO.setToken(token);
 
         // 手机号脱敏

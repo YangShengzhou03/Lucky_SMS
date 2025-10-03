@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -52,9 +53,9 @@ public class JwtUtil {
      * @return 用户 ID
      * @throws JwtException 如果 Token 无效、过期等
      */
-    public int getUserIdFromToken(String token) throws JwtException {
+    public Integer getUserIdFromToken(String token) throws JwtException {
         Claims claims = parseTokenClaims(token);
-        return claims.get("userId", int.class);
+        return claims.get("userId", Integer.class);
     }
 
     /**
@@ -91,5 +92,23 @@ public class JwtUtil {
             // 捕获所有 JWT 相关异常（过期、签名错误等）
             return false;
         }
+    }
+
+    /**
+     * get uid by Request
+     */
+    public Integer getUidByRequest(HttpServletRequest request) {
+        String authorization = request.getHeader("Authorization");
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            throw new RuntimeException("请携带有效的 Token（格式：Bearer <token>）");
+        }
+
+        String token = authorization.substring(7);
+
+        if (!this.validateToken(token)) {
+            throw new RuntimeException("Token 无效或已过期");
+        }
+
+        return this.getUserIdFromToken(token);
     }
 }

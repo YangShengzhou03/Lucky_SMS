@@ -1,4 +1,4 @@
-package com.yangshengzhou.lucky_sms.vo;
+package com.yangshengzhou.lucky_sms.vo.user;
 
 // 封装注册成功给前端的数据类型
 public class RegisterVO {

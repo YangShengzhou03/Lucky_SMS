@@ -1,7 +1,7 @@
-package com.yangshengzhou.lucky_sms.controller.User;
+package com.yangshengzhou.lucky_sms.controller.user;
 
 import com.yangshengzhou.lucky_sms.service.UserService;
-import com.yangshengzhou.lucky_sms.vo.LoginVO;
+import com.yangshengzhou.lucky_sms.vo.user.LoginVO;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;

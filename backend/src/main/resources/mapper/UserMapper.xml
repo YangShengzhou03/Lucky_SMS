@@ -4,7 +4,7 @@
 
 <mapper namespace="com.yangshengzhou.lucky_sms.mapper.UserMapper">
     <!-- 通过手机号返回用户 -->
-    <select id="loginByPhone" parameterType="String" resultType="com.yangshengzhou.lucky_sms.vo.LoginVO">
+    <select id="loginByPhone" parameterType="String" resultType="com.yangshengzhou.lucky_sms.vo.user.LoginVO">
         SELECT
             u.user_id,
             u.username,
