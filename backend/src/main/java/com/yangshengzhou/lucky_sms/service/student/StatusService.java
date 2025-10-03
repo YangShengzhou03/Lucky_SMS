@@ -1,2 +1,5 @@
-package com.yangshengzhou.lucky_sms.service.student;public class StatusSerive {
+package com.yangshengzhou.lucky_sms.service.student;
+
+public class StatusService {
+
 }

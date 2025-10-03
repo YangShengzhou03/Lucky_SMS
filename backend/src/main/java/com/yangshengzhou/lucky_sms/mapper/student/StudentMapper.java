@@ -2,6 +2,7 @@ package com.yangshengzhou.lucky_sms.mapper.student;
 
 import com.yangshengzhou.lucky_sms.pojo.Announcement;
 import com.yangshengzhou.lucky_sms.pojo.Todos;
+import com.yangshengzhou.lucky_sms.vo.student.StatusVO;
 import com.yangshengzhou.lucky_sms.vo.student.StudentVO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -18,4 +19,6 @@ public interface StudentMapper {
     // 根据userId返回List<announcement>数据
     List<Announcement> selectAnnouncementList();
 
+    // 根据userId返回Status数据
+    StatusVO selectStatusById(Integer userId);
 }

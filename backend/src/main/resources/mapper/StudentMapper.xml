@@ -73,4 +73,11 @@
         FROM announcements
     </select>
 
+    <!-- 选择出Status数据 -->
+    <select id="selectStatusById" parameterType="Integer" resultType="com.yangshengzhou.lucky_sms.vo.student.StatusVO">
+        SELECT
+
+        FROM student_statuses, lucky_sms.students, lucky_sms.users
+    </select>
+
 </mapper>
