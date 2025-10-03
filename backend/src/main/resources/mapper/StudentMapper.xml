@@ -14,6 +14,6 @@
         WHERE
             u.user_id = #{userId}
         GROUP BY
-            u.username, s.student_no, s.class_name, s.gpa, s.class_rank  -- 非聚合字段需分组
+            u.username, s.student_no, s.gpa, s.class_rank  -- 非聚合字段需分组
     </select>
 </mapper>
