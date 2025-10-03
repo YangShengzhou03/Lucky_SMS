@@ -34,16 +34,16 @@
 
 ## 1. 认证相关接口
 
-### 1.1 用户登录
+### 1.1 账号密码登录
 
-**接口地址**: `POST /login`
+**接口地址**: `POST /login/password`
 
 **请求参数**:
 
 ```json
 {
-  "username": "string",  // 用户名
-  "keyhash": "string"    // 密码
+  "phone": "string",   // 手机号
+  "password": "string" // 密码
 }
 ```
 
@@ -53,15 +53,12 @@
 {
   "code": 200,
   "message": "登录成功",
-  "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "userInfo": {
-      "id": "string",
-      "username": "string",
-      "name": "string",
-      "role": "string",  // admin, student, teacher
-      "avatar": "string"
-    }
+  "date": {
+    "uid": "string",
+    "username": "string",
+    "phone": "string",
+    "role": "string",  // ADMIN, STUDENT, TEACHER
+    "token": "string"
   }
 }
 ```
@@ -86,14 +83,11 @@
   "code": 200,
   "message": "登录成功",
   "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "userInfo": {
-      "id": "string",
-      "username": "string",
-      "name": "string",
-      "role": "string",  // admin, student, teacher
-      "avatar": "string"
-    }
+    "uid": "string",
+    "username": "string",
+    "phone": "string",
+    "role": "string",  // ADMIN, STUDENT, TEACHER
+    "token": "string"
   }
 }
 ```
@@ -120,18 +114,17 @@
 }
 ```
 
-### 1.4 用户注册（注册和手机号登录共用接口）
+### 1.4 重置密码
 
-**接口地址**: `POST /register`
+**接口地址**: `POST /resetPassword`
 
 **请求参数**:
 
 ```json
 {
-  "username": "string",  // 用户名
   "phone": "string",     // 手机号
   "captcha": "string",   // 验证码
-  "password": "string"   // 密码（重置密码时需要）
+  "newPassword": "string" // 新密码
 }
 ```
 
@@ -140,7 +133,7 @@
 ```json
 {
   "code": 200,
-  "message": "注册成功",
+  "message": "密码重置成功",
   "data": null
 }
 ```
@@ -158,16 +151,16 @@
 ```json
 {
   "code": 200,
-  "message": "获取成功",
+  "message": "请求成功",
   "data": {
     "student": {
-      "id": "string",
-      "name": "string",
-      "class": "string",
+      "username": "string",
+      "student_no": "string",
+      "class_name": "string",
       "gpa": "string",
-      "rank": number,
-      "classSize": number,
-      "courseCount": number,
+      "class_rank": "string",
+      "classSize": "string",
+      "course_count": "string",
       "nextCourse": {
         "name": "string",
         "time": "string",
@@ -177,9 +170,10 @@
         {
           "id": number,
           "text": "string",
-          "dueDate": "string",
           "completed": boolean,
-          "important": boolean
+          "dueDate": "string",
+          "important": boolean,
+          "category": "string"
         }
       ]
     },
@@ -1232,7 +1226,20 @@
 }
 ```
 
-### 5.9 公告模型
+### 5.9 待办事项模型
+
+```json
+{
+  "id": number,
+  "text": "string",
+  "completed": boolean,
+  "dueDate": "string",  // 日期格式，如 "2025-06-24"
+  "important": boolean,
+  "category": "string"  // 分类，如 "作业"、"报告"等
+}
+```
+
+### 5.10 公告模型
 
 ```json
 {
@@ -1247,7 +1254,7 @@
 }
 ```
 
-### 5.10 消息模型
+### 5.11 消息模型
 
 ```json
 {
@@ -1271,3 +1278,4 @@
 5. 所有接口返回的数据中，敏感信息（如密码）不应包含在内。
 6. 接口开发时应考虑数据安全性，对用户输入进行验证和过滤，防止 SQL 注入等安全问题。
 7. 对于需要权限控制的接口，应在后端进行权限校验，确保用户只能访问自己有权限的资源。
+8. 注意：登录接口的响应数据中，用户信息字段名为 `date` 而非 `data`，这是当前实现的一个特殊情况，后续版本可能会统一为 `data`。
