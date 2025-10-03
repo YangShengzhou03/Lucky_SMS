@@ -133,6 +133,7 @@ CREATE TABLE majors (
     major_name VARCHAR(50) NOT NULL COMMENT '专业名称',
     department_id INT NOT NULL COMMENT '所属学院ID（外键）',
     major_code VARCHAR(10) UNIQUE NOT NULL COMMENT '专业代码（全局唯一）',
+    required_credits DECIMAL(5,2) NOT NULL DEFAULT 0.00 COMMENT '应修学分',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     FOREIGN KEY (department_id) REFERENCES departments(department_id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -177,7 +178,7 @@ CREATE TABLE students (
     department_id INT NOT NULL COMMENT '学院ID（外键）',
     major_id INT NOT NULL COMMENT '专业ID（外键）',
     class_id INT NOT NULL COMMENT '班级ID（外键）',
-    enrollment_year YEAR NOT NULL COMMENT '入学年份',
+    enrollment_date DATE NOT NULL COMMENT '入学日期',
     education_years TINYINT NOT NULL DEFAULT 4 COMMENT '学制（年）',
     student_no VARCHAR(20) UNIQUE NOT NULL COMMENT '学号（全局唯一）',
     status_id INT NOT NULL DEFAULT 1 COMMENT '学生状态（外键）',

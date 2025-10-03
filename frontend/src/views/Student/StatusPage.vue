@@ -122,20 +122,22 @@ const isDarkMode = inject('isDarkMode', ref(false))
 
 // 学籍状态配置映射 - 定义不同学籍状态的显示样式
 const statusConfig = {
-  normal: { label: '正常', type: 'success', color: '#10b981' },
-  suspended: { label: '休学', type: 'warning', color: '#f59e0b' },
-  probation: { label: '试读', type: 'info', color: '#3b82f6' },
-  graduated: { label: '已毕业', type: 'primary', color: '#6366f1' },
-  dropped: { label: '退学', type: 'danger', color: '#ef4444' }
+  ACTIVE: { label: '在读', type: 'success', color: '#10b981' },
+  GRADUATED: { label: '已毕业', type: 'primary', color: '#6366f1' },
+  SUSPENDED: { label: '休学', type: 'warning', color: '#f59e0b' },
+  TRANSFERRED: { label: '转学', type: 'info', color: '#3b82f6' },
+  LEAVE_SICK: { label: '病假', type: 'warning', color: '#f59e0b' },
+  LEAVE_PERSONAL: { label: '事假', type: 'warning', color: '#f59e0b' },
+  DROP_OUT: { label: '退学', type: 'danger', color: '#ef4444' }
 }
 
 // 响应式数据
-const status = ref('normal') // 学籍状态
+const status = ref('ACTIVE') // 学籍状态
 const effectiveDate = ref('2022-09-01') // 入学日期
 const graduationDate = ref('2026-06-30') // 预计毕业日期
-const credits = ref(68) // 已修学分
+const credits = ref(70) // 已修学分
 const totalCredits = ref(140) // 总学分要求
-const attendanceRate = ref(96) // 出勤率
+const attendanceRate = ref(99) // 出勤率
 const performanceLevel = ref('良好') // 学业等级
 const loading = ref(false) // 加载状态
 const error = ref(null) // 错误信息
@@ -155,15 +157,15 @@ const fetchStudentStatus = async () => {
       const data = response.data
       
       // 更新基本信息
-      status.value = data.academicStatus.status || 'normal'
-      credits.value = data.academicStatus.completedCredits || 0
-      totalCredits.value = data.academicStatus.totalCredits || 140
+      status.value = data.basicInfo.status || 'ACTIVE'
+      credits.value = data.basicInfo.completedCredits || 0
+      totalCredits.value = data.basicInfo.totalCredits || 140
       effectiveDate.value = data.basicInfo.enrollmentDate || '--'
       // 使用后端传入的预计毕业时间
       graduationDate.value = data.basicInfo.expectedGraduationDate || '--'
       
       // 根据GPA计算学业等级
-      const gpa = parseFloat(data.academicStatus.gpa || 0)
+      const gpa = parseFloat(data.basicInfo.gpa || 0)
       if (gpa >= 3.7) performanceLevel.value = '优秀'
       else if (gpa >= 3.0) performanceLevel.value = '良好'
       else if (gpa >= 2.0) performanceLevel.value = '中等'
@@ -202,21 +204,18 @@ const useMockData = () => {
   // 精简的模拟数据，只包含必要字段
   const mockData = {
     basicInfo: {
-      status: "normal",
-      gpa: "3.65",
+      status: "ACTIVE",
+      gpa: "0.00",
       totalCredits: 140,
-      completedCredits: 68,
-      enrollmentDate: "2022-09-01",
-      expectedGraduationDate: "2026-06-30"
+      completedCredits: 0,
+      enrollmentDate: "2021-01-01",
+      expectedGraduationDate: "2025"
     },
-    academicHistory: [
-      { semester: "大一上", attendanceRate: 92 },
-      { semester: "大一下", attendanceRate: 94 }
-    ]
+    academicHistory: null
   }
   
   // 更新基本信息
-  status.value = mockData.basicInfo.status || 'normal'
+  status.value = mockData.basicInfo.status || 'ACTIVE'
   credits.value = mockData.basicInfo.completedCredits || 0
   totalCredits.value = mockData.basicInfo.totalCredits || 140
   effectiveDate.value = mockData.basicInfo.enrollmentDate || '2022-09-01'
@@ -697,6 +696,16 @@ onUnmounted(() => {
       // 评分样式
       .stat-rating {
         margin-top: 12px;
+
+        .el-rate__item {
+          // 添加过渡效果
+          transition: transform 0.2s ease;
+
+          // 鼠标悬停时的微动画
+          &:hover {
+            transform: scale(1.1);
+          }
+        }
       }
     }
   }
