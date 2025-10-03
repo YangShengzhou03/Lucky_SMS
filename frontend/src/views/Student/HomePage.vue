@@ -59,13 +59,13 @@
             <div class="todo-list">
               <template v-if="student?.todos && student.todos.length">
                 <div class="todo-item" v-for="item in filteredTodos" :key="item.id"
-                  :class="{ 'urgent': isUrgent(item.dueDate), 'completed': item.completed }">
+                  :class="{ 'urgent': isUrgent(item.dueDate), 'overdue': isOverdue(item.dueDate), 'completed': item.completed }">
                   <el-checkbox v-model="item.completed" @change="updateTodo(item)" />
                   <div class="todo-content">
                     <span>{{ item.text }}</span>
                     <div class="todo-meta">
                       <el-tag size="small" :type="getDueTagType(item.dueDate)" effect="plain">
-                        {{ item.dueDate }}
+                        {{ formatDueDate(item.dueDate) }}
                       </el-tag>
                       <el-icon v-if="item.important" color="#F56C6C">
                         <StarFilled />
@@ -188,15 +188,67 @@ const formatCourseTime = (timeString) => {
   return timeString?.replace('-', ' - ') || '--'
 }
 
-const isUrgent = (dueDate) => {
-  return dueDate?.includes('天') || dueDate?.includes('明天')
+// 计算日期与今天的天数差
+const getDaysDiff = (dueDate) => {
+  if (!dueDate) return null
+  
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  
+  const due = new Date(dueDate)
+  due.setHours(0, 0, 0, 0)
+  
+  const diffTime = due - today
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  
+  return diffDays
 }
 
+// 格式化日期显示为更友好的格式
+const formatDueDate = (dueDate) => {
+  if (!dueDate) return '--'
+  
+  const daysDiff = getDaysDiff(dueDate)
+  
+  if (daysDiff === null) return dueDate
+  
+  if (daysDiff < 0) {
+    return `已过期${Math.abs(daysDiff)}天`
+  } else if (daysDiff === 0) {
+    return '今天'
+  } else if (daysDiff === 1) {
+    return '明天'
+  } else if (daysDiff <= 7) {
+    return `${daysDiff}天后`
+  } else {
+    return formatDate(dueDate)
+  }
+}
+
+// 判断是否紧急
+const isUrgent = (dueDate) => {
+  const daysDiff = getDaysDiff(dueDate)
+  return daysDiff !== null && daysDiff <= 1
+}
+
+// 判断是否已过期
+const isOverdue = (dueDate) => {
+  const daysDiff = getDaysDiff(dueDate)
+  return daysDiff !== null && daysDiff < 0
+}
+
+// 获取标签类型
 const getDueTagType = (dueDate) => {
   if (!dueDate) return 'info'
-  if (dueDate.includes('明天')) return 'danger'
-  if (dueDate.includes('天') && parseInt(dueDate) <= 3) return 'warning'
-  return 'info'
+  
+  const daysDiff = getDaysDiff(dueDate)
+  
+  if (daysDiff === null) return 'info'
+  if (daysDiff < 0) return 'danger'  // 已过期
+  if (daysDiff === 0) return 'danger'  // 今天
+  if (daysDiff === 1) return 'warning'  // 明天
+  if (daysDiff <= 3) return 'warning'  // 3天内
+  return 'success'  // 其他日期 - 绿色
 }
 
 const getAnnouncementType = (type) => {
@@ -257,13 +309,37 @@ const fetchData = async () => {
       },
       todos: [
         {
-          "id": "todo1",
+          "id": 1,
           "text": "完成数据结构作业第三章",
           "completed": false,
           "dueDate": "2025-06-24",
           "important": true,
           "category": "作业"
         },
+        {
+          "id": 2,
+          "text": "完成数据库原理作业第二章",
+          "completed": false,
+          "dueDate": "2025-06-25",
+          "important": false,
+          "category": "作业"
+        },
+        {
+          "id": 3,
+          "text": "完成数据结构作业第二章",
+          "completed": false,
+          "dueDate": "2025-06-25",
+          "important": false,
+          "category": "作业"
+        },
+        {
+          "id": 4,
+          "text": "提交数学建模报告",
+          "completed": false,
+          "dueDate": "2025-06-20",
+          "important": true,
+          "category": "报告"
+        }
       ]
     }
 
@@ -614,7 +690,24 @@ onUnmounted(() => {
 
     &.urgent {
       .todo-content span {
+        color: #898989;
+      }
+    }
+
+    &.overdue {
+      .todo-meta .el-tag {
+        background-color: rgba(245, 108, 108, 0.1);
+        border-color: #F56C6C;
         color: #F56C6C;
+      }
+    }
+
+    // 为未来很久的日期添加绿色标签样式
+    .todo-meta {
+      .el-tag--success {
+        background-color: rgba(103, 194, 58, 0.1);
+        border-color: #67c23a;
+        color: #67c23a;
       }
     }
 
