@@ -3,8 +3,8 @@ package com.yangshengzhou.lucky_sms.pojo;
 public class BasicInfo {
     private String status;
     private String gpa;
-    private String totalCredits;
-    private String completedCredits;
+    private int totalCredits;
+    private int completedCredits;
     public String enrollmentDate;
     public String expectedGraduationDate;
 
@@ -24,19 +24,19 @@ public class BasicInfo {
         this.gpa = gpa;
     }
 
-    public String getTotalCredits() {
+    public int getTotalCredits() {
         return totalCredits;
     }
 
-    public void setTotalCredits(String totalCredits) {
+    public void setTotalCredits(int totalCredits) {
         this.totalCredits = totalCredits;
     }
 
-    public String getCompletedCredits() {
+    public int getCompletedCredits() {
         return completedCredits;
     }
 
-    public void setCompletedCredits(String completedCredits) {
+    public void setCompletedCredits(int completedCredits) {
         this.completedCredits = completedCredits;
     }
 

@@ -15,7 +15,7 @@ public class StatusService {
     public StatusVO getStatusDate(Integer userId) {
         StatusVO statusVO = new StatusVO();
         BasicInfo basicInfo = studentMapper.selectBasicInfoById(userId);
-        basicInfo.setTotalCredits("140");
+        basicInfo.setTotalCredits(140);
 //        List<AcademicHistory> academicHistories = studentMapper.selectAcademicHistoryList(userId);
 
         statusVO.setBasicInfo(basicInfo);
