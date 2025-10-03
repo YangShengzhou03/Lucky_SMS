@@ -260,7 +260,7 @@ const fetchData = async () => {
           "id": "todo1",
           "text": "完成数据结构作业第三章",
           "completed": false,
-          "dueDate": "明天",
+          "dueDate": "2025-06-24",
           "important": true,
           "category": "作业"
         },
