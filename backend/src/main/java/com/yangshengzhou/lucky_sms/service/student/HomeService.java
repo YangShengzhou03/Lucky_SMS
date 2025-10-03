@@ -23,7 +23,6 @@ public class HomeService {
         StudentVO studentVO = studentMapper.selectStudentById(userid);
         List<Announcement> announcement = new ArrayList<>();
         List<Todos> todos = studentMapper.selectTodosList(userid);
-        System.out.println(todos);
 
         if (studentVO == null) {
             throw new RuntimeException("获取用户数据失败");

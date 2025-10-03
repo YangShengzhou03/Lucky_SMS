@@ -37,15 +37,25 @@
             u.user_id = #{userId}
     </select>
 
-    <!-- 根据userId检索todos -->
-    <select id="selectTodosList" parameterType="Integer" resultType="com.yangshengzhou.lucky_sms.pojo.Todos">
+    <!-- 1. 先定义 Todos 的显式映射规则（必须放在 select 标签之前） -->
+    <resultMap id="TodosMap" type="com.yangshengzhou.lucky_sms.pojo.Todos">
+        <result column="id" property="id"/>
+        <result column="text" property="text"/>
+        <result column="completed" property="completed"/>
+        <result column="due_date" property="due_date"/> <!-- 明确 due_date 列与属性的映射 -->
+        <result column="important" property="important"/>
+        <result column="category" property="category"/>
+    </resultMap>
+
+    <!-- 2. 修改 select 标签：用 resultMap 替换 resultType，引用上面的 TodosMap -->
+    <select id="selectTodosList" parameterType="Integer" resultMap="TodosMap">
         SELECT
-            id,
-            text,
-            completed,
-            due_date,
-            important,
-            category
+        id,
+        text,
+        completed,
+        due_date,  <!-- 数据库 Date 类型列，通过 TodosMap 映射到属性 -->
+        important,
+        category
         FROM todos
         WHERE user_id = #{userId}
     </select>

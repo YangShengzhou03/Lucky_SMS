@@ -1,11 +1,12 @@
 package com.yangshengzhou.lucky_sms.pojo;
 
+import java.time.LocalDate;
+
 public class Todos {
     private int id;
-    private Integer user_id;
     private String text;
     private boolean completed;
-    private String due_date;
+    private LocalDate due_date;
     private boolean important;
     private String category;
 
@@ -15,14 +16,6 @@ public class Todos {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public Integer getUser_id() {
-        return user_id;
-    }
-
-    public void setUser_id(Integer user_id) {
-        this.user_id = user_id;
     }
 
     public String getText() {
@@ -41,11 +34,11 @@ public class Todos {
         this.completed = completed;
     }
 
-    public String getDue_date() {
+    public LocalDate getDue_date() {
         return due_date;
     }
 
-    public void setDue_date(String due_date) {
+    public void setDue_date(LocalDate due_date) {
         this.due_date = due_date;
     }
 
