@@ -1,5 +1,7 @@
 package com.yangshengzhou.lucky_sms.vo.student;
 
+import com.yangshengzhou.lucky_sms.pojo.Announcement;
+
 import java.util.List;
 
 // 返回给student端Home页面数据的封装，HomeVO包含一个map和列表。
