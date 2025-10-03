@@ -158,9 +158,9 @@ const fetchStudentStatus = async () => {
       status.value = data.academicStatus.status || 'normal'
       credits.value = data.academicStatus.completedCredits || 0
       totalCredits.value = data.academicStatus.totalCredits || 140
-      effectiveDate.value = data.basicInfo.enrollmentDate || '2022-09-01'
+      effectiveDate.value = data.basicInfo.enrollmentDate || '--'
       // 使用后端传入的预计毕业时间
-      graduationDate.value = data.basicInfo.expectedGraduationDate || data.academicStatus.expectedGraduationDate || ''
+      graduationDate.value = data.basicInfo.expectedGraduationDate || '--'
       
       // 根据GPA计算学业等级
       const gpa = parseFloat(data.academicStatus.gpa || 0)
@@ -205,12 +205,11 @@ const useMockData = () => {
       status: "normal",
       gpa: "3.65",
       totalCredits: 140,
-      completedCredits: 68,
-      expectedGraduationDate: "2026-06-30" // 后端应该传入预计毕业时间
+      completedCredits: 68
     },
     basicInfo: {
       enrollmentDate: "2022-09-01",
-      expectedGraduationDate: "2026-06-30" // 后端应该传入预计毕业时间
+      expectedGraduationDate: "2026-06-30" // 预计毕业时间放在基本信息中
     },
     academicHistory: [
       { semester: "大一上", attendanceRate: 92 },
@@ -223,8 +222,9 @@ const useMockData = () => {
   credits.value = mockData.academicStatus.completedCredits || 0
   totalCredits.value = mockData.academicStatus.totalCredits || 140
   effectiveDate.value = mockData.basicInfo.enrollmentDate || '2022-09-01'
+  
   // 使用后端传入的预计毕业时间
-  graduationDate.value = mockData.basicInfo.expectedGraduationDate || mockData.academicStatus.expectedGraduationDate || ''
+  graduationDate.value = mockData.basicInfo.expectedGraduationDate || ''
   
   // 根据GPA计算学业等级
   const gpa = parseFloat(mockData.academicStatus.gpa || 0)
