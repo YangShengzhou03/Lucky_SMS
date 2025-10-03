@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yangshengzhou.lucky_sms.mapper.student.StudentMapper">
+    <!-- 通过uid返回学生信息 -->
+    <select id="selectStudentById" parameterType="Integer" resultType="com.yangshengzhou.lucky_sms.vo.student.StudentVO">
+        SELECT
+            username
+        FROM
+            users
+        WHERE
+            user_id = #{userId}
+    </select>
+</mapper>

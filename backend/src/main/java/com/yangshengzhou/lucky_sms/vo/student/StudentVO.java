@@ -4,38 +4,38 @@ import java.util.HashMap;
 import java.util.List;
 
 public class StudentVO {
-    private String name;
-    private String id;
-    private String className;
+    private String username;
+    private String student_no;
+    private String class_name;
     private String gpa;
-    private String rank;
+    private String class_rank;
     private String classSize;
-    private String courseCount;
+    private String course_count;
     private HashMap<String, Object> nextCourse;
     public List<HashMap<String, Object>> todos;
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getId() {
-        return id;
+    public String getStudent_no() {
+        return student_no;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setStudent_no(String student_no) {
+        this.student_no = student_no;
     }
 
-    public String getClassName() {
-        return className;
+    public String getClass_name() {
+        return class_name;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
+    public void setClass_name(String class_name) {
+        this.class_name = class_name;
     }
 
     public String getGpa() {
@@ -46,12 +46,12 @@ public class StudentVO {
         this.gpa = gpa;
     }
 
-    public String getRank() {
-        return rank;
+    public String getClass_rank() {
+        return class_rank;
     }
 
-    public void setRank(String rank) {
-        this.rank = rank;
+    public void setClass_rank(String class_rank) {
+        this.class_rank = class_rank;
     }
 
     public String getClassSize() {
@@ -62,12 +62,12 @@ public class StudentVO {
         this.classSize = classSize;
     }
 
-    public String getCourseCount() {
-        return courseCount;
+    public String getCourse_count() {
+        return course_count;
     }
 
-    public void setCourseCount(String courseCount) {
-        this.courseCount = courseCount;
+    public void setCourse_count(String course_count) {
+        this.course_count = course_count;
     }
 
     public HashMap<String, Object> getNextCourse() {
