@@ -268,6 +268,11 @@ const handleLoginSuccess = (role, token) => {
     localStorage.setItem('token', token);
   }
   
+  // 将用户角色存储到localStorage
+  if (role) {
+    localStorage.setItem('userRole', role);
+  }
+  
   ElMessage.success('登录成功！');
   switch (role) {
     case 'ADMIN':

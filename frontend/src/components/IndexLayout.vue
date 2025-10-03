@@ -9,7 +9,7 @@
           </div>
           <div class="nav-actions">
             <el-button type="text" size="large" class="main-login-btn" @click="handleLogin">
-              <span class="btn-text">登录 / 注册</span>
+              <span class="btn-text">{{ isLoggedIn ? '我的主页' : '登录 / 注册' }}</span>
             </el-button>
           </div>
         </div>
@@ -185,6 +185,7 @@ const router = useRouter()
 const route = useRoute();
 const showBackToTop = ref(false)
 const isHomePage = computed(() => route.path === '/');
+const isLoggedIn = ref(false);
 
 const features = [
   {
@@ -271,10 +272,34 @@ const handleScroll = () => {
 }
 
 const handleLogin = () => {
-  router.push('/login')
+  if (isLoggedIn.value) {
+    // 如果已登录，根据用户角色跳转到相应的主页
+    const userRole = localStorage.getItem('userRole');
+    switch (userRole) {
+      case 'ADMIN':
+        router.push('/admin');
+        break;
+      case 'STUDENT':
+        router.push('/student');
+        break;
+      case 'TEACHER':
+        router.push('/teacher');
+        break;
+      default:
+        // 如果没有角色信息，默认跳转到学生主页
+        router.push('/student');
+    }
+  } else {
+    // 如果未登录，跳转到登录页
+    router.push('/login');
+  }
 }
 
 onMounted(() => {
+  // 检查本地存储中是否有 token
+  const token = localStorage.getItem('token');
+  isLoggedIn.value = !!token;
+  
   window.addEventListener('scroll', handleScroll)
   if (window.particlesJS) {
     window.particlesJS('particles-js', {
