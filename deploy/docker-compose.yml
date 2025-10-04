@@ -1,5 +1,5 @@
 services:
-  # 1. MySQL 服务
+  # 1. MySQL 服务（仅新增 1 行 volumes 配置）
   mysql:
     image: mysql:8.0  # 使用 MySQL 8.0 镜像
     container_name: mysql  # 容器名称
@@ -11,8 +11,11 @@ services:
       - "3306:3306"  # 宿主机端口:容器端口，方便本地连接数据库
     volumes:
       - mysql-data:/var/lib/mysql  # 数据持久化（防止容器删除后数据丢失）
+      - ./mysql-init:/docker-entrypoint-initdb.d  # 【新增】挂载 SQL 目录到自动执行路径
+    networks:  # 【新增】让 MySQL 加入 app-network，确保和后端/前端互通（原配置漏了）
+      - app-network
 
-  # 2. 后端 SpringBoot 服务
+  # 2. 后端 SpringBoot 服务（无需修改）
   backend:
     build: ./backend  # 指定后端项目的 Dockerfile 所在目录
     container_name: backend
@@ -24,7 +27,7 @@ services:
     networks:
       - app-network
 
-  # 3. 前端 Vue 服务
+  # 3. 前端 Vue 服务（无需修改）
   frontend:
     build: ./frontend  # 指定前端项目的 Dockerfile 所在目录
     container_name: frontend

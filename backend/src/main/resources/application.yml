@@ -16,10 +16,11 @@ logging:
 #     driver-class-name: com.mysql.cj.jdbc.Driver  # MySQL 8以上用这个驱动，老版本的话换成com.mysql.jdbc.Driver
 spring:
   datasource:
-    url: jdbc:mysql://mysql:3306/lucky_sms?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root  
-    password: 123456  
-    driver-class-name: com.mysql.cj.jdbc.Driver  
+    # 关键修正：serverTimezone=Asia/Shanghai（替换 UTC）
+    url: jdbc:mysql://mysql:3306/lucky_sms?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8
+    username: root
+    password: 123456  # 与 MySQL 密码一致
+    driver-class-name: com.mysql.cj.jdbc.Driver  # MySQL 8.0 正确驱动
 
 # MyBatis的配置，xml文件和实体类的位置在这指定
 mybatis:
