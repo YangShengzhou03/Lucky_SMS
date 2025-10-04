@@ -4,7 +4,7 @@
       <div class="card-header">
         <h2>成绩概览</h2>
         <div class="semester-selector">
-          <el-select v-model="currentSemester" placeholder="选择学期" size="small">
+          <el-select v-model="currentSemester" placeholder="选择学期" size="small" @change="handleSemesterChange">
             <el-option v-for="item in semesters" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </div>
@@ -125,79 +125,76 @@ import { ref, computed, onMounted, onUnmounted, inject, watch } from 'vue'
 import { User } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import Chart from 'chart.js/auto'
+import service from '@/utils/request'
 
 const isDarkMode = inject('isDarkMode', ref(false))
 
-const currentSemester = ref('2023-2024-2')
-const semesters = ref([
-  { value: '2023-2024-2', label: '2023-2024学年第二学期' },
-  { value: '2023-2024-1', label: '2023-2024学年第一学期' },
-  { value: '2022-2023-2', label: '2022-2023学年第二学期' },
-  { value: '2022-2023-1', label: '2022-2023学年第一学期' }
-])
+const allGrades = ref([])
+const gradeStats = ref(null)
+const semesterGPAList = ref([])
+const loading = ref(false)
+const chartType = ref('gpa')
 
-const allGrades = ref([
-  {
-    id: 1,
-    courseName: '数据结构与算法',
-    courseCode: 'CS101',
-    courseType: '必修课',
-    credits: 4,
-    score: 85,
-    gpa: 3.7,
-    semester: '2023-2024-2'
-  },
-  {
-    id: 2,
-    courseName: '计算机网络',
-    courseCode: 'CS102',
-    courseType: '必修课',
-    credits: 3,
-    score: 78,
-    gpa: 2.8,
-    semester: '2023-2024-2'
-  },
-  {
-    id: 3,
-    courseName: '操作系统',
-    courseCode: 'CS103',
-    courseType: '必修课',
-    credits: 4,
-    score: 92,
-    gpa: 4.0,
-    semester: '2023-2024-2'
-  },
-  {
-    id: 4,
-    courseName: '人工智能导论',
-    courseCode: 'CS104',
-    courseType: '选修课',
-    credits: 3,
-    score: 88,
-    gpa: 3.9,
-    semester: '2023-2024-2'
-  },
-  {
-    id: 5,
-    courseName: '高等数学（下）',
-    courseCode: 'MATH102',
-    courseType: '必修课',
-    credits: 5,
-    score: 76,
-    gpa: 2.6,
-    semester: '2023-2024-1'
-  },
-  {
-    id: 6,
-    courseName: '线性代数',
-    courseCode: 'MATH103',
-    courseType: '必修课',
-    credits: 4,
-    score: 82,
-    gpa: 3.3,
-    semester: '2023-2024-1'
+// 从后端获取成绩数据
+const fetchGradesData = async () => {
+  loading.value = true
+  try {
+    const res = await service.get('/student/grades')
+    if (res.code === 200) {
+      const data = res.data
+      allGrades.value = data.courseGrades || []
+      gradeStats.value = data.gradeStats || null
+      semesterGPAList.value = data.semesterGPAList || []
+      
+      // 初始化图表
+      if (trendChartCanvas.value) {
+        initTrendChart()
+      }
+    } else {
+      throw new Error(res.message || '获取成绩数据失败')
+    }
+  } catch (err) {
+    console.error('获取成绩数据失败:', err)
+    ElMessage.error('获取成绩数据失败，请稍后重试')
+    
+    // 如果API请求失败，使用默认空数据
+    allGrades.value = []
+    gradeStats.value = null
+    semesterGPAList.value = []
+  } finally {
+    loading.value = false
   }
-])
+}
+
+// 根据学期获取成绩数据
+const fetchGradesDataBySemester = async (semester) => {
+  loading.value = true
+  try {
+    const res = await service.get(`/student/grades/${semester}`)
+    if (res.code === 200) {
+      const data = res.data
+      allGrades.value = data.courseGrades || []
+      gradeStats.value = data.gradeStats || null
+      // 学期GPA列表保持不变，因为我们需要所有学期的数据来绘制趋势图
+      
+      // 初始化图表
+      if (trendChartCanvas.value) {
+        initTrendChart()
+      }
+    } else {
+      throw new Error(res.message || '获取成绩数据失败')
+    }
+  } catch (err) {
+    console.error('获取成绩数据失败:', err)
+    ElMessage.error('获取成绩数据失败，请稍后重试')
+    
+    // 如果API请求失败，使用默认空数据
+    allGrades.value = []
+    gradeStats.value = null
+  } finally {
+    loading.value = false
+  }
+}
 
 const trendChartCanvas = ref(null)
 let trendChart = null
@@ -217,33 +214,82 @@ const filteredGrades = computed(() => {
     )
 })
 
+// 获取所有学期列表
+const semesters = computed(() => {
+  if (semesterGPAList.value.length === 0) return []
+  const allOption = { value: '全部', label: '全部学期' }
+  const semesterOptions = semesterGPAList.value.map(item => ({
+    value: item.semester,
+    label: item.semester
+  }))
+  return [allOption, ...semesterOptions]
+})
+
+// 当前选中的学期
+const currentSemester = ref('全部')
+
+// 当前学期的成绩
 const currentSemesterGrades = computed(() => {
+  if (currentSemester.value === '全部') {
+    return allGrades.value
+  }
   return allGrades.value.filter(grade => grade.semester === currentSemester.value)
 })
 
+// 处理学期选择变化
+const handleSemesterChange = (semester) => {
+  currentSemester.value = semester
+  if (semester === '全部') {
+    fetchGradesData().then(() => {
+      // 确保图表更新
+      if (trendChartCanvas.value) {
+        initTrendChart()
+      }
+    })
+  } else {
+    fetchGradesDataBySemester(semester).then(() => {
+      // 确保图表更新
+      if (trendChartCanvas.value) {
+        initTrendChart()
+      }
+    })
+  }
+}
+
 const gpa = computed(() => {
-  if (currentSemesterGrades.value.length === 0) return 0
-  const totalCredits = currentSemesterGrades.value.reduce((sum, grade) => sum + grade.credits, 0)
-  const totalPoints = currentSemesterGrades.value.reduce((sum, grade) => sum + (grade.gpa * grade.credits), 0)
-  return (totalPoints / totalCredits).toFixed(2)
+  if (!gradeStats.value || currentSemesterGrades.value.length === 0) return '0.00'
+  return gradeStats.value.gpa?.toFixed(2) || '0.00'
 })
 
 const avgScore = computed(() => {
-  if (currentSemesterGrades.value.length === 0) return 0
-  const totalScore = currentSemesterGrades.value.reduce((sum, grade) => sum + grade.score, 0)
-  return Math.round(totalScore / currentSemesterGrades.value.length)
+  if (!gradeStats.value || currentSemesterGrades.value.length === 0) return 0
+  return gradeStats.value.avgScore || 0
 })
 
-const rank = ref(12)
-const classSize = ref(45)
+const rank = computed(() => {
+  return gradeStats.value?.rank || '--'
+})
+
+const classSize = computed(() => {
+  return gradeStats.value?.classSize || '--'
+})
+
+const completedCredits = computed(() => {
+  return gradeStats.value?.completedCredits || 0
+})
+
+const totalCredits = computed(() => {
+  return gradeStats.value?.totalCredits || 0
+})
+
 const gpaPercentage = computed(() => {
-  return Math.round((1 - (rank.value / classSize.value)) * 100)
+  if (!gradeStats.value || !gradeStats.value.rank || !gradeStats.value.classSize) return 0
+  return Math.round((1 - (gradeStats.value.rank / gradeStats.value.classSize)) * 100)
 })
 
-const completedCredits = ref(68)
-const totalCredits = ref(140)
 const creditPercentage = computed(() => {
-  return Math.round((completedCredits.value / totalCredits.value) * 100)
+  if (!gradeStats.value || !gradeStats.value.completedCredits || !gradeStats.value.totalCredits) return 0
+  return Math.round((gradeStats.value.completedCredits / gradeStats.value.totalCredits) * 100)
 })
 
 const progressColor = computed(() => {
@@ -269,62 +315,87 @@ const scoreDistribution = ref([
 ])
 
 const initTrendChart = () => {
-  if (trendChartCanvas.value) {
-    const ctx = trendChartCanvas.value.getContext('2d')
+  if (!trendChartCanvas.value || semesterGPAList.value.length === 0) return
+  
+  const ctx = trendChartCanvas.value.getContext('2d')
 
-    const data = [
-      { semester: '2022-2023-1', gpa: 3.2, score: 80, credits: 28 },
-      { semester: '2022-2023-2', gpa: 3.5, score: 84, credits: 32 },
-      { semester: '2023-2024-1', gpa: 3.4, score: 82, credits: 30 },
-      { semester: '2023-2024-2', gpa: 3.6, score: 86, credits: 28 }
-    ]
+  // 销毁旧图表
+  if (trendChart.value) {
+    trendChart.value.destroy()
+  }
 
-    trendChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: data.map(item => item.semester),
-        datasets: [{
-          label: '绩点趋势',
-          data: data.map(item => item.gpa),
-          borderColor: '#409eff',
-          backgroundColor: isDarkMode.value ? 'rgba(64, 158, 255, 0.1)' : 'rgba(64, 158, 255, 0.2)',
-          tension: 0.4,
-          borderWidth: 2,
-          pointBackgroundColor: '#fff',
-          pointBorderColor: '#409eff',
-          pointRadius: 4,
-          pointHoverRadius: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: false,
-            min: 2.5,
-            max: 4.0,
-            ticks: {
-              stepSize: 0.5
-            },
-            grid: {
-              color: isDarkMode.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'
-            }
+  // 根据图表类型设置数据
+  let chartLabel, chartData, chartColor, chartMin, chartMax, chartStep
+  
+  if (chartType.value === 'gpa') {
+    chartLabel = '绩点趋势'
+    chartData = semesterGPAList.value.map(item => item.gpa)
+    chartColor = '#409eff'
+    chartMin = 2.5
+    chartMax = 4.0
+    chartStep = 0.5
+  } else if (chartType.value === 'score') {
+    chartLabel = '分数趋势'
+    chartData = semesterGPAList.value.map(item => item.avgScore)
+    chartColor = '#67c23a'
+    chartMin = 60
+    chartMax = 100
+    chartStep = 10
+  } else if (chartType.value === 'credit') {
+    chartLabel = '学分趋势'
+    chartData = semesterGPAList.value.map(item => item.credits)
+    chartColor = '#e6a23c'
+    chartMin = 0
+    chartMax = 40
+    chartStep = 10
+  }
+
+  // 创建新图表
+  trendChart.value = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: semesterGPAList.value.map(item => item.semester),
+      datasets: [{
+        label: chartLabel,
+        data: chartData,
+        borderColor: chartColor,
+        backgroundColor: isDarkMode.value ? `${chartColor}20` : `${chartColor}40`,
+        tension: 0.4,
+        borderWidth: 2,
+        pointBackgroundColor: '#fff',
+        pointBorderColor: chartColor,
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: false,
+          min: chartMin,
+          max: chartMax,
+          ticks: {
+            stepSize: chartStep
           },
-          x: {
-            grid: {
-              display: false
-            }
+          grid: {
+            color: isDarkMode.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'
           }
         },
-        plugins: {
-          legend: {
+        x: {
+          grid: {
             display: false
           }
         }
+      },
+      plugins: {
+        legend: {
+          display: false
+        }
       }
-    })
-  }
+    }
+  })
 }
 
 watch(isDarkMode, (newVal) => {
@@ -333,9 +404,15 @@ watch(isDarkMode, (newVal) => {
       ? 'rgba(255, 255, 255, 0.1)'
       : 'rgba(0, 0, 0, 0.05)'
     trendChart.data.datasets[0].backgroundColor = newVal
-      ? 'rgba(64, 158, 255, 0.1)'
-      : 'rgba(64, 158, 255, 0.2)'
+      ? `${trendChart.data.datasets[0].borderColor}20`
+      : `${trendChart.data.datasets[0].borderColor}40`
     trendChart.update()
+  }
+})
+
+watch(chartType, () => {
+  if (trendChartCanvas.value && semesterGPAList.value.length > 0) {
+    initTrendChart()
   }
 })
 
@@ -364,8 +441,14 @@ const handleMouseMove = (e) => {
   document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`)
 }
 
+// 组件挂载时获取成绩数据
 onMounted(() => {
-  initTrendChart()
+  fetchGradesData().then(() => {
+    // 初始化图表
+    if (trendChartCanvas.value) {
+      initTrendChart()
+    }
+  })
 })
 
 onUnmounted(() => {

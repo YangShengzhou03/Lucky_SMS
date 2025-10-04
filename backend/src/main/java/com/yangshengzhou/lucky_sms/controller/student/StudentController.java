@@ -1,8 +1,10 @@
 package com.yangshengzhou.lucky_sms.controller.student;
 
+import com.yangshengzhou.lucky_sms.service.student.GradeService;
 import com.yangshengzhou.lucky_sms.service.student.HomeService;
 import com.yangshengzhou.lucky_sms.service.student.StatusService;
 import com.yangshengzhou.lucky_sms.utils.JwtUtil;
+import com.yangshengzhou.lucky_sms.vo.student.GradesVO;
 import com.yangshengzhou.lucky_sms.vo.student.HomeVO;
 import com.yangshengzhou.lucky_sms.vo.student.StatusVO;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,6 +25,8 @@ public class StudentController {
     private HomeService homeService;
     @Resource
     private StatusService statusService;
+    @Resource
+    private GradeService gradeService;
 
     @GetMapping("/home")
     public HashMap<String, Object> studentHomeResult(
@@ -64,5 +68,50 @@ public class StudentController {
         }
 
         return studentStatusResult;
+    }
+
+    @GetMapping("/grades")
+    public HashMap<String, Object> studentGradesResult(
+            HttpServletRequest request
+    ) {
+        HashMap<String, Object> studentGradesResult = new HashMap<>();
+
+        try {
+            Integer userId = jwtUtil.getUidByRequest(request);
+            GradesVO gradesData = gradeService.getGradesData(userId);
+
+            studentGradesResult.put("code", 200);
+            studentGradesResult.put("message", "请求成功");
+            studentGradesResult.put("data", gradesData);
+        } catch (Exception e) {
+            studentGradesResult.put("code", 500);
+            studentGradesResult.put("message", e.getMessage());
+            studentGradesResult.put("data", null);
+        }
+
+        return studentGradesResult;
+    }
+
+    @GetMapping("/grades/{semester}")
+    public HashMap<String, Object> studentGradesBySemesterResult(
+            @PathVariable String semester,
+            HttpServletRequest request
+    ) {
+        HashMap<String, Object> studentGradesResult = new HashMap<>();
+
+        try {
+            Integer userId = jwtUtil.getUidByRequest(request);
+            GradesVO gradesData = gradeService.getGradesDataBySemester(userId, semester);
+
+            studentGradesResult.put("code", 200);
+            studentGradesResult.put("message", "请求成功");
+            studentGradesResult.put("data", gradesData);
+        } catch (Exception e) {
+            studentGradesResult.put("code", 500);
+            studentGradesResult.put("message", e.getMessage());
+            studentGradesResult.put("data", null);
+        }
+
+        return studentGradesResult;
     }
 }
