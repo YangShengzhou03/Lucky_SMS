@@ -1034,7 +1034,7 @@ INSERT INTO user_roles (user_id, role_id) VALUES (3, 3);
 
 -- 初始化学生表（使用示例班级ID）
 INSERT INTO students (user_id, department_id, major_id, class_id, enrollment_date, education_years, student_no, status_id, emergency_contact, emergency_phone) VALUES
-(3, 1, 1, 1, '2021-09-01', 4, '2021CS01001', 1, '张爸爸', '13800000010');
+(3, 1, 1, 1, '2022-09-01', 4, '2022CS1944', 1, '张爸爸', '13800000010');
 
 -- 初始化教师授课表
 INSERT INTO teaching_assignments (teacher_id, course_id, semester_id, classroom, schedule, max_students, current_students) VALUES
@@ -1045,7 +1045,7 @@ INSERT INTO course_selections (student_id, assignment_id, status)
 SELECT s.student_id, ta.assignment_id, 'SELECTED'
 FROM students s
 CROSS JOIN teaching_assignments ta
-WHERE s.student_no = '2021CS01001'
+WHERE s.student_no = '2022CS1944'
 AND ta.assignment_id = 1;
 
 -- 初始化图书表（只保留一本示例图书）
@@ -1173,8 +1173,8 @@ CREATE TABLE announcements (
 
 -- 初始化待办事项表数据
 INSERT INTO todos (id, user_id, text, completed, due_date, important, category) VALUES
-(1, 3, '完成数据结构作业第三章', FALSE, '2025-06-24', TRUE, '作业'),
-(2, 3, '完成数据库原理作业第二章', FALSE, '2025-06-25', FALSE, '作业'),
+(1, 3, '完成学生个人信息核对', FALSE, '2025-09-24', TRUE, '学工'),
+(2, 3, '查收新生开学必读须知', FALSE, '2025-06-25', FALSE, '通知'),
 (3, 3, '完成数据结构作业第二章', FALSE, '2025-06-25', FALSE, '作业');
 
 -- 初始化公告表数据
