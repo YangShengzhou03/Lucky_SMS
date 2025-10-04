@@ -95,6 +95,330 @@
         WHERE user_id = #{userId}
     </select>
 
+    <!-- 定义GradesVO的映射规则 -->
+    <resultMap id="GradesVOMap" type="com.yangshengzhou.lucky_sms.vo.student.GradesVO">
+        <association property="gradeStats" javaType="com.yangshengzhou.lucky_sms.vo.student.GradesVO$StudentGradeStats">
+            <result column="student_gpa" property="gpa"/>
+            <result column="avg_score" property="avgScore"/>
+            <result column="class_rank" property="rank"/>
+            <result column="class_size" property="classSize"/>
+            <result column="completed_credits" property="completedCredits"/>
+            <result column="total_credits" property="totalCredits"/>
+        </association>
+        <collection property="courseGrades" ofType="com.yangshengzhou.lucky_sms.vo.student.GradesVO$CourseGrade">
+            <id column="grade_id" property="id"/>
+            <result column="course_name" property="courseName"/>
+            <result column="course_code" property="courseCode"/>
+            <result column="course_type" property="courseType"/>
+            <result column="credit" property="credits"/>
+            <result column="final_grade" property="score"/>
+            <result column="gpa_grade" property="gpa"/>
+            <result column="semester_name" property="semester"/>
+        </collection>
+        <collection property="semesterGPAList" ofType="com.yangshengzhou.lucky_sms.vo.student.GradesVO$SemesterGPA">
+            <result column="semester_name" property="semester"/>
+            <result column="semester_gpa" property="gpa"/>
+            <result column="semester_avg_score" property="avgScore"/>
+            <result column="semester_credits" property="credits"/>
+        </collection>
+    </resultMap>
+
+    <!-- 查询学生成绩数据 -->
+    <select id="getGradesData" parameterType="Integer" resultMap="GradesVOMap">
+        SELECT 
+            cg.grade_id,
+            c.course_name,
+            c.course_code,
+            CASE c.course_type 
+                WHEN 'COMPULSORY' THEN '必修课'
+                WHEN 'ELECTIVE' THEN '选修课'
+                ELSE c.course_type
+            END AS course_type,
+            c.credit,
+            COALESCE(cg.final_grade, 0) AS final_grade,
+            COALESCE(cg.gpa_grade, 0.0) AS gpa_grade,
+            CONCAT(s.academic_year, '-', s.semester_name) AS semester_name,
+            COALESCE(st.gpa, 0.0) AS student_gpa,
+            COALESCE(st.class_rank, 0) AS class_rank,
+            COALESCE((SELECT COUNT(*) FROM students WHERE class_id = st.class_id), 0) AS class_size,
+            COALESCE(st.total_credits, 0) AS completed_credits,
+            COALESCE(
+                (SELECT SUM(c2.credit)
+                FROM majors m
+                INNER JOIN courses c2 ON m.department_id = c2.department_id
+                WHERE m.major_id = st.major_id), 0
+            ) AS total_credits,
+            COALESCE(
+                (SELECT AVG(cg2.final_grade)
+                FROM course_grades cg2
+                INNER JOIN teaching_assignments ta2 ON cg2.assignment_id = ta2.assignment_id
+                INNER JOIN semesters s2 ON ta2.semester_id = s2.semester_id
+                WHERE cg2.student_id = st.student_id), 0
+            ) AS avg_score,
+            CONCAT(s.academic_year, '-', s.semester_name) AS semester_name,
+            COALESCE(
+                (SELECT AVG(cg3.gpa_grade)
+                FROM course_grades cg3
+                INNER JOIN teaching_assignments ta3 ON cg3.assignment_id = ta3.assignment_id
+                INNER JOIN semesters s3 ON ta3.semester_id = s3.semester_id
+                WHERE cg3.student_id = st.student_id 
+                AND CONCAT(s3.academic_year, '-', s3.semester_name) = CONCAT(s.academic_year, '-', s.semester_name)), 0.0
+            ) AS semester_gpa,
+            COALESCE(
+                (SELECT AVG(cg4.final_grade)
+                FROM course_grades cg4
+                INNER JOIN teaching_assignments ta4 ON cg4.assignment_id = ta4.assignment_id
+                INNER JOIN semesters s4 ON ta4.semester_id = s4.semester_id
+                WHERE cg4.student_id = st.student_id 
+                AND CONCAT(s4.academic_year, '-', s4.semester_name) = CONCAT(s.academic_year, '-', s.semester_name)), 0
+            ) AS semester_avg_score,
+            COALESCE(
+                (SELECT SUM(c2.credit)
+                FROM course_grades cg5
+                INNER JOIN teaching_assignments ta5 ON cg5.assignment_id = ta5.assignment_id
+                INNER JOIN semesters s5 ON ta5.semester_id = s5.semester_id
+                INNER JOIN courses c2 ON ta5.course_id = c2.course_id
+                WHERE cg5.student_id = st.student_id 
+                AND CONCAT(s5.academic_year, '-', s5.semester_name) = CONCAT(s.academic_year, '-', s.semester_name)), 0
+            ) AS semester_credits
+        FROM 
+            students st
+            INNER JOIN users u ON st.user_id = u.user_id
+            INNER JOIN course_selections cs ON st.student_id = cs.student_id
+            INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
+            INNER JOIN courses c ON ta.course_id = c.course_id
+            INNER JOIN semesters s ON ta.semester_id = s.semester_id
+            LEFT JOIN course_grades cg ON st.student_id = cg.student_id AND ta.assignment_id = cg.assignment_id
+        WHERE 
+            u.user_id = #{userId}
+            AND cs.status = 'COMPLETED'
+        GROUP BY cg.grade_id, c.course_id, c.course_name, c.course_code, c.course_type, c.credit, 
+                 s.semester_id, s.academic_year, s.semester_name, st.student_id, st.gpa, st.class_rank, st.total_credits
+    </select>
+
+    <!-- 查询指定学期的学生成绩数据 -->
+    <select id="getGradesDataBySemester" resultMap="GradesVOMap">
+        SELECT 
+            cg.grade_id,
+            c.course_name,
+            c.course_code,
+            CASE c.course_type 
+                WHEN 'COMPULSORY' THEN '必修课'
+                WHEN 'ELECTIVE' THEN '选修课'
+                ELSE c.course_type
+            END AS course_type,
+            c.credit,
+            COALESCE(cg.final_grade, 0) AS final_grade,
+            COALESCE(cg.gpa_grade, 0.0) AS gpa_grade,
+            CONCAT(s.academic_year, '-', s.semester_name) AS semester_name,
+            COALESCE(st.gpa, 0.0) AS student_gpa,
+            COALESCE(st.class_rank, 0) AS class_rank,
+            COALESCE((SELECT COUNT(*) FROM students WHERE class_id = st.class_id), 0) AS class_size,
+            COALESCE(st.total_credits, 0) AS completed_credits,
+            COALESCE(
+                (SELECT SUM(c2.credit)
+                FROM majors m
+                INNER JOIN courses c2 ON m.department_id = c2.department_id
+                WHERE m.major_id = st.major_id), 0
+            ) AS total_credits,
+            COALESCE(
+                (SELECT AVG(cg2.final_grade)
+                FROM course_grades cg2
+                INNER JOIN teaching_assignments ta2 ON cg2.assignment_id = ta2.assignment_id
+                INNER JOIN semesters s2 ON ta2.semester_id = s2.semester_id
+                WHERE cg2.student_id = st.student_id), 0
+            ) AS avg_score,
+            CONCAT(s.academic_year, '-', s.semester_name) AS semester_name,
+            COALESCE(
+                (SELECT AVG(cg3.gpa_grade)
+                FROM course_grades cg3
+                INNER JOIN teaching_assignments ta3 ON cg3.assignment_id = ta3.assignment_id
+                INNER JOIN semesters s3 ON ta3.semester_id = s3.semester_id
+                WHERE cg3.student_id = st.student_id 
+                AND CONCAT(s3.academic_year, '-', s3.semester_name) = CONCAT(s.academic_year, '-', s.semester_name)), 0.0
+            ) AS semester_gpa,
+            COALESCE(
+                (SELECT AVG(cg4.final_grade)
+                FROM course_grades cg4
+                INNER JOIN teaching_assignments ta4 ON cg4.assignment_id = ta4.assignment_id
+                INNER JOIN semesters s4 ON ta4.semester_id = s4.semester_id
+                WHERE cg4.student_id = st.student_id 
+                AND CONCAT(s4.academic_year, '-', s4.semester_name) = CONCAT(s.academic_year, '-', s.semester_name)), 0
+            ) AS semester_avg_score,
+            COALESCE(
+                (SELECT SUM(c2.credit)
+                FROM course_grades cg5
+                INNER JOIN teaching_assignments ta5 ON cg5.assignment_id = ta5.assignment_id
+                INNER JOIN semesters s5 ON ta5.semester_id = s5.semester_id
+                INNER JOIN courses c2 ON ta5.course_id = c2.course_id
+                WHERE cg5.student_id = st.student_id 
+                AND CONCAT(s5.academic_year, '-', s5.semester_name) = CONCAT(s.academic_year, '-', s.semester_name)), 0
+            ) AS semester_credits
+        FROM 
+            students st
+            INNER JOIN users u ON st.user_id = u.user_id
+            INNER JOIN course_selections cs ON st.student_id = cs.student_id
+            INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
+            INNER JOIN courses c ON ta.course_id = c.course_id
+            INNER JOIN semesters s ON ta.semester_id = s.semester_id
+            LEFT JOIN course_grades cg ON st.student_id = cg.student_id AND ta.assignment_id = cg.assignment_id
+        WHERE 
+            u.user_id = #{userId}
+            AND cs.status = 'COMPLETED'
+            AND CONCAT(s.academic_year, '-', s.semester_name) = #{semester}
+        GROUP BY cg.grade_id, c.course_id, c.course_name, c.course_code, c.course_type, c.credit, 
+                 s.semester_id, s.academic_year, s.semester_name, st.student_id, st.gpa, st.class_rank, st.total_credits
+    </select>
+
+    <!-- 查询分页的学生成绩数据 -->
+    <select id="getGradesDataWithPagination" parameterType="java.util.Map" resultMap="GradesVOMap">
+        SELECT 
+            cg.grade_id,
+            c.course_name,
+            c.course_code,
+            CASE c.course_type 
+                WHEN 'COMPULSORY' THEN '必修课'
+                WHEN 'ELECTIVE' THEN '选修课'
+                ELSE c.course_type
+            END AS course_type,
+            c.credit,
+            COALESCE(cg.final_grade, 0) AS final_grade,
+            COALESCE(cg.gpa_grade, 0.0) AS gpa_grade,
+            CONCAT(s.academic_year, '-', s.semester_name) AS semester_name,
+            COALESCE(st.gpa, 0.0) AS student_gpa,
+            COALESCE(st.class_rank, 0) AS class_rank,
+            COALESCE((SELECT COUNT(*) FROM students WHERE class_id = st.class_id), 0) AS class_size,
+            COALESCE(st.total_credits, 0) AS completed_credits,
+            COALESCE(
+                (SELECT SUM(c2.credit)
+                FROM majors m
+                INNER JOIN courses c2 ON m.department_id = c2.department_id
+                WHERE m.major_id = st.major_id), 0
+            ) AS total_credits,
+            COALESCE(
+                (SELECT AVG(cg2.final_grade)
+                FROM course_grades cg2
+                INNER JOIN teaching_assignments ta2 ON cg2.assignment_id = ta2.assignment_id
+                INNER JOIN semesters s2 ON ta2.semester_id = s2.semester_id
+                WHERE cg2.student_id = st.student_id), 0
+            ) AS avg_score,
+            CONCAT(s.academic_year, '-', s.semester_name) AS semester_name,
+            COALESCE(
+                (SELECT AVG(cg3.gpa_grade)
+                FROM course_grades cg3
+                INNER JOIN teaching_assignments ta3 ON cg3.assignment_id = ta3.assignment_id
+                INNER JOIN semesters s3 ON ta3.semester_id = s3.semester_id
+                WHERE cg3.student_id = st.student_id 
+                AND CONCAT(s3.academic_year, '-', s3.semester_name) = CONCAT(s.academic_year, '-', s.semester_name)), 0.0
+            ) AS semester_gpa,
+            COALESCE(
+                (SELECT AVG(cg4.final_grade)
+                FROM course_grades cg4
+                INNER JOIN teaching_assignments ta4 ON cg4.assignment_id = ta4.assignment_id
+                INNER JOIN semesters s4 ON ta4.semester_id = s4.semester_id
+                WHERE cg4.student_id = st.student_id 
+                AND CONCAT(s4.academic_year, '-', s4.semester_name) = CONCAT(s.academic_year, '-', s.semester_name)), 0
+            ) AS semester_avg_score,
+            COALESCE(
+                (SELECT SUM(c2.credit)
+                FROM course_grades cg5
+                INNER JOIN teaching_assignments ta5 ON cg5.assignment_id = ta5.assignment_id
+                INNER JOIN semesters s5 ON ta5.semester_id = s5.semester_id
+                INNER JOIN courses c2 ON ta5.course_id = c2.course_id
+                WHERE cg5.student_id = st.student_id 
+                AND CONCAT(s5.academic_year, '-', s5.semester_name) = CONCAT(s.academic_year, '-', s.semester_name)), 0
+            ) AS semester_credits
+        FROM 
+            students st
+            INNER JOIN users u ON st.user_id = u.user_id
+            INNER JOIN course_selections cs ON st.student_id = cs.student_id
+            INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
+            INNER JOIN courses c ON ta.course_id = c.course_id
+            INNER JOIN semesters s ON ta.semester_id = s.semester_id
+            LEFT JOIN course_grades cg ON st.student_id = cg.student_id AND ta.assignment_id = cg.assignment_id
+        WHERE 
+            u.user_id = #{userId}
+            AND cs.status = 'COMPLETED'
+        GROUP BY cg.grade_id, c.course_id, c.course_name, c.course_code, c.course_type, c.credit, 
+                 s.semester_id, s.academic_year, s.semester_name, st.student_id, st.gpa, st.class_rank, st.total_credits
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <!-- 查询指定学期的分页学生成绩数据 -->
+    <select id="getGradesDataBySemesterWithPagination" parameterType="java.util.Map" resultMap="GradesVOMap">
+        SELECT 
+            cg.grade_id,
+            c.course_name,
+            c.course_code,
+            CASE c.course_type 
+                WHEN 'COMPULSORY' THEN '必修课'
+                WHEN 'ELECTIVE' THEN '选修课'
+                ELSE c.course_type
+            END AS course_type,
+            c.credit,
+            COALESCE(cg.final_grade, 0) AS final_grade,
+            COALESCE(cg.gpa_grade, 0.0) AS gpa_grade,
+            CONCAT(s.academic_year, '-', s.semester_name) AS semester_name,
+            COALESCE(st.gpa, 0.0) AS student_gpa,
+            COALESCE(st.class_rank, 0) AS class_rank,
+            COALESCE((SELECT COUNT(*) FROM students WHERE class_id = st.class_id), 0) AS class_size,
+            COALESCE(st.total_credits, 0) AS completed_credits,
+            COALESCE(
+                (SELECT SUM(c2.credit)
+                FROM majors m
+                INNER JOIN courses c2 ON m.department_id = c2.department_id
+                WHERE m.major_id = st.major_id), 0
+            ) AS total_credits,
+            COALESCE(
+                (SELECT AVG(cg2.final_grade)
+                FROM course_grades cg2
+                INNER JOIN teaching_assignments ta2 ON cg2.assignment_id = ta2.assignment_id
+                INNER JOIN semesters s2 ON ta2.semester_id = s2.semester_id
+                WHERE cg2.student_id = st.student_id), 0
+            ) AS avg_score,
+            CONCAT(s.academic_year, '-', s.semester_name) AS semester_name,
+            COALESCE(
+                (SELECT AVG(cg3.gpa_grade)
+                FROM course_grades cg3
+                INNER JOIN teaching_assignments ta3 ON cg3.assignment_id = ta3.assignment_id
+                INNER JOIN semesters s3 ON ta3.semester_id = s3.semester_id
+                WHERE cg3.student_id = st.student_id 
+                AND CONCAT(s3.academic_year, '-', s3.semester_name) = CONCAT(s.academic_year, '-', s.semester_name)), 0.0
+            ) AS semester_gpa,
+            COALESCE(
+                (SELECT AVG(cg4.final_grade)
+                FROM course_grades cg4
+                INNER JOIN teaching_assignments ta4 ON cg4.assignment_id = ta4.assignment_id
+                INNER JOIN semesters s4 ON ta4.semester_id = s4.semester_id
+                WHERE cg4.student_id = st.student_id 
+                AND CONCAT(s4.academic_year, '-', s4.semester_name) = CONCAT(s.academic_year, '-', s.semester_name)), 0
+            ) AS semester_avg_score,
+            COALESCE(
+                (SELECT SUM(c2.credit)
+                FROM course_grades cg5
+                INNER JOIN teaching_assignments ta5 ON cg5.assignment_id = ta5.assignment_id
+                INNER JOIN semesters s5 ON ta5.semester_id = s5.semester_id
+                INNER JOIN courses c2 ON ta5.course_id = c2.course_id
+                WHERE cg5.student_id = st.student_id 
+                AND CONCAT(s5.academic_year, '-', s5.semester_name) = CONCAT(s.academic_year, '-', s.semester_name)), 0
+            ) AS semester_credits
+        FROM 
+            students st
+            INNER JOIN users u ON st.user_id = u.user_id
+            INNER JOIN course_selections cs ON st.student_id = cs.student_id
+            INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
+            INNER JOIN courses c ON ta.course_id = c.course_id
+            INNER JOIN semesters s ON ta.semester_id = s.semester_id
+            LEFT JOIN course_grades cg ON st.student_id = cg.student_id AND ta.assignment_id = cg.assignment_id
+        WHERE 
+            u.user_id = #{userId}
+            AND cs.status = 'COMPLETED'
+            AND CONCAT(s.academic_year, '-', s.semester_name) = #{semester}
+        GROUP BY cg.grade_id, c.course_id, c.course_name, c.course_code, c.course_type, c.credit, 
+                 s.semester_id, s.academic_year, s.semester_name, st.student_id, st.gpa, st.class_rank, st.total_credits
+        LIMIT #{offset}, #{size}
+    </select>
+
 <!--    &lt;!&ndash; 选择出AcademicHistoryList数据 &ndash;&gt;-->
 <!--    <select id="selectAcademicHistoryList" parameterType="Integer" resultType="com.yangshengzhou.lucky_sms.pojo.AcademicHistory">-->
 <!--        SELECT-->

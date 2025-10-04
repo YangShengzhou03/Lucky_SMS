@@ -7,32 +7,36 @@ import com.yangshengzhou.lucky_sms.pojo.Todos;
 import com.yangshengzhou.lucky_sms.vo.student.GradesVO;
 import com.yangshengzhou.lucky_sms.vo.student.StudentVO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface StudentMapper {
-    // 根据userId返回student数据
+    // 1. 查询学生信息
     StudentVO selectStudentById(Integer userId);
 
-    // 根据userId返回List<todos>数据
+    // 2. 查询待办事项列表
     List<Todos> selectTodosList(Integer userId);
 
-    // 根据userId返回List<announcement>数据
+    // 3. 查询公告列表
     List<Announcement> selectAnnouncementList();
 
-    // 根据userId返回basicInfo数据
+    // 4. 查询学生基本信息
     BasicInfo selectBasicInfoById(Integer userId);
 
-    // 根据userId返回List<AcademicHistory>数据
-    List<AcademicHistory> selectAcademicHistoryList(Integer userId);
-
+    // 5. 查询学生成绩数据
     GradesVO getGradesData(Integer userId);
-    
-    GradesVO getGradesDataBySemester(Integer userId, String semester);
-    
-    GradesVO getGradesDataWithPagination(Integer userId, Integer page, Integer size);
-    
-    GradesVO getGradesDataBySemesterWithPagination(Integer userId, String semester, Integer page, Integer size);
 
+    // 6. 查询指定学期的学生成绩数据
+    GradesVO getGradesDataBySemester(@Param("userId") Integer userId, @Param("semester") String semester);
+
+    // 7. 查询分页的学生成绩数据
+    GradesVO getGradesDataWithPagination(Map<String, Object> params);
+
+    // 8. 查询指定学期的分页学生成绩数据
+    GradesVO getGradesDataBySemesterWithPagination(Map<String, Object> params);
+
+//    List<AcademicHistory> selectAcademicHistoryList(Integer userId);
 }

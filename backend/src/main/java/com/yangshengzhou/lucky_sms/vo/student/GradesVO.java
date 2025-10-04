@@ -1,14 +1,21 @@
 package com.yangshengzhou.lucky_sms.vo.student;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GradesVO {
-    private List<CourseGrade> courseGrades;
+    private List<CourseGrade> courseGrades = new ArrayList<>();
     private StudentGradeStats gradeStats;
-    private List<SemesterGPA> semesterGPAList;
+    private List<SemesterGPA> semesterGPAList = new ArrayList<>();
     private Integer total;
     private Integer page;
     private Integer size;
+
+    public GradesVO() {
+        // 默认构造函数，初始化集合属性
+        this.courseGrades = new ArrayList<>();
+        this.semesterGPAList = new ArrayList<>();
+    }
 
     public List<CourseGrade> getCourseGrades() {
         return courseGrades;
