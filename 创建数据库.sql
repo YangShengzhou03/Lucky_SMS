@@ -193,7 +193,7 @@ CREATE TABLE students (
     FOREIGN KEY (class_id) REFERENCES class_info(class_id) ON UPDATE CASCADE,
     FOREIGN KEY (status_id) REFERENCES student_statuses(status_id) ON UPDATE CASCADE,
     INDEX idx_student_no (student_no),
-    INDEX idx_enrollment_year (enrollment_year)
+    INDEX idx_enrollment_date (enrollment_date)
 ) COMMENT = '学生表-存储学生详细信息';
 
 -- 课程表（补充级联操作）
@@ -1001,7 +1001,7 @@ INSERT INTO semesters (academic_year, semester_name, start_date, end_date, is_cu
 
 -- 初始化用户表（管理员）
 INSERT INTO users (username, password_hash, email, phone, gender, status) VALUES
-('ADMIN01', '123456', 'admin@lucky-sms.com', '13800000000', 'M', 'ACTIVE');
+('ADMIN01', '123456', 'admin@lucky-sms.com', '13300000000', 'M', 'ACTIVE');
 
 -- 为管理员分配角色（管理员角色ID为1）
 INSERT INTO user_roles (user_id, role_id) VALUES (1, 1);
@@ -1012,7 +1012,7 @@ INSERT INTO teachers (user_id, department_id, title_id, hire_date, office_locati
 
 -- 初始化用户表（教师）
 INSERT INTO users (username, password_hash, email, phone, gender, status) VALUES
-('TEACHER01', '123456', 'teacher1@lucky-sms.com', '13800000001', 'M', 'ACTIVE');
+('TEACHER01', '123456', 'teacher1@lucky-sms.com', '13300000001', 'M', 'ACTIVE');
 
 -- 为教师分配角色（教师角色ID为2）
 INSERT INTO user_roles (user_id, role_id) VALUES (2, 2);
@@ -1033,8 +1033,8 @@ INSERT INTO users (username, password_hash, email, phone, gender, status) VALUES
 INSERT INTO user_roles (user_id, role_id) VALUES (3, 3);
 
 -- 初始化学生表（使用示例班级ID）
-INSERT INTO students (user_id, department_id, major_id, class_id, enrollment_year, education_years, student_no, status_id, emergency_contact, emergency_phone) VALUES
-(3, 1, 1, 1, 2021, 4, '2021CS01001', 1, '张爸爸', '13800000010');
+INSERT INTO students (user_id, department_id, major_id, class_id, enrollment_date, education_years, student_no, status_id, emergency_contact, emergency_phone) VALUES
+(3, 1, 1, 1, '2021-09-01', 4, '2021CS01001', 1, '张爸爸', '13800000010');
 
 -- 初始化教师授课表
 INSERT INTO teaching_assignments (teacher_id, course_id, semester_id, classroom, schedule, max_students, current_students) VALUES
@@ -1099,8 +1099,8 @@ BEGIN
         -- 为学生角色创建学生记录
         -- 获取下一个序号
         SELECT COALESCE(MAX(student_id), 0) + 1 INTO next_seq FROM students;
-        INSERT INTO students (user_id, department_id, major_id, class_id, enrollment_year, education_years, student_no, status_id)
-        VALUES (NEW.user_id, 1, 1, 1, YEAR(CURRENT_DATE), 4, 
+        INSERT INTO students (user_id, department_id, major_id, class_id, enrollment_date, education_years, student_no, status_id)
+        VALUES (NEW.user_id, 1, 1, 1, CURRENT_DATE, 4, 
                 CONCAT(YEAR(CURRENT_DATE), 'CS', LPAD(next_seq, 4, '0')), 1);
     ELSEIF user_role_id = 2 AND has_teacher_record = 0 THEN
         -- 为教师角色创建教师记录

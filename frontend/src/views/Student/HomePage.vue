@@ -292,11 +292,11 @@ const fetchData = async () => {
 
     // 如果API请求失败，使用模拟数据作为后备
     student.value = {
-      username: '张三',
+      username: '--',
       student_no: '2025CS0002',
       class_name: '示例班级',
       gpa: '4.00',
-      class_rank: '23',
+      class_rank: '1',
       classSize: '2',
       course_count: '1',
       nextCourse: {
@@ -348,7 +348,7 @@ const fetchData = async () => {
         "id": "ann5",
         "title": "校园招聘信息",
         "content": "多家知名企业将于下周来校招聘，欢迎大四同学参加...",
-        "date": "2023-12-11",
+        "date": "2025-12-11",
         "department": "就业指导中心",
         "type": "info",
         "priority": "low"
