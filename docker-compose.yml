@@ -1,0 +1,47 @@
+version: '3'
+services:
+  # 1. MySQL 服务
+  mysql:
+    image: mysql:8.0  # 使用 MySQL 8.0 镜像
+    container_name: mysql  # 容器名称
+    restart: always  # 容器退出时自动重启
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456  # MySQL root 用户密码（自己设置，记好）
+      MYSQL_DATABASE: lucky_sms     # 要创建的数据库名（和后端配置一致）
+    ports:
+      - "3306:3306"  # 宿主机端口:容器端口，方便本地连接数据库
+    volumes:
+      - mysql-data:/var/lib/mysql  # 数据持久化（防止容器删除后数据丢失）
+
+  # 2. 后端 SpringBoot 服务
+  backend:
+    build: ./backend  # 指定后端项目的 Dockerfile 所在目录
+    container_name: backend
+    restart: always
+    depends_on:
+      - mysql  # 后端依赖 MySQL，确保 MySQL 启动后再启动后端
+    ports:
+      - "8081:8081"  # 后端服务端口（和 application.yml 中配置的一致）
+    networks:
+      - app-network
+
+  # 3. 前端 Vue 服务
+  frontend:
+    build: ./frontend  # 指定前端项目的 Dockerfile 所在目录
+    container_name: frontend
+    restart: always
+    depends_on:
+      - backend  # 前端依赖后端，确保后端启动后再启动前端
+    ports:
+      - "80:80"   # 前端 Nginx 端口（浏览器访问用 80 端口）
+    networks:
+      - app-network
+
+# 网络配置（让容器之间能互相访问）
+networks:
+  app-network:
+    driver: bridge
+
+# 数据卷配置（持久化 MySQL 数据）
+volumes:
+  mysql-data:

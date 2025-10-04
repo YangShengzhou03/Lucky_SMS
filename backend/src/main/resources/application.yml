@@ -7,13 +7,19 @@ logging:
   level:
     root: INFO  # 日志级别设成INFO，别搞成DEBUG，不然日志太多看着乱
 
-# 数据库连接配置，填自己的数据库信息
+# # 数据库连接配置，填自己的数据库信息
+# spring:
+#   datasource:
+#     url: jdbc:mysql://localhost:3306/lucky_sms?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+#     username: root  # 数据库用户名，默认是root
+#     password: 123456  # 数据库登录密码
+#     driver-class-name: com.mysql.cj.jdbc.Driver  # MySQL 8以上用这个驱动，老版本的话换成com.mysql.jdbc.Driver
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/lucky_sms?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root  # 数据库用户名，默认是root
-    password: 123456  # 数据库登录密码
-    driver-class-name: com.mysql.cj.jdbc.Driver  # MySQL 8以上用这个驱动，老版本的话换成com.mysql.jdbc.Driver
+    url: jdbc:mysql://mysql:3306/lucky_sms?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root  
+    password: 123456  
+    driver-class-name: com.mysql.cj.jdbc.Driver  
 
 # MyBatis的配置，xml文件和实体类的位置在这指定
 mybatis:
@@ -22,19 +28,19 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true  # 数据库字段如果下划线的，自动转成实体类的驼峰命名，比如user_name转userName
 
-# Redis配置 - 抢课功能和高并发控制
-redis:
-  host: localhost
-  port: 6379
-  password:  # 默认无密码
-  database: 0
-  timeout: 3000
-  lettuce:
-    pool:
-      max-active: 8
-      max-idle: 8
-      min-idle: 0
-      max-wait: -1ms
+## Redis配置 - 抢课功能和高并发控制
+#redis:
+#  host: localhost
+#  port: 6379
+#  password:  # 默认无密码
+#  database: 0
+#  timeout: 3000
+#  lettuce:
+#    pool:
+#      max-active: 8
+#      max-idle: 8
+#      min-idle: 0
+#      max-wait: -1ms
 
 # JWT的基本配置
 jwt:
