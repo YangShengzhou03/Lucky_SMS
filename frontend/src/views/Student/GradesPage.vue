@@ -315,12 +315,12 @@ const scoreDistribution = ref([
 ])
 
 const initTrendChart = () => {
-  if (!trendChartCanvas.value || semesterGPAList.value.length === 0) return
+  if (!trendChartCanvas.value || !semesterGPAList.value || semesterGPAList.value.length === 0) return
   
   const ctx = trendChartCanvas.value.getContext('2d')
 
   // 销毁旧图表
-  if (trendChart.value) {
+  if (trendChart && trendChart.value) {
     trendChart.value.destroy()
   }
 
@@ -351,6 +351,10 @@ const initTrendChart = () => {
   }
 
   // 创建新图表
+  if (!trendChart) {
+    trendChart = {}
+  }
+  
   trendChart.value = new Chart(ctx, {
     type: 'line',
     data: {
@@ -399,14 +403,14 @@ const initTrendChart = () => {
 }
 
 watch(isDarkMode, (newVal) => {
-  if (trendChart) {
-    trendChart.options.scales.y.grid.color = newVal
+  if (trendChart && trendChart.value) {
+    trendChart.value.options.scales.y.grid.color = newVal
       ? 'rgba(255, 255, 255, 0.1)'
       : 'rgba(0, 0, 0, 0.05)'
-    trendChart.data.datasets[0].backgroundColor = newVal
-      ? `${trendChart.data.datasets[0].borderColor}20`
-      : `${trendChart.data.datasets[0].borderColor}40`
-    trendChart.update()
+    trendChart.value.data.datasets[0].backgroundColor = newVal
+      ? `${trendChart.value.data.datasets[0].borderColor}20`
+      : `${trendChart.value.data.datasets[0].borderColor}40`
+    trendChart.value.update()
   }
 })
 
@@ -452,7 +456,9 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  if (trendChart) trendChart.destroy()
+  if (trendChart && trendChart.value) {
+    trendChart.value.destroy()
+  }
 })
 </script>
 

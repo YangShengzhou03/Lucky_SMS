@@ -20,7 +20,7 @@ public class GradeServiceImpl implements GradeService {
         
         GradesVO.CourseGrade grade1 = new GradesVO.CourseGrade();
         grade1.setId(1);
-        grade1.setCourseName("数据结构与算法");
+        grade1.setCourseName("杨圣洲与算法");
         grade1.setCourseCode("CS101");
         grade1.setCourseType("必修课");
         grade1.setCredits(4);
