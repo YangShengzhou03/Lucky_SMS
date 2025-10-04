@@ -4,6 +4,7 @@ import com.yangshengzhou.lucky_sms.pojo.AcademicHistory;
 import com.yangshengzhou.lucky_sms.pojo.Announcement;
 import com.yangshengzhou.lucky_sms.pojo.BasicInfo;
 import com.yangshengzhou.lucky_sms.pojo.Todos;
+import com.yangshengzhou.lucky_sms.vo.student.GradesVO;
 import com.yangshengzhou.lucky_sms.vo.student.StudentVO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -25,5 +26,9 @@ public interface StudentMapper {
 
     // 根据userId返回List<AcademicHistory>数据
     List<AcademicHistory> selectAcademicHistoryList(Integer userId);
+
+    GradesVO getGradesData(Integer userId);
+    
+    GradesVO getGradesDataBySemester(Integer userId, String semester);
 
 }
