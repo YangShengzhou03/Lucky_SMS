@@ -182,4 +182,72 @@ public class GradeService {
 
         return semesterGrades;
     }
+
+    public GradesVO getGradesDataWithPagination(Integer userId, Integer page, Integer size) {
+        // 获取所有成绩数据
+        GradesVO allGrades = getGradesData(userId);
+        
+        // 创建分页结果
+        GradesVO paginatedGrades = new GradesVO();
+        
+        // 计算分页范围
+        int total = allGrades.getCourseGrades().size();
+        int fromIndex = (page - 1) * size;
+        int toIndex = Math.min(fromIndex + size, total);
+        
+        // 防止索引越界
+        if (fromIndex >= total) {
+            fromIndex = 0;
+            toIndex = 0;
+        }
+        
+        // 获取分页后的课程成绩
+        List<GradesVO.CourseGrade> paginatedCourseGrades = allGrades.getCourseGrades().subList(fromIndex, toIndex);
+        paginatedGrades.setCourseGrades(paginatedCourseGrades);
+        
+        // 设置其他数据
+        paginatedGrades.setGradeStats(allGrades.getGradeStats());
+        paginatedGrades.setSemesterGPAList(allGrades.getSemesterGPAList());
+        
+        // 设置分页信息
+        paginatedGrades.setTotal(total);
+        paginatedGrades.setPage(page);
+        paginatedGrades.setSize(size);
+        
+        return paginatedGrades;
+    }
+    
+    public GradesVO getGradesDataBySemesterWithPagination(Integer userId, String semester, Integer page, Integer size) {
+        // 获取指定学期的所有成绩数据
+        GradesVO semesterGrades = getGradesDataBySemester(userId, semester);
+        
+        // 创建分页结果
+        GradesVO paginatedGrades = new GradesVO();
+        
+        // 计算分页范围
+        int total = semesterGrades.getCourseGrades().size();
+        int fromIndex = (page - 1) * size;
+        int toIndex = Math.min(fromIndex + size, total);
+        
+        // 防止索引越界
+        if (fromIndex >= total) {
+            fromIndex = 0;
+            toIndex = 0;
+        }
+        
+        // 获取分页后的课程成绩
+        List<GradesVO.CourseGrade> paginatedCourseGrades = semesterGrades.getCourseGrades().subList(fromIndex, toIndex);
+        paginatedGrades.setCourseGrades(paginatedCourseGrades);
+        
+        // 设置其他数据
+        paginatedGrades.setGradeStats(semesterGrades.getGradeStats());
+        paginatedGrades.setSemesterGPAList(semesterGrades.getSemesterGPAList());
+        
+        // 设置分页信息
+        paginatedGrades.setTotal(total);
+        paginatedGrades.setPage(page);
+        paginatedGrades.setSize(size);
+        
+        return paginatedGrades;
+    }
 }

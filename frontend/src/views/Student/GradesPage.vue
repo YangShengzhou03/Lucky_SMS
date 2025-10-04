@@ -4,9 +4,14 @@
       <div class="card-header">
         <h2>成绩概览</h2>
         <div class="semester-selector">
-          <el-select v-model="currentSemester" placeholder="选择学期" size="small" @change="handleSemesterChange">
-            <el-option v-for="item in semesters" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <el-select v-model="currentSemester" placeholder="选择学期" size="small" class="semester-select" @change="handleSemesterChange">
+              <el-option
+                v-for="item in semesters"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
         </div>
       </div>
 
@@ -65,17 +70,17 @@
         <h2>详细成绩</h2>
         <div class="table-actions">
           <el-input v-model="searchKeyword" placeholder="搜索课程名称" prefix-icon="Search" size="small"
-            class="search-input" />
-          <el-select v-model="filterType" placeholder="筛选类型" size="small" class="filter-select">
-            <el-option label="全部课程" value="all" />
-            <el-option label="必修课" value="required" />
-            <el-option label="选修课" value="elective" />
-            <el-option label="实践课" value="practical" />
-          </el-select>
+            class="search-input" @clear="handleSearch" @keyup.enter="handleSearch" />
+          <el-select v-model="filterType" placeholder="筛选类型" size="small" class="filter-select" @change="handleFilterChange">
+              <el-option label="全部课程" value="all" />
+              <el-option label="必修课" value="required" />
+              <el-option label="选修课" value="elective" />
+              <el-option label="实践课" value="practical" />
+            </el-select>
         </div>
       </div>
 
-      <el-table :data="filteredGrades" border stripe class="grades-data-table" style="width: 100%">
+      <el-table :data="allGrades" border stripe class="grades-data-table" style="width: 100%" v-loading="loading" element-loading-text="加载中...">
         <el-table-column prop="courseName" label="课程名称" min-width="200" />
         <el-table-column prop="courseCode" label="课程代码" width="120" />
         <el-table-column prop="courseType" label="课程类型" width="100" />
@@ -94,7 +99,7 @@
 
       <div class="pagination" v-if="filteredGrades.length > 0">
         <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
-          :page-sizes="[5, 10, 20]" :page-size="pageSize" :total="filteredGrades.length"
+          :page-sizes="[5, 10, 20]" :page-size="pageSize" :total="totalGrades"
           layout="total, sizes, prev, pager, next" small />
       </div>
     </div>
@@ -134,17 +139,34 @@ const gradeStats = ref(null)
 const semesterGPAList = ref([])
 const loading = ref(false)
 const chartType = ref('gpa')
+const totalGrades = ref(0)
+const searchKeyword = ref('')
+const filterType = ref('all')
+const currentSemester = ref('全部')
+const semesters = ref([
+  { value: '全部', label: '全部学期' },
+  { value: '2023-2024-1', label: '2023-2024学年第一学期' },
+  { value: '2023-2024-2', label: '2023-2024学年第二学期' },
+  { value: '2022-2023-1', label: '2022-2023学年第一学期' },
+  { value: '2022-2023-2', label: '2022-2023学年第二学期' }
+])
 
 // 从后端获取成绩数据
 const fetchGradesData = async () => {
   loading.value = true
   try {
-    const res = await service.get('/student/grades')
+    const res = await service.get('/student/grades/pagination', {
+      params: {
+        page: currentPage.value,
+        size: pageSize.value
+      }
+    })
     if (res.code === 200) {
       const data = res.data
       allGrades.value = data.courseGrades || []
       gradeStats.value = data.gradeStats || null
       semesterGPAList.value = data.semesterGPAList || []
+      totalGrades.value = data.total || 0
       
       // 初始化图表
       if (trendChartCanvas.value) {
@@ -161,6 +183,7 @@ const fetchGradesData = async () => {
     allGrades.value = []
     gradeStats.value = null
     semesterGPAList.value = []
+    totalGrades.value = 0
   } finally {
     loading.value = false
   }
@@ -170,11 +193,18 @@ const fetchGradesData = async () => {
 const fetchGradesDataBySemester = async (semester) => {
   loading.value = true
   try {
-    const res = await service.get(`/student/grades/${semester}`)
+    const res = await service.get(`/student/grades/${semester}/pagination`, {
+      params: {
+        page: currentPage.value,
+        size: pageSize.value
+      }
+    })
     if (res.code === 200) {
       const data = res.data
       allGrades.value = data.courseGrades || []
       gradeStats.value = data.gradeStats || null
+      semesterGPAList.value = data.semesterGPAList || []
+      totalGrades.value = data.total || 0
       // 学期GPA列表保持不变，因为我们需要所有学期的数据来绘制趋势图
       
       // 初始化图表
@@ -191,6 +221,7 @@ const fetchGradesDataBySemester = async (semester) => {
     // 如果API请求失败，使用默认空数据
     allGrades.value = []
     gradeStats.value = null
+    totalGrades.value = 0
   } finally {
     loading.value = false
   }
@@ -199,70 +230,32 @@ const fetchGradesDataBySemester = async (semester) => {
 const trendChartCanvas = ref(null)
 let trendChart = null
 
-const searchKeyword = ref('')
-const filterType = ref('all')
 const currentPage = ref(1)
 const pageSize = ref(10)
 
+// 过滤后的成绩数据（根据当前选择的学期）
 const filteredGrades = computed(() => {
   return allGrades.value
-    .filter(grade =>
-      grade.courseName.toLowerCase().includes(searchKeyword.value.toLowerCase())
-    )
-    .filter(grade =>
-      filterType.value === 'all' || grade.courseType === filterType.value
-    )
-})
-
-// 获取所有学期列表
-const semesters = computed(() => {
-  if (semesterGPAList.value.length === 0) return []
-  const allOption = { value: '全部', label: '全部学期' }
-  const semesterOptions = semesterGPAList.value.map(item => ({
-    value: item.semester,
-    label: item.semester
-  }))
-  return [allOption, ...semesterOptions]
-})
-
-// 当前选中的学期
-const currentSemester = ref('全部')
-
-// 当前学期的成绩
-const currentSemesterGrades = computed(() => {
-  if (currentSemester.value === '全部') {
-    return allGrades.value
-  }
-  return allGrades.value.filter(grade => grade.semester === currentSemester.value)
 })
 
 // 处理学期选择变化
 const handleSemesterChange = (semester) => {
   currentSemester.value = semester
+  currentPage.value = 1 // 重置到第一页
   if (semester === '全部') {
-    fetchGradesData().then(() => {
-      // 确保图表更新
-      if (trendChartCanvas.value) {
-        initTrendChart()
-      }
-    })
+    fetchGradesData()
   } else {
-    fetchGradesDataBySemester(semester).then(() => {
-      // 确保图表更新
-      if (trendChartCanvas.value) {
-        initTrendChart()
-      }
-    })
+    fetchGradesDataBySemester(semester)
   }
 }
 
 const gpa = computed(() => {
-  if (!gradeStats.value || currentSemesterGrades.value.length === 0) return '0.00'
+  if (!gradeStats.value || allGrades.value.length === 0) return '0.00'
   return gradeStats.value.gpa?.toFixed(2) || '0.00'
 })
 
 const avgScore = computed(() => {
-  if (!gradeStats.value || currentSemesterGrades.value.length === 0) return 0
+  if (!gradeStats.value || allGrades.value.length === 0) return 0
   return gradeStats.value.avgScore || 0
 })
 
@@ -432,12 +425,49 @@ const viewDetails = (row) => {
   ElMessage.info(`查看课程详情: ${row.courseName}`)
 }
 
+// 处理每页条数变化
 const handleSizeChange = (size) => {
   pageSize.value = size
+  currentPage.value = 1 // 重置到第一页
+  // 重新获取数据
+  if (currentSemester.value !== '全部') {
+    fetchGradesDataBySemester(currentSemester.value)
+  } else {
+    fetchGradesData()
+  }
 }
 
+// 处理页码变化
 const handleCurrentChange = (page) => {
   currentPage.value = page
+  // 重新获取数据
+  if (currentSemester.value !== '全部') {
+    fetchGradesDataBySemester(currentSemester.value)
+  } else {
+    fetchGradesData()
+  }
+}
+
+// 处理搜索
+const handleSearch = () => {
+  currentPage.value = 1 // 重置到第一页
+  // 重新获取数据
+  if (currentSemester.value !== '全部') {
+    fetchGradesDataBySemester(currentSemester.value)
+  } else {
+    fetchGradesData()
+  }
+}
+
+// 处理过滤条件变化
+const handleFilterChange = () => {
+  currentPage.value = 1 // 重置到第一页
+  // 重新获取数据
+  if (currentSemester.value !== '全部') {
+    fetchGradesDataBySemester(currentSemester.value)
+  } else {
+    fetchGradesData()
+  }
 }
 
 const handleMouseMove = (e) => {

@@ -30,5 +30,9 @@ public interface StudentMapper {
     GradesVO getGradesData(Integer userId);
     
     GradesVO getGradesDataBySemester(Integer userId, String semester);
+    
+    GradesVO getGradesDataWithPagination(Integer userId, Integer page, Integer size);
+    
+    GradesVO getGradesDataBySemesterWithPagination(Integer userId, String semester, Integer page, Integer size);
 
 }

@@ -114,4 +114,53 @@ public class StudentController {
 
         return studentGradesResult;
     }
+
+    @GetMapping("/grades/pagination")
+    public HashMap<String, Object> studentGradesWithPaginationResult(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            HttpServletRequest request
+    ) {
+        HashMap<String, Object> studentGradesResult = new HashMap<>();
+
+        try {
+            Integer userId = jwtUtil.getUidByRequest(request);
+            GradesVO gradesData = gradeService.getGradesDataWithPagination(userId, page, size);
+
+            studentGradesResult.put("code", 200);
+            studentGradesResult.put("message", "请求成功");
+            studentGradesResult.put("data", gradesData);
+        } catch (Exception e) {
+            studentGradesResult.put("code", 500);
+            studentGradesResult.put("message", e.getMessage());
+            studentGradesResult.put("data", null);
+        }
+
+        return studentGradesResult;
+    }
+
+    @GetMapping("/grades/{semester}/pagination")
+    public HashMap<String, Object> studentGradesBySemesterWithPaginationResult(
+            @PathVariable String semester,
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            HttpServletRequest request
+    ) {
+        HashMap<String, Object> studentGradesResult = new HashMap<>();
+
+        try {
+            Integer userId = jwtUtil.getUidByRequest(request);
+            GradesVO gradesData = gradeService.getGradesDataBySemesterWithPagination(userId, semester, page, size);
+
+            studentGradesResult.put("code", 200);
+            studentGradesResult.put("message", "请求成功");
+            studentGradesResult.put("data", gradesData);
+        } catch (Exception e) {
+            studentGradesResult.put("code", 500);
+            studentGradesResult.put("message", e.getMessage());
+            studentGradesResult.put("data", null);
+        }
+
+        return studentGradesResult;
+    }
 }
