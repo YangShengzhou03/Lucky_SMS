@@ -2,11 +2,11 @@ services:
   # 1. MySQL 服务（仅新增 1 行 volumes 配置）
   mysql:
     image: mysql:8.0  # 使用 MySQL 8.0 镜像
-    container_name: mysql  # 容器名称
+    container_name: mysql  # 容器名称（和后端配置一致）
     restart: always  # 容器退出时自动重启
     environment:
       MYSQL_ROOT_PASSWORD: 123456  # MySQL root 用户密码（自己设置，记好）
-      MYSQL_DATABASE: lucky_sms     # 要创建的数据库名（和后端配置一致）
+      MYSQL_DATABASE: Lucky_SMS     # 要创建的数据库名（和后端配置一致）
     ports:
       - "3306:3306"  # 宿主机端口:容器端口，方便本地连接数据库
     volumes:

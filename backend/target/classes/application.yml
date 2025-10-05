@@ -2,6 +2,12 @@ server:
   port: 8081  # 后端服务使用的端口，选个不冲突的就行，这里用8081（前端用了8080）
   servlet:
     context-path: /api  # 接口加个前缀，比如调接口得用http://localhost:8081/api/xxx，省得和前端路径混了
+    # 新配置：替代原 spring.http.encoding（解决弃用警告）
+    encoding:
+      charset: UTF-8       # 响应编码（同之前功能）
+      enabled: true        # 启用编码配置
+      force: true          # 强制覆盖所有响应编码（同之前功能）
+      force-response: true # 额外确保响应编码生效（可选，增强兼容性）
 
 logging:
   level:
@@ -17,7 +23,7 @@ logging:
 spring:
   datasource:
     # 关键修正：serverTimezone=Asia/Shanghai（替换 UTC）
-    url: jdbc:mysql://mysql:3306/lucky_sms?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8
+    url: jdbc:mysql://mysql:3306/Lucky_SMS?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8
     username: root
     password: 123456  # 与 MySQL 密码一致
     driver-class-name: com.mysql.cj.jdbc.Driver  # MySQL 8.0 正确驱动
