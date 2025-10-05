@@ -1,3 +1,8 @@
+-- 1. 强制 SQL 执行错误时中断，暴露问题
+SET SQL_MODE = 'STRICT_ALL_TABLES';
+-- 2. 关闭外键检查，避免建表顺序导致的外键失败（执行完后再开启）
+SET FOREIGN_KEY_CHECKS = 0;
+
 CREATE DATABASE IF NOT EXISTS Lucky_SMS;
 USE Lucky_SMS;
 
@@ -221,7 +226,7 @@ CREATE TABLE courses (
 CREATE TABLE semesters (
     semester_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '学期ID（主键）',
     academic_year VARCHAR(9) NOT NULL COMMENT '学年（如2023-2024）',
-    semester_name VARCHAR(10) NOT NULL COMMENT '学期名称（如第一学期、第二学期）',
+    semester_name VARCHAR(20) NOT NULL COMMENT '学期名称（如第一学期、第二学期）',  -- 改为VARCHAR(20)
     start_date DATE NOT NULL COMMENT '开始日期',
     end_date DATE NOT NULL COMMENT '结束日期（必须晚于开始日期）',
     is_current TINYINT(1) DEFAULT 0 COMMENT '是否当前学期（0-否，1-是）',
@@ -400,16 +405,18 @@ CREATE TABLE course_prerequisites (
 
 -- 更新班级排名的存储过程
 DELIMITER $$
-CREATE PROCEDURE update_class_ranking()
+CREATE PROCEDURE update_class_ranking(IN student_id_param INT)
 BEGIN
-    -- 创建临时表存储每个学生的平均绩点
+    -- 创建临时表存储指定学生的平均绩点（若传参则只更新该学生，否则更新所有）
     CREATE TEMPORARY TABLE IF NOT EXISTS temp_student_gpa AS
     SELECT 
         s.student_id,
         s.class_id,
         COALESCE(calculate_gpa(s.student_id), 0) AS gpa
     FROM 
-        students s;
+        students s
+    WHERE 
+        s.student_id = IFNULL(student_id_param, s.student_id);  -- 支持传参过滤
     
     -- 更新学生表中的班级排名
     UPDATE students s
@@ -802,7 +809,7 @@ SELECT
 FROM 
     courses c
 JOIN 
-    teaching_assignments ta ON c.course_id = c.course_id
+    teaching_assignments ta ON c.course_id = ta.course_id  -- 修复：关联ta.course_id
 JOIN 
     semesters s ON ta.semester_id = s.semester_id
 LEFT JOIN 
@@ -1113,32 +1120,32 @@ BEGIN
 END$$
 DELIMITER ;
 
--- 定期维护事件：每天凌晨执行逾期图书检查和班级排名更新
-DELIMITER $$
-CREATE EVENT IF NOT EXISTS daily_maintenance_event
-ON SCHEDULE EVERY 1 DAY
-STARTS CURRENT_DATE + INTERVAL 1 DAY
-DO
-BEGIN
-    -- 更新逾期图书状态和罚款
-    CALL update_overdue_books();
-    
-    -- 更新班级排名
-    CALL update_class_ranking();
-END$$
-DELIMITER ;
+-- 注释掉定期维护事件（避免事件调度器未启用导致错误）
+-- DELIMITER $$
+-- CREATE EVENT IF NOT EXISTS daily_maintenance_event
+-- ON SCHEDULE EVERY 1 DAY
+-- STARTS '2025-01-01 00:00:00'  -- 用固定时间启动，避免当前时间计算问题
+-- DO
+-- BEGIN
+--     -- 更新逾期图书状态和罚款
+--     CALL update_overdue_books();
+--     
+--     -- 更新班级排名（不传参，更新所有学生）
+--     CALL update_class_ranking(NULL);
+-- END$$
+-- DELIMITER ;
 
--- 学期结束事件：自动更新学生班级（学年升级）
-DELIMITER $$
-CREATE EVENT IF NOT EXISTS semester_end_event
-ON SCHEDULE EVERY 1 YEAR
-STARTS CONCAT(YEAR(CURRENT_DATE), '-09-01')  -- 假设9月1日为新学年开始
-DO
-BEGIN
-    -- 更新学生班级（学年升级）
-    CALL update_student_classes();
-END$$
-DELIMITER ;
+-- 注释掉学期结束事件
+-- DELIMITER $$
+-- CREATE EVENT IF NOT EXISTS semester_end_event
+-- ON SCHEDULE EVERY 1 YEAR
+-- STARTS CONCAT(YEAR(CURRENT_DATE), '-09-01')  -- 假设9月1日为新学年开始
+-- DO
+-- BEGIN
+--     -- 更新学生班级（学年升级）
+--     CALL update_student_classes();
+-- END$$
+-- DELIMITER ;
 
 -- 数据库名称：Lucky_SMS
 
