@@ -2,12 +2,26 @@ package com.yangshengzhou.lucky_sms.config;
 
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    /**
+     * 处理ResponseStatusException（包括401未授权）
+     */
+    @ExceptionHandler(ResponseStatusException.class)
+    public Map<String, Object> handleResponseStatusException(ResponseStatusException e) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", e.getStatusCode().value());
+        result.put("message", e.getReason());
+        result.put("data", null);
+        return result;
+    }
 
     /**
      * 处理所有异常

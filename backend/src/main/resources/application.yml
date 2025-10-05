@@ -1,41 +1,28 @@
 server:
-  port: 8081
+  port: 8081  # 后端服务使用的端口，这里用8081（前端用了8080）
   servlet:
-    context-path: /api
-    encoding:
-      charset: UTF-8       # 强制 Servlet 响应头带 "charset=UTF-8"
-      enabled: true
-      force: true          # 覆盖所有响应编码，防止被其他配置覆盖
-      force-response: true # 额外保障响应编码生效
-  tomcat:
-    uri-encoding: UTF-8     # 确保 Tomcat 容器编码
+    context-path: /api  # 接口加个前缀，比如调接口得用http://localhost:8081/api/xxx，省得和前端路径混了
 
 logging:
   level:
-    root: INFO
+    root: INFO  # 日志级别设成INFO，别搞成DEBUG，不然日志太多看着乱
 
+# # 数据库连接配置，填自己的数据库信息
 spring:
   datasource:
-    # 数据库连接（编码正确，保留不变）
-    url: jdbc:mysql://mysql:3306/Lucky_SMS?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8
-    username: root
-    password: 123456
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  # Jackson 3.x + 2.x 兼容配置（删除不存在的枚举项）
-  jackson:
-    charset: UTF-8                          # 3.x 支持，强制 JSON 序列化 UTF-8
-    default-property-inclusion: NON_NULL    # 过滤 null 字段
-    date-format: yyyy-MM-dd                  # 统一日期格式
-    # 关键：用 Jackson 2.x 支持的枚举替代 "write-characters-as-escaped"
-    generator:
-      escape-non-ascii: false                # 2.x 枚举：禁用非 ASCII 字符转义（含中文）
+    url: jdbc:mysql://localhost:3306/lucky_sms?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root  # 数据库用户名，默认是root
+    password: 123456  # 数据库登录密码
+    driver-class-name: com.mysql.cj.jdbc.Driver  # MySQL 8以上用这个驱动，老版本的话换成com.mysql.jdbc.Driver
 
+# MyBatis的配置，xml文件和实体类的位置在这指定
 mybatis:
-  mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: com.yangshengzhou.lucky_sms.entity
+  mapper-locations: classpath:mapper/*.xml  # 写SQL的xml文件放src/main/resources/mapper文件夹里
+  type-aliases-package: com.yangshengzhou.lucky_sms.entity  # 实体类放这个包下面
   configuration:
-    map-underscore-to-camel-case: true
+    map-underscore-to-camel-case: true  # 数据库字段如果下划线的，自动转成实体类的驼峰命名，比如user_name转userName
 
+# JWT的基本配置
 jwt:
-  secret: 3f7d2a9b5e8c1d4f6h0j2k7m9n1p3q5r8t0v2x4y6z8b0d2f4h6j8l0n2p
-  expiration: 86400000
+  secret: 3f7d2a9b5e8c1d4f6h0j2k7m9n1p3q5r8t0v2x4y6z8b0d2f4h6j8l0n2p  # 至少 32 位
+  expiration: 86400000  # 过期时间（毫秒），24小时=86400000

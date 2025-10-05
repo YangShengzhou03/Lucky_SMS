@@ -8,6 +8,8 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -100,13 +102,13 @@ public class JwtUtil {
     public Integer getUidByRequest(HttpServletRequest request) {
         String authorization = request.getHeader("Authorization");
         if (authorization == null || !authorization.startsWith("Bearer ")) {
-            throw new RuntimeException("请携带有效的 Token（格式：Bearer <token>）");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "请携带有效的 Token（格式：Bearer <token>）");
         }
 
         String token = authorization.substring(7);
 
         if (!this.validateToken(token)) {
-            throw new RuntimeException("Token 无效或已过期");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token 无效或已过期");
         }
 
         return this.getUserIdFromToken(token);
