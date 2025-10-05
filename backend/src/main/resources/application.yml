@@ -7,20 +7,33 @@ logging:
   level:
     root: INFO  # 日志级别设成INFO，别搞成DEBUG，不然日志太多看着乱
 
-# # 数据库连接配置，填自己的数据库信息
+# 数据库连接配置 + Redis配置（都在 spring 下面，层级要对）
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/lucky_sms?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root  # 数据库用户名，默认是root
     password: 123456  # 数据库登录密码
     driver-class-name: com.mysql.cj.jdbc.Driver  # MySQL 8以上用这个驱动，老版本的话换成com.mysql.jdbc.Driver
+  # Redis配置：直接跟在 spring 下面，删掉多余的 data.redis 层级
+  redis:
+    host: localhost  # Redis 地址（本地就是localhost）
+    port: 6379       # Redis 默认端口（不用改，除非手动改了Redis配置）
+    password: ""     # Redis 密码（没设密码就填空字符串，设了就填实际密码）
+    database: 0      # Redis 数据库编号（默认0，不用改）
+    timeout: 3000    # 连接超时时间（3秒，单位毫秒）
+    lettuce:         # 连接池配置（Spring Boot 2.x 默认用 lettuce）
+      pool:
+        max-active: 8   # 连接池最大连接数
+        max-idle: 8     # 连接池最大空闲连接数
+        min-idle: 2     # 连接池最小空闲连接数
+        max-wait: -1    # 最大等待时间（-1表示无限等，直到拿到连接）
 
 # MyBatis的配置，xml文件和实体类的位置在这指定
 mybatis:
   mapper-locations: classpath:mapper/*.xml  # 写SQL的xml文件放src/main/resources/mapper文件夹里
   type-aliases-package: com.yangshengzhou.lucky_sms.entity  # 实体类放这个包下面
   configuration:
-    map-underscore-to-camel-case: true  # 数据库字段如果下划线的，自动转成实体类的驼峰命名，比如user_name转userName
+    map-underscore-to-camel-case: true  # 数据库字段下划线转实体类驼峰命名
 
 # JWT的基本配置
 jwt:

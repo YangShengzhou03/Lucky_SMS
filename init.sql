@@ -1004,7 +1004,7 @@ INSERT INTO book_categories (category_name, parent_id) VALUES
 
 -- 初始化学期表（只保留一个当前学期）
 INSERT INTO semesters (academic_year, semester_name, start_date, end_date, is_current) VALUES
-('2023-2024', '第二学期', '2024-02-26', '2024-07-15', 1);
+('2023-2024', '2023-2024-2', '2024-02-26', '2024-07-15', 1);
 
 -- 初始化用户表（管理员）
 INSERT INTO users (username, password_hash, email, phone, gender, status) VALUES
