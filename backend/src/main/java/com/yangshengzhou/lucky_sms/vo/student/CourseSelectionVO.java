@@ -21,6 +21,22 @@ public class CourseSelectionVO {
     public static class ScheduleVO {
         private Integer day;
         private Integer timeSlot;
+
+        public Integer getDay() {
+            return day;
+        }
+
+        public void setDay(Integer day) {
+            this.day = day;
+        }
+
+        public Integer getTimeSlot() {
+            return timeSlot;
+        }
+
+        public void setTimeSlot(Integer timeSlot) {
+            this.timeSlot = timeSlot;
+        }
     }
 
     public Integer getId() {

@@ -2,9 +2,25 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.yangshengzhou.lucky_sms.mapper.student.CourseMapper">
 
-    <select id="getAvailableCourses" resultType="com.yangshengzhou.lucky_sms.vo.student.CourseSelectionVO">
+    <resultMap id="CourseSelectionResultMap" type="com.yangshengzhou.lucky_sms.vo.student.CourseSelectionVO">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="code" column="code"/>
+        <result property="teacher" column="teacher"/>
+        <result property="time" column="time"/>
+        <result property="location" column="location"/>
+        <result property="credits" column="credits"/>
+        <result property="capacityUsed" column="capacityUsed"/>
+        <result property="category" column="category"/>
+        <result property="schedule" column="schedule" typeHandler="com.yangshengzhou.lucky_sms.handler.ScheduleTypeHandler"/>
+        <result property="maxStudents" column="maxStudents"/>
+        <result property="currentStudents" column="currentStudents"/>
+        <result property="semester" column="semester"/>
+    </resultMap>
+
+    <select id="getAvailableCourses" resultMap="CourseSelectionResultMap">
         SELECT
-            ta.assignment_id,
+            ta.assignment_id as id,
             c.course_name as name,
             c.course_code as code,
             u.username as teacher,
@@ -13,8 +29,7 @@
             c.credit as credits,
             ROUND((ta.current_students / ta.max_students) * 100) as capacityUsed,
             c.course_type as category,
-            ta.schedule as day,
-            ta.schedule as timeSlot,
+            ta.schedule,
             ta.max_students,
             ta.current_students,
             s.semester_name as semester
@@ -41,9 +56,9 @@
     </select>
 
     <!-- 根据课程ID获取课程信息 -->
-    <select id="getCourseById" resultType="com.yangshengzhou.lucky_sms.vo.student.CourseSelectionVO">
+    <select id="getCourseById" resultMap="CourseSelectionResultMap">
         SELECT
-            ta.assignment_id,
+            ta.assignment_id as id,
             c.course_name as name,
             c.course_code as code,
             u.username as teacher,
@@ -52,8 +67,7 @@
             c.credit as credits,
             ROUND((ta.current_students / ta.max_students) * 100) as capacityUsed,
             c.course_type as category,
-            ta.schedule as day,
-            ta.schedule as timeSlot,
+            ta.schedule,
             ta.max_students,
             ta.current_students,
             s.semester_name as semester

@@ -220,16 +220,18 @@ const loadAvailableCourses = async () => {
     if (response.code === 200) {
       // 转换后端数据为前端需要的格式
       allCourses.value = response.data.map(course => ({
-        id: course.courseId,
-        name: course.courseName,
-        code: course.courseCode,
-        teacher: course.teacherName,
-        time: course.schedule.map(s => `${getDayName(s.day)} ${getTimeSlotName(s.timeSlot)}`).join(', '),
+        id: course.id,
+        name: course.name,
+        code: course.code,
+        teacher: course.teacher,
+        time: course.schedule && course.schedule.length > 0 ? 
+          course.schedule.map(s => `${getDayName(s.day)} ${getTimeSlotName(s.timeSlot)}`).join(', ') : 
+          "待安排",
         location: course.location,
         credits: course.credits,
-        capacityUsed: Math.round((course.selectedCount / course.capacity) * 100),
-        category: course.courseType.toLowerCase(),
-        schedule: course.schedule
+        capacityUsed: course.capacityUsed || 0,
+        category: (course.category || '').toLowerCase(),
+        schedule: course.schedule || []
       }))
     }
   } catch (error) {
@@ -245,16 +247,18 @@ const loadSelectedCourses = async () => {
     if (response.code === 200) {
       // 转换后端数据为前端需要的格式
       selectedCourses.value = response.data.map(course => ({
-        id: course.courseId,
-        name: course.courseName,
-        code: course.courseCode,
-        teacher: course.teacherName,
-        time: course.schedule.map(s => `${getDayName(s.day)} ${getTimeSlotName(s.timeSlot)}`).join(', '),
+        id: course.id,
+        name: course.name,
+        code: course.code,
+        teacher: course.teacher,
+        time: course.schedule && course.schedule.length > 0 ? 
+          course.schedule.map(s => `${getDayName(s.day)} ${getTimeSlotName(s.timeSlot)}`).join(', ') : 
+          "待安排",
         location: course.location,
         credits: course.credits,
-        capacityUsed: Math.round((course.selectedCount / course.capacity) * 100),
-        category: course.courseType.toLowerCase(),
-        schedule: course.schedule
+        capacityUsed: course.capacityUsed || 0,
+        category: (course.category || '').toLowerCase(),
+        schedule: course.schedule || []
       }))
     }
   } catch (error) {
@@ -265,14 +269,16 @@ const loadSelectedCourses = async () => {
 
 // 将星期数字转换为名称
 const getDayName = (day) => {
+  if (!day) return '待安排'
   const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-  return days[day - 1] || ''
+  return days[day - 1] || '待安排'
 }
 
 // 将时间段转换为名称
 const getTimeSlotName = (timeSlot) => {
+  if (!timeSlot && timeSlot !== 0) return '待安排'
   const slots = ['1-2节', '3-4节', '5-6节', '7-8节', '9-10节']
-  return slots[timeSlot] || ''
+  return slots[timeSlot] || '待安排'
 }
 
 const stats = computed(() => [
@@ -360,8 +366,9 @@ const selectCourse = async (course) => {
   }
 
   const hasConflict = selectedCourses.value.some(selectedCourse => {
+    if (!selectedCourse.schedule || !course.schedule) return false
     return selectedCourse.schedule.some(s =>
-      course.schedule.some(cs => s.day === cs.day && s.timeSlot === cs.timeSlot)
+      course.schedule.some(cs => s && cs && s.day === cs.day && s.timeSlot === cs.timeSlot)
     )
   })
 
