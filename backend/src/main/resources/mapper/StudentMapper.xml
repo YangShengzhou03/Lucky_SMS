@@ -425,4 +425,11 @@
 
 <!--    </select>-->
 
+    <!-- 查询学生最大学分 -->
+    <select id="getMaxCredits" parameterType="Integer" resultType="Integer">
+        SELECT max_credits
+        FROM students
+        WHERE user_id = #{userId}
+    </select>
+
 </mapper>

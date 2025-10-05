@@ -1,0 +1,64 @@
+services:
+
+  # 1. MySQL 服务
+  mysql:
+    image: mysql:8.0  # 使用 MySQL 8.0 镜像
+    container_name: mysql  # 容器名称
+    restart: always  # 容器退出时自动重启
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456  # MySQL root 用户密码
+      MYSQL_DATABASE: Lucky_SMS     # 要创建的数据库名
+    ports:
+      - "3306:3306"  # 宿主机端口:容器端口
+    volumes:
+      - mysql-data:/var/lib/mysql  # 数据持久化
+      - ./mysql-init:/docker-entrypoint-initdb.d  # 挂载 SQL 目录到自动执行路径
+    networks:
+      - app-network
+
+  # 2. Redis 服务
+  redis:
+    image: redis:7-alpine  # 使用 Redis 7 镜像
+    container_name: redis  # 容器名称
+    restart: always  # 容器退出时自动重启
+    ports:
+      - "6379:6379"  # Redis 端口
+    volumes:
+      - redis-data:/data  # Redis 数据持久化
+    networks:
+      - app-network
+
+  # 3. 后端 SpringBoot 服务
+  backend:
+    build: ./backend  # 指定后端项目的 Dockerfile 所在目录
+    container_name: backend
+    restart: always
+    depends_on:
+      - mysql  # 后端依赖 MySQL
+      - redis  # 后端依赖 Redis
+    ports:
+      - "8081:8081"  # 后端服务端口
+    networks:
+      - app-network
+
+  # 4. 前端 Vue 服务
+  frontend:
+    build: ./frontend  # 指定前端项目的 Dockerfile 所在目录
+    container_name: frontend
+    restart: always
+    depends_on:
+      - backend  # 前端依赖后端
+    ports:
+      - "80:80"   # 前端 Nginx 端口
+    networks:
+      - app-network
+
+# 网络配置（让容器之间能互相访问）
+networks:
+  app-network:
+    driver: bridge
+
+# 数据卷配置（持久化数据）
+volumes:
+  mysql-data:
+  redis-data:

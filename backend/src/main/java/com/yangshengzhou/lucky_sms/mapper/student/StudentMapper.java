@@ -38,5 +38,8 @@ public interface StudentMapper {
     // 8. 查询指定学期的分页学生成绩数据
     GradesVO getGradesDataBySemesterWithPagination(Map<String, Object> params);
 
+    // 9. 查询学生最大学分
+    Integer getMaxCredits(Integer userId);
+
 //    List<AcademicHistory> selectAcademicHistoryList(Integer userId);
 }

@@ -99,6 +99,10 @@
                   size="small">
                   {{ isCourseSelected(course.id) ? '已选' : '选课' }}
                 </el-button>
+                <el-button v-if="isCourseSelected(course.id)" @click="dropSelectedCourse(course)" type="danger"
+                  size="small">
+                  退课
+                </el-button>
               </div>
             </el-card>
 
@@ -143,7 +147,7 @@
                 <div class="day-column" v-for="(day, dayIndex) in daysOfWeek" :key="dayIndex">
                   <!-- 这里是关键修改：只渲染属于当前天的课程 -->
                   <div class="course-block"
-                    v-for="course in selectedCourses.filter(c => c.schedule.some(s => s.day === dayIndex + 1 && s.timeSlot === timeIndex))"
+                    v-for="course in selectedCourses.filter(c => c.schedule && c.schedule.some(s => s.day === dayIndex + 1 && s.timeSlot === timeIndex))"
                     :key="course.id" :style="{
                       left: '0',
                       top: '0',
@@ -180,6 +184,7 @@ import {
   Search
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { getAvailableCourses, getSelectedCourses, selectCourse as apiSelectCourse, dropCourse } from '@/api/student'
 
 const currentSemester = ref('2023-2024-2')
 const semesters = ref([
@@ -189,7 +194,7 @@ const semesters = ref([
 
 const hoveredStat = ref(null)
 
-const maxCredits = 25
+const maxCredits = ref(25) // 初始值，将从后端获取
 
 const searchQuery = ref('')
 const filterCategory = ref('all')
@@ -203,6 +208,72 @@ const categories = ref([
 
 const currentPage = ref(1)
 const pageSize = ref(5)
+
+// 从后端获取的课程数据
+const allCourses = ref([])
+const selectedCourses = ref([])
+
+// 加载可选课程数据
+const loadAvailableCourses = async () => {
+  try {
+    const response = await getAvailableCourses()
+    if (response.code === 200) {
+      // 转换后端数据为前端需要的格式
+      allCourses.value = response.data.map(course => ({
+        id: course.courseId,
+        name: course.courseName,
+        code: course.courseCode,
+        teacher: course.teacherName,
+        time: course.schedule.map(s => `${getDayName(s.day)} ${getTimeSlotName(s.timeSlot)}`).join(', '),
+        location: course.location,
+        credits: course.credits,
+        capacityUsed: Math.round((course.selectedCount / course.capacity) * 100),
+        category: course.courseType.toLowerCase(),
+        schedule: course.schedule
+      }))
+    }
+  } catch (error) {
+    ElMessage.error('获取可选课程失败')
+    console.error('获取可选课程失败:', error)
+  }
+}
+
+// 加载已选课程数据
+const loadSelectedCourses = async () => {
+  try {
+    const response = await getSelectedCourses()
+    if (response.code === 200) {
+      // 转换后端数据为前端需要的格式
+      selectedCourses.value = response.data.map(course => ({
+        id: course.courseId,
+        name: course.courseName,
+        code: course.courseCode,
+        teacher: course.teacherName,
+        time: course.schedule.map(s => `${getDayName(s.day)} ${getTimeSlotName(s.timeSlot)}`).join(', '),
+        location: course.location,
+        credits: course.credits,
+        capacityUsed: Math.round((course.selectedCount / course.capacity) * 100),
+        category: course.courseType.toLowerCase(),
+        schedule: course.schedule
+      }))
+    }
+  } catch (error) {
+    ElMessage.error('获取已选课程失败')
+    console.error('获取已选课程失败:', error)
+  }
+}
+
+// 将星期数字转换为名称
+const getDayName = (day) => {
+  const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+  return days[day - 1] || ''
+}
+
+// 将时间段转换为名称
+const getTimeSlotName = (timeSlot) => {
+  const slots = ['1-2节', '3-4节', '5-6节', '7-8节', '9-10节']
+  return slots[timeSlot] || ''
+}
 
 const stats = computed(() => [
   {
@@ -218,7 +289,7 @@ const stats = computed(() => [
     color: '#10b981'
   },
   {
-    value: `${selectedCredits.value}/${maxCredits}`,
+    value: `${selectedCredits.value}/${maxCredits.value}`,
     label: '已选学分',
     icon: CreditCard,
     color: '#f59e0b'
@@ -230,123 +301,6 @@ const stats = computed(() => [
     color: '#ef4444'
   }
 ])
-
-const allCourses = ref([
-  {
-    id: 1,
-    name: '数据结构与算法',
-    code: 'CS101',
-    teacher: '李教授',
-    time: '周一 1-2节',
-    location: '科技楼A302',
-    credits: 4,
-    capacityUsed: 75,
-    category: 'compulsory',
-    schedule: [
-      { day: 1, timeSlot: 0 }
-    ]
-  },
-  {
-    id: 2,
-    name: '计算机网络',
-    code: 'CS102',
-    teacher: '王教授',
-    time: '周二 3-4节',
-    location: '科技楼B401',
-    credits: 3,
-    capacityUsed: 60,
-    category: 'compulsory',
-    schedule: [
-      { day: 2, timeSlot: 1 }
-    ]
-  },
-  {
-    id: 3,
-    name: '人工智能导论',
-    code: 'CS103',
-    teacher: '张教授',
-    time: '周三 5-6节',
-    location: '科技楼C503',
-    credits: 4,
-    capacityUsed: 85,
-    category: 'elective',
-    schedule: [
-      { day: 3, timeSlot: 2 }
-    ]
-  },
-  {
-    id: 4,
-    name: '操作系统',
-    code: 'CS104',
-    teacher: '刘教授',
-    time: '周四 1-2节',
-    location: '科技楼A301',
-    credits: 4,
-    capacityUsed: 90,
-    category: 'compulsory',
-    schedule: [
-      { day: 4, timeSlot: 0 }
-    ]
-  },
-  {
-    id: 5,
-    name: '数据库系统',
-    code: 'CS105',
-    teacher: '陈教授',
-    time: '周五 3-4节',
-    location: '科技楼B402',
-    credits: 3,
-    capacityUsed: 50,
-    category: 'compulsory',
-    schedule: [
-      { day: 5, timeSlot: 1 }
-    ]
-  },
-  {
-    id: 6,
-    name: '机器学习',
-    code: 'CS106',
-    teacher: '赵教授',
-    time: '周二 5-6节',
-    location: '科技楼C501',
-    credits: 4,
-    capacityUsed: 70,
-    category: 'elective',
-    schedule: [
-      { day: 2, timeSlot: 2 }
-    ]
-  },
-  {
-    id: 7,
-    name: '软件工程',
-    code: 'CS107',
-    teacher: '孙教授',
-    time: '周四 5-6节',
-    location: '科技楼C502',
-    credits: 3,
-    capacityUsed: 65,
-    category: 'compulsory',
-    schedule: [
-      { day: 4, timeSlot: 2 }
-    ]
-  },
-  {
-    id: 8,
-    name: '计算机组成原理',
-    code: 'CS108',
-    teacher: '周教授',
-    time: '周一 3-4节',
-    location: '科技楼B403',
-    credits: 4,
-    capacityUsed: 80,
-    category: 'compulsory',
-    schedule: [
-      { day: 1, timeSlot: 1 }
-    ]
-  }
-])
-
-const selectedCourses = ref([])
 
 const daysOfWeek = ref(['周一', '周二', '周三', '周四', '周五'])
 const timeSlots = ref(['08:00-09:40', '10:00-11:40', '14:00-15:40'])
@@ -399,9 +353,9 @@ const unhoverStat = (index) => {
   }
 }
 
-const selectCourse = (course) => {
-  if (selectedCredits.value + course.credits > maxCredits) {
-    ElMessage.warning(`已达到学分上限(${maxCredits}学分)，无法选择更多课程`)
+const selectCourse = async (course) => {
+  if (selectedCredits.value + course.credits > maxCredits.value) {
+    ElMessage.warning(`已达到学分上限(${maxCredits.value}学分)，无法选择更多课程`)
     return
   }
 
@@ -416,8 +370,38 @@ const selectCourse = (course) => {
     return
   }
 
-  selectedCourses.value.push(course)
-  ElMessage.success(`已成功选择课程：${course.name}`)
+  try {
+    const response = await apiSelectCourse(course.id)
+    if (response.code === 200) {
+      // 选课成功，重新加载课程数据
+      await loadAvailableCourses()
+      await loadSelectedCourses()
+      ElMessage.success(`已成功选择课程：${course.name}`)
+    } else {
+      ElMessage.error(response.message || '选课失败')
+    }
+  } catch (error) {
+    ElMessage.error('选课请求失败')
+    console.error('选课失败:', error)
+  }
+}
+
+// 添加退课功能
+const dropSelectedCourse = async (course) => {
+  try {
+    const response = await dropCourse(course.id)
+    if (response.code === 200) {
+      // 退课成功，重新加载课程数据
+      await loadAvailableCourses()
+      await loadSelectedCourses()
+      ElMessage.success(`已成功退选课程：${course.name}`)
+    } else {
+      ElMessage.error(response.message || '退课失败')
+    }
+  } catch (error) {
+    ElMessage.error('退课请求失败')
+    console.error('退课失败:', error)
+  }
 }
 
 const isCourseSelected = (courseId) => {
@@ -438,9 +422,10 @@ const handleCurrentChange = (newPage) => {
   currentPage.value = newPage
 }
 
-onMounted(() => {
-  setTimeout(() => {
-  }, 300)
+onMounted(async () => {
+  // 加载课程数据
+  await loadAvailableCourses()
+  await loadSelectedCourses()
 })
 </script>
 
