@@ -2,6 +2,11 @@ server:
   port: 8081  # 后端服务使用的端口，这里用8081（前端用了8080）
   servlet:
     context-path: /api  # 接口加个前缀，比如调接口得用http://localhost:8081/api/xxx，省得和前端路径混了
+  # 👇 添加以下配置：强制使用 UTF-8 编码
+  encoding:
+    charset: UTF-8
+    enabled: true
+    force: true  # 强制对请求和响应都使用 UTF-8
 
 logging:
   level:

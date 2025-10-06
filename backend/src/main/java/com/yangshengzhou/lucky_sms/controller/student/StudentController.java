@@ -1,9 +1,9 @@
 package com.yangshengzhou.lucky_sms.controller.student;
 
 import com.yangshengzhou.lucky_sms.service.student.CourseSelectionService;
-import com.yangshengzhou.lucky_sms.service.student.GradeService;
-import com.yangshengzhou.lucky_sms.service.student.HomeService;
-import com.yangshengzhou.lucky_sms.service.student.StatusService;
+import com.yangshengzhou.lucky_sms.service.student.impl.GradeServiceImpl;
+import com.yangshengzhou.lucky_sms.service.student.impl.HomeServiceImpl;
+import com.yangshengzhou.lucky_sms.service.student.impl.StatusServiceImpl;
 import com.yangshengzhou.lucky_sms.utils.JwtUtil;
 import com.yangshengzhou.lucky_sms.vo.student.CourseSelectionResultVO;
 import com.yangshengzhou.lucky_sms.vo.student.CourseSelectionVO;
@@ -26,11 +26,11 @@ public class StudentController {
     private JwtUtil jwtUtil;
 
     @Resource
-    private HomeService homeService;
+    private HomeServiceImpl homeServiceImpl;
     @Resource
-    private StatusService statusService;
+    private StatusServiceImpl statusServiceImpl;
     @Resource
-    private GradeService gradeService;
+    private GradeServiceImpl gradeServiceImpl;
     @Resource
     private CourseSelectionService courseSelectionService;
 
@@ -41,7 +41,7 @@ public class StudentController {
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
-            HomeVO homeVO = homeService.getHomeDate(userId);
+            HomeVO homeVO = homeServiceImpl.getHomeDate(userId);
 
             result.put("code", 200);
             result.put("message", "请求成功");
@@ -62,7 +62,7 @@ public class StudentController {
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
-            StatusVO statusDate = statusService.getStatusDate(userId);
+            StatusVO statusDate = statusServiceImpl.getStatusDate(userId);
 
             studentStatusResult.put("code", 200);
             studentStatusResult.put("message", "请求成功");
@@ -84,7 +84,7 @@ public class StudentController {
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
-            GradesVO gradesData = gradeService.getGradesData(userId);
+            GradesVO gradesData = gradeServiceImpl.getGradesData(userId);
 
             studentGradesResult.put("code", 200);
             studentGradesResult.put("message", "请求成功");
@@ -200,7 +200,7 @@ public class StudentController {
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
-            GradesVO gradesData = gradeService.getGradesDataBySemester(userId, semester);
+            GradesVO gradesData = gradeServiceImpl.getGradesDataBySemester(userId, semester);
 
             studentGradesResult.put("code", 200);
             studentGradesResult.put("message", "请求成功");
@@ -224,7 +224,7 @@ public class StudentController {
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
-            GradesVO gradesData = gradeService.getGradesDataWithPagination(userId, page, size);
+            GradesVO gradesData = gradeServiceImpl.getGradesDataWithPagination(userId, page, size);
 
             studentGradesResult.put("code", 200);
             studentGradesResult.put("message", "请求成功");
@@ -249,7 +249,7 @@ public class StudentController {
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
-            GradesVO gradesData = gradeService.getGradesDataBySemesterWithPagination(userId, semester, page, size);
+            GradesVO gradesData = gradeServiceImpl.getGradesDataBySemesterWithPagination(userId, semester, page, size);
 
             studentGradesResult.put("code", 200);
             studentGradesResult.put("message", "请求成功");
