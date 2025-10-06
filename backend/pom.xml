@@ -125,7 +125,7 @@
         </plugins>
     </build>
 
-    <!-- 配置Maven仓库 - 优先使用国内镜像加速依赖下载 -->
+    <!-- 配置Maven仓库 - 使用国内镜像加速依赖下载 -->
     <repositories>
         <repository>
             <id>aliyunmaven</id>

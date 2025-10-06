@@ -30,7 +30,6 @@ public class LoginRegisterController {
             if (captcha==null || !captcha.equals("123456")) {
                 throw new RuntimeException("无效验证码");
             }
-            // TODO 用户存在则登录，不存在则注册
             loginVO = userService.loginByPhone(phone);
             loginResult.put("code", 200);
             loginResult.put("message", "登录成功");

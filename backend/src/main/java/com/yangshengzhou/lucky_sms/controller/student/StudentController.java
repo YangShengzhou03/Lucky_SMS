@@ -35,6 +35,10 @@ public class StudentController {
     @Resource
     private CourseSelectionService courseSelectionService;
 
+    /**
+     * 用来拿到学生端首页数据
+     * @return request响应
+     */
     @GetMapping("/home")
     public HashMap<String, Object> studentHomeResult(
             HttpServletRequest request) {
@@ -48,11 +52,10 @@ public class StudentController {
             result.put("message", "请求成功");
             result.put("data", homeVO);
         } catch (ResponseStatusException e) {
-            // 获取状态码（如 401）
             result.put("code", e.getStatusCode().value());
             result.put("message", e.getReason());  // 使用 getReason() 获取自定义消息
             result.put("data", null);
-        } catch (Exception e) {  // 捕获其他所有异常（兜底）
+        } catch (Exception e) {  // 捕获其他所有异常
             result.put("code", 500);  // 通用错误码
             result.put("message", e.getMessage());  // 其他异常的消息
             result.put("data", null);
@@ -60,6 +63,10 @@ public class StudentController {
         return result;
     }
 
+    /**
+     * 用来拿到学生端学籍数据
+     * @return request响应
+     */
     @GetMapping("/status")
     public HashMap<String, Object> studentStatusResult(
             HttpServletRequest request
@@ -86,6 +93,10 @@ public class StudentController {
         return result;
     }
 
+    /**
+     * 用来拿到学生端成绩数据
+     * @return request响应
+     */
     @GetMapping("/grades")
     public HashMap<String, Object> studentGradesResult(
             HttpServletRequest request
@@ -112,12 +123,16 @@ public class StudentController {
         return result;
     }
 
+    /**
+     * 用来拿到选课功能的可选课程数据
+     * @return request响应
+     */
     @GetMapping("/courses/available")
     public HashMap<String, Object> getAvailableCourses(
             @RequestParam(defaultValue = "2023-2024-2") String semester,
             HttpServletRequest request
     ) {
-        // 响应可用课程
+        // 返回所有可选的课程
         HashMap<String, Object> result = new HashMap<>();
 
         try {
@@ -167,6 +182,11 @@ public class StudentController {
         return result;
     }
 
+    /**
+     * 用户点击了选课按钮
+     * @param courseId 传入被选择课程的id
+     * @return request响应
+     */
     @PostMapping("/courses/select")
     public HashMap<String, Object> selectCourse(
             @RequestParam Integer courseId,
@@ -175,6 +195,7 @@ public class StudentController {
         HashMap<String, Object> result = new HashMap<>();
 
         try {
+            System.out.println(courseId);
             Integer userId = jwtUtil.getUidByRequest(request);
             CourseSelectionResultVO selectionResult = courseSelectionService.selectCourse(userId, courseId);
 
@@ -194,6 +215,10 @@ public class StudentController {
         return result;
     }
 
+    /**
+     * 用来退课
+     * @return request响应
+     */
     @PostMapping("/courses/drop")
     public HashMap<String, Object> dropCourse(
             @RequestParam Integer courseId,

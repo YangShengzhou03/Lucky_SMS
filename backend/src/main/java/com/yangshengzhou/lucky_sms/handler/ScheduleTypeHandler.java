@@ -17,7 +17,7 @@ public class ScheduleTypeHandler extends BaseTypeHandler<List<CourseSelectionVO.
 
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, List<CourseSelectionVO.ScheduleVO> parameter, JdbcType jdbcType) throws SQLException {
-        // 这里不需要实现，因为我们只需要从数据库读取数据
+        // 这里不需要实现，因为只需要从数据库读取数据
     }
 
     @Override
