@@ -2,7 +2,7 @@
   <div class="student-home" @mousemove="handleMouseMove">
     <div>
       <div class="welcome-section modern-card">
-        <h2>欢迎回来，<span class="username">{{ student?.username || '--' }}</span> 👋</h2>
+        <h2>欢迎回来，<span class="username">{{ student?.username || '--' }}</span> </h2>
         <p class="subtitle">学号：{{ student?.student_no || '--' }} | 班级：{{ student?.class_name || '--' }}</p>
       </div>
       <div class="info-cards">
@@ -754,7 +754,7 @@ onUnmounted(() => {
     transition: all 0.2s ease;
 
     &:hover {
-      transform: translateX(8px);
+      transform: translateX(4px);
       background: rgba(245, 247, 250, 0.4);
       border-radius: 8px;
       padding: 16px;
