@@ -113,7 +113,7 @@
             </div>
 
             <div v-if="!filteredCourses.length && searchQuery" class="no-courses">
-              <el-empty image="search" description="没有找到匹配的课程" />
+              <el-empty description="没有找到匹配的课程" />
             </div>
           </div>
 
