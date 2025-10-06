@@ -12,6 +12,7 @@ import com.yangshengzhou.lucky_sms.vo.student.HomeVO;
 import com.yangshengzhou.lucky_sms.vo.student.StatusVO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -46,9 +47,14 @@ public class StudentController {
             result.put("code", 200);
             result.put("message", "请求成功");
             result.put("data", homeVO);
-        } catch (Exception e) {
-            result.put("code", 500);
-            result.put("message", e.getMessage());
+        } catch (ResponseStatusException e) {
+            // 获取状态码（如 401）
+            result.put("code", e.getStatusCode().value());
+            result.put("message", e.getReason());  // 使用 getReason() 获取自定义消息
+            result.put("data", null);
+        } catch (Exception e) {  // 捕获其他所有异常（兜底）
+            result.put("code", 500);  // 通用错误码
+            result.put("message", e.getMessage());  // 其他异常的消息
             result.put("data", null);
         }
         return result;
@@ -58,44 +64,52 @@ public class StudentController {
     public HashMap<String, Object> studentStatusResult(
             HttpServletRequest request
     ) {
-        HashMap<String, Object> studentStatusResult = new HashMap<>();
+        HashMap<String, Object> result = new HashMap<>();
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
             StatusVO statusDate = statusServiceImpl.getStatusDate(userId);
 
-            studentStatusResult.put("code", 200);
-            studentStatusResult.put("message", "请求成功");
-            studentStatusResult.put("data", statusDate);
+            result.put("code", 200);
+            result.put("message", "请求成功");
+            result.put("data", statusDate);
+        } catch (ResponseStatusException e) {
+            result.put("code", e.getStatusCode().value());
+            result.put("message", e.getReason());
+            result.put("data", null);
         } catch (Exception e) {
-            studentStatusResult.put("code", 500);
-            studentStatusResult.put("message", e.getMessage());
-            studentStatusResult.put("data", null);
+            result.put("code", 500);
+            result.put("message", e.getMessage());
+            result.put("data", null);
         }
 
-        return studentStatusResult;
+        return result;
     }
 
     @GetMapping("/grades")
     public HashMap<String, Object> studentGradesResult(
             HttpServletRequest request
     ) {
-        HashMap<String, Object> studentGradesResult = new HashMap<>();
+        HashMap<String, Object> result = new HashMap<>();
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
             GradesVO gradesData = gradeServiceImpl.getGradesData(userId);
 
-            studentGradesResult.put("code", 200);
-            studentGradesResult.put("message", "请求成功");
-            studentGradesResult.put("data", gradesData);
+            result.put("code", 200);
+            result.put("message", "请求成功");
+            result.put("data", gradesData);
+        } catch (ResponseStatusException e) {
+            result.put("code", e.getStatusCode().value());
+            result.put("message", e.getReason());
+            result.put("data", null);
         } catch (Exception e) {
-            studentGradesResult.put("code", 500);
-            studentGradesResult.put("message", e.getMessage());
-            studentGradesResult.put("data", null);
+            result.put("code", 500);
+            result.put("message", e.getMessage());
+            result.put("data", null);
         }
 
-        return studentGradesResult;
+        return result;
     }
 
     @GetMapping("/courses/available")
@@ -113,6 +127,10 @@ public class StudentController {
             result.put("code", 200);
             result.put("message", "请求成功");
             result.put("data", courses);
+        } catch (ResponseStatusException e) {
+            result.put("code", e.getStatusCode().value());
+            result.put("message", e.getReason());
+            result.put("data", null);
         } catch (Exception e) {
             result.put("code", 500);
             result.put("message", e.getMessage());
@@ -136,6 +154,10 @@ public class StudentController {
             result.put("code", 200);
             result.put("message", "请求成功");
             result.put("data", courses);
+        } catch (ResponseStatusException e) {
+            result.put("code", e.getStatusCode().value());
+            result.put("message", e.getReason());
+            result.put("data", null);
         } catch (Exception e) {
             result.put("code", 500);
             result.put("message", e.getMessage());
@@ -159,6 +181,10 @@ public class StudentController {
             result.put("code", selectionResult.getSuccess() ? 200 : 400);
             result.put("message", selectionResult.getMessage());
             result.put("data", selectionResult.getCourse());
+        } catch (ResponseStatusException e) {
+            result.put("code", e.getStatusCode().value());
+            result.put("message", e.getReason());
+            result.put("data", null);
         } catch (Exception e) {
             result.put("code", 500);
             result.put("message", e.getMessage());
@@ -182,6 +208,10 @@ public class StudentController {
             result.put("code", dropResult.getSuccess() ? 200 : 400);
             result.put("message", dropResult.getMessage());
             result.put("data", dropResult.getCourse());
+        } catch (ResponseStatusException e) {
+            result.put("code", e.getStatusCode().value());
+            result.put("message", e.getReason());
+            result.put("data", null);
         } catch (Exception e) {
             result.put("code", 500);
             result.put("message", e.getMessage());
@@ -196,22 +226,26 @@ public class StudentController {
             @PathVariable String semester,
             HttpServletRequest request
     ) {
-        HashMap<String, Object> studentGradesResult = new HashMap<>();
+        HashMap<String, Object> result = new HashMap<>();
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
             GradesVO gradesData = gradeServiceImpl.getGradesDataBySemester(userId, semester);
 
-            studentGradesResult.put("code", 200);
-            studentGradesResult.put("message", "请求成功");
-            studentGradesResult.put("data", gradesData);
+            result.put("code", 200);
+            result.put("message", "请求成功");
+            result.put("data", gradesData);
+        } catch (ResponseStatusException e) {
+            result.put("code", e.getStatusCode().value());
+            result.put("message", e.getReason());
+            result.put("data", null);
         } catch (Exception e) {
-            studentGradesResult.put("code", 500);
-            studentGradesResult.put("message", e.getMessage());
-            studentGradesResult.put("data", null);
+            result.put("code", 500);
+            result.put("message", e.getMessage());
+            result.put("data", null);
         }
 
-        return studentGradesResult;
+        return result;
     }
 
     @GetMapping("/grades/pagination")
@@ -220,22 +254,26 @@ public class StudentController {
             @RequestParam(defaultValue = "10") Integer size,
             HttpServletRequest request
     ) {
-        HashMap<String, Object> studentGradesResult = new HashMap<>();
+        HashMap<String, Object> result = new HashMap<>();
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
             GradesVO gradesData = gradeServiceImpl.getGradesDataWithPagination(userId, page, size);
 
-            studentGradesResult.put("code", 200);
-            studentGradesResult.put("message", "请求成功");
-            studentGradesResult.put("data", gradesData);
+            result.put("code", 200);
+            result.put("message", "请求成功");
+            result.put("data", gradesData);
+        } catch (ResponseStatusException e) {
+            result.put("code", e.getStatusCode().value());
+            result.put("message", e.getReason());
+            result.put("data", null);
         } catch (Exception e) {
-            studentGradesResult.put("code", 500);
-            studentGradesResult.put("message", e.getMessage());
-            studentGradesResult.put("data", null);
+            result.put("code", 500);
+            result.put("message", e.getMessage());
+            result.put("data", null);
         }
 
-        return studentGradesResult;
+        return result;
     }
 
     @GetMapping("/grades/{semester}/pagination")
@@ -245,21 +283,25 @@ public class StudentController {
             @RequestParam(defaultValue = "10") Integer size,
             HttpServletRequest request
     ) {
-        HashMap<String, Object> studentGradesResult = new HashMap<>();
+        HashMap<String, Object> result = new HashMap<>();
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
             GradesVO gradesData = gradeServiceImpl.getGradesDataBySemesterWithPagination(userId, semester, page, size);
 
-            studentGradesResult.put("code", 200);
-            studentGradesResult.put("message", "请求成功");
-            studentGradesResult.put("data", gradesData);
+            result.put("code", 200);
+            result.put("message", "请求成功");
+            result.put("data", gradesData);
+        } catch (ResponseStatusException e) {
+            result.put("code", e.getStatusCode().value());
+            result.put("message", e.getReason());
+            result.put("data", null);
         } catch (Exception e) {
-            studentGradesResult.put("code", 500);
-            studentGradesResult.put("message", e.getMessage());
-            studentGradesResult.put("data", null);
+            result.put("code", 500);
+            result.put("message", e.getMessage());
+            result.put("data", null);
         }
 
-        return studentGradesResult;
+        return result;
     }
 }
