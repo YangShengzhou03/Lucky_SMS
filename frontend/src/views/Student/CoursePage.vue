@@ -106,6 +106,8 @@
               </div>
             </el-card>
 
+            <div class="empty-course-card"></div>
+            
             <div v-if="!filteredCourses.length && !searchQuery" class="no-courses">
               <el-empty description="暂无可选课程" />
             </div>
@@ -779,6 +781,18 @@ onMounted(async () => {
   margin-bottom: 24px;
 }
 
+.empty-course-card {
+  visibility: hidden;
+}
+
+.no-courses {
+  grid-column: 2;
+  padding: 40px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .course-card {
   display: flex;
   flex-direction: column;
@@ -883,13 +897,6 @@ onMounted(async () => {
     display: flex;
     justify-content: flex-end;
   }
-}
-
-.no-courses {
-  padding: 40px 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .pagination {
