@@ -195,7 +195,6 @@ public class StudentController {
         HashMap<String, Object> result = new HashMap<>();
 
         try {
-            System.out.println(courseId);
             Integer userId = jwtUtil.getUidByRequest(request);
             CourseSelectionResultVO selectionResult = courseSelectionService.selectCourse(userId, courseId);
 

@@ -103,7 +103,7 @@
     <!-- 添加选课记录 -->
     <insert id="addCourseSelection">
         INSERT INTO course_selections (student_id, assignment_id, status, selection_time)
-        VALUES (#{userId}, #{courseId}, 'selected', NOW())
+        VALUES ((SELECT student_id FROM students WHERE user_id = #{userId}), #{courseId}, 'selected', NOW())
     </insert>
 
     <!-- 删除选课记录 -->

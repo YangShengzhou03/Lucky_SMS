@@ -49,7 +49,7 @@ public class CourseSelectionServiceImpl implements CourseSelectionService {
     public CourseSelectionResultVO selectCourse(Integer userId, Integer courseId) {
         CourseSelectionResultVO result = new CourseSelectionResultVO();
         
-        // 获取Redis锁，防止并发问题
+        // 定义Redis锁
         String lockKey = COURSE_SELECTION_LOCK_PREFIX + courseId;
         boolean locked = false;
         
@@ -85,24 +85,24 @@ public class CourseSelectionServiceImpl implements CourseSelectionService {
                 return result;
             }
             
-            // 检查时间冲突
-            boolean hasTimeConflict = courseSelectionMapper.checkTimeConflict(userId, courseId);
-            if (hasTimeConflict) {
-                result.setSuccess(false);
-                result.setMessage("所选课程与已选课程时间冲突");
-                return result;
-            }
+            // TODO 检查时间冲突
+//            boolean hasTimeConflict = courseSelectionMapper.checkTimeConflict(userId, courseId);
+//            if (hasTimeConflict) {
+//                result.setSuccess(false);
+//                result.setMessage("所选课程与已选课程时间冲突");
+//                return result;
+//            }
             
-            // 检查学分上限
-            Integer totalCredits = courseSelectionMapper.getTotalCredits(userId);
-            Integer courseCredits = courseMapper.getCourseCredits(courseId);
-            Integer maxCredits = studentMapper.getMaxCredits(userId);
-            
-            if (totalCredits + courseCredits > maxCredits) {
-                result.setSuccess(false);
-                result.setMessage("已达到学分上限，无法选择更多课程");
-                return result;
-            }
+            // TODO 检查学分上限
+//            Integer totalCredits = courseSelectionMapper.getTotalCredits(userId);
+//            Integer courseCredits = courseMapper.getCourseCredits(courseId);
+//            Integer maxCredits = studentMapper.getMaxCredits(userId);
+//
+//            if (totalCredits + courseCredits > maxCredits) {
+//                result.setSuccess(false);
+//                result.setMessage("已达到学分上限，无法选择更多课程");
+//                return result;
+//            }
             
             // 执行选课
             boolean selectionSuccess = courseSelectionMapper.addCourseSelection(userId, courseId);

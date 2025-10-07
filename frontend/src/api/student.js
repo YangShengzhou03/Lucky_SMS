@@ -18,10 +18,11 @@ export function getSelectedCourses() {
 
 // 选课
 export function selectCourse(courseId) {
+  console.log(courseId)
   return request({
     url: '/student/courses/select',
     method: 'post',
-    data: {
+    params: {
       courseId: courseId
     }
   })
