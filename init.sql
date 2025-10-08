@@ -1,6 +1,6 @@
--- 1. 强制 SQL 执行错误时中断，暴露建库问题
+-- 1. 强制 SQL 执行错误时中断，暴露问题
 SET SQL_MODE = 'STRICT_ALL_TABLES';
--- 2. 关闭外键检查，避免建表顺序导致的外键失败
+-- 2. 关闭外键检查，避免建表顺序导致的外键失败（执行完后再开启）
 SET FOREIGN_KEY_CHECKS = 0;
 
 CREATE DATABASE IF NOT EXISTS Lucky_SMS;
@@ -1192,17 +1192,17 @@ INSERT INTO announcements (title, content, date, department, type, priority, cre
 ('校园招聘信息', '多家知名企业将于下周来校招聘，欢迎大四同学参加。请准备好个人简历和相关材料。', '2025-06-12', '就业指导中心', 'info', 'low', 1);
 
 /*
-  Lucky_SMS 学生管理系统数据库：
+  Lucky_SMS 学生管理系统数据库功能特点：
   
-  1. 用户权限管理
+  1. 完整的用户权限管理
      - 三种角色：管理员、教师、学生
      - 自动角色关联和记录创建
   
-  2. 学院-专业-班级三级结构
+  2. 规范的学院-专业-班级三级结构
      - 清晰的层级关系和外键约束
      - 支持班级排名和学年升级
   
-  3. 课程管理
+  3. 完善的课程管理
      - 课程信息、授课安排、选课管理
      - 成绩录入、审核和绩点计算
      - 支持课程先修关系
@@ -1223,7 +1223,7 @@ INSERT INTO announcements (title, content, date, department, type, priority, cre
      - 班级排名自动计算
      - 学年自动升级
   
-  7. 系统配置
+  7. 灵活的系统配置
      - 可配置的系统参数
      - 支持业务规则调整
   
