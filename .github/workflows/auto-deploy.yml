@@ -1,7 +1,7 @@
 name: 自动部署服务到k8s
 on:
   push:
-    branches: [ master ]  # 注意：你的触发分支是master，保持与本地推送分支一致
+    branches: [ master ]  # 触发分支为master
 
 jobs:
   build-and-deploy:
@@ -17,19 +17,19 @@ jobs:
           username: ${{ secrets.DOCKER_REGISTRY_USER }}
           password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
 
-      # 新增：后端编译打包（在构建镜像前执行，生成JAR包）
+      # 后端编译打包（生成JAR包）
       - name: 配置Java环境（用于Maven编译）
         uses: actions/setup-java@v4
         with:
-          java-version: '17'  # 必须与你的Spring Boot项目使用的Java版本一致（如11、17）
-          distribution: 'temurin'  # 推荐的Java发行版，兼容Maven
-          cache: maven  # 缓存Maven依赖，加速后续构建
+          java-version: '17'  # 与Spring Boot项目Java版本一致
+          distribution: 'temurin'
+          cache: maven
 
       - name: 用Maven编译后端代码生成JAR包
-        run: mvn clean package -DskipTests  # 执行打包命令（跳过测试节省时间）
-        working-directory: ./backend  # 指定后端代码目录（含pom.xml的位置）
+        run: mvn clean package -DskipTests
+        working-directory: ./backend  # 后端代码目录
 
-      # 步骤2：构建并推送后端镜像（此时target目录已生成JAR包）
+      # 步骤2：构建并推送后端镜像
       - name: 构建后端镜像
         uses: docker/build-push-action@v5
         with:
@@ -39,7 +39,21 @@ jobs:
             ${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-backend:${{ github.sha }}
             ${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-backend:latest
 
-      # 步骤3：构建并推送前端镜像（若前端需要编译，也可类似添加npm步骤，这里假设Dockerfile已处理）
+      # 前端编译打包（生成dist目录）
+      - name: 配置Node环境（用于前端编译）
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'  # 改为与本地一致的v22
+          cache: 'npm'
+          cache-dependency-path: ./frontend/package-lock.json
+
+      - name: 安装前端依赖并构建生成dist目录
+        run: |
+          npm install  # 安装依赖
+          npm run build  # 执行打包命令（生成dist目录）
+        working-directory: ./frontend  # 前端代码目录（含package.json）
+
+      # 步骤3：构建并推送前端镜像（此时dist目录已生成）
       - name: 构建前端镜像
         uses: docker/build-push-action@v5
         with:
