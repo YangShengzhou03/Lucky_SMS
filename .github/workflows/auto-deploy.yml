@@ -1,7 +1,7 @@
 name: 自动部署服务到k8s
 on:
   push:
-    branches: [ master ]
+    branches: [ master ]  # 注意：你的触发分支是master，保持与本地推送分支一致
 
 jobs:
   build-and-deploy:
@@ -17,7 +17,19 @@ jobs:
           username: ${{ secrets.DOCKER_REGISTRY_USER }}
           password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
 
-      # 步骤2：构建并推送后端镜像
+      # 新增：后端编译打包（在构建镜像前执行，生成JAR包）
+      - name: 配置Java环境（用于Maven编译）
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'  # 必须与你的Spring Boot项目使用的Java版本一致（如11、17）
+          distribution: 'temurin'  # 推荐的Java发行版，兼容Maven
+          cache: maven  # 缓存Maven依赖，加速后续构建
+
+      - name: 用Maven编译后端代码生成JAR包
+        run: mvn clean package -DskipTests  # 执行打包命令（跳过测试节省时间）
+        working-directory: ./backend  # 指定后端代码目录（含pom.xml的位置）
+
+      # 步骤2：构建并推送后端镜像（此时target目录已生成JAR包）
       - name: 构建后端镜像
         uses: docker/build-push-action@v5
         with:
@@ -27,7 +39,7 @@ jobs:
             ${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-backend:${{ github.sha }}
             ${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-backend:latest
 
-      # 步骤3：构建并推送前端镜像
+      # 步骤3：构建并推送前端镜像（若前端需要编译，也可类似添加npm步骤，这里假设Dockerfile已处理）
       - name: 构建前端镜像
         uses: docker/build-push-action@v5
         with:
@@ -49,13 +61,13 @@ jobs:
           kubectl apply -f k8s/mysql-init-configmap.yaml
           kubectl apply -f k8s/mysql.yaml
 
-      # 步骤6：更新后端部署（修改镜像名称，与步骤2一致）
+      # 步骤6：更新后端部署
       - name: 部署后端
         run: |
           kubectl set image deployment/backend backend=${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-backend:${{ github.sha }}
           kubectl rollout status deployment/backend
 
-      # 步骤7：更新前端部署（修改镜像名称，与步骤3一致）
+      # 步骤7：更新前端部署
       - name: 部署前端
         run: |
           kubectl set image deployment/frontend frontend=${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-frontend:${{ github.sha }}
