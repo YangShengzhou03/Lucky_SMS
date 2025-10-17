@@ -1,0 +1,41 @@
+# 前端 Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: <你的镜像仓库>/frontend:latest  # 后续由CI/CD动态替换
+          ports:
+            - containerPort: 80
+          # 健康检查（确保前端就绪）
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+---
+# 前端 Service（暴露给外部访问）
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80
+  type: NodePort  # 测试用（生产建议用Ingress）

@@ -1,0 +1,71 @@
+# MySQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  replicas: 1  # MySQL单实例（生产可考虑主从）
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0  # 直接使用官方镜像，无需构建
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "123456"  # 和原配置一致（生产建议用Secret存储）
+            - name: MYSQL_DATABASE
+              value: "Lucky_SMS"
+          volumeMounts:
+            - name: mysql-data  # 持久化数据
+              mountPath: /var/lib/mysql
+            - name: mysql-init  # 挂载初始化SQL脚本
+              mountPath: /docker-entrypoint-initdb.d
+          # 健康检查（确保MySQL就绪）
+          readinessProbe:
+            exec:
+              command: ["mysqladmin", "ping", "-h", "localhost"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-pvc  # 关联PVC
+        - name: mysql-init
+          configMap:  # 用ConfigMap挂载初始化脚本（需提前创建）
+            name: mysql-init-scripts
+
+---
+# MySQL Service（内部访问）
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
+  clusterIP: None  # 无头服务（固定名称访问，适合数据库）
+
+---
+# MySQL 持久化存储（PVC）
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce  # 单节点读写（多节点需用ReadWriteMany）
+  resources:
+    requests:
+      storage: 10Gi  # 申请10GB存储（根据需求调整）
+  # 若集群有StorageClass，可添加：storageClassName: "你的存储类"

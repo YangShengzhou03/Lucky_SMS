@@ -1,0 +1,62 @@
+name: 自动部署多服务到k8s
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      # 步骤1：登录镜像仓库
+      - name: 登录镜像仓库
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_REGISTRY_USER }}
+          password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
+
+      # 步骤2：构建并推送后端镜像
+      - name: 构建后端镜像
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend  # 后端代码目录（含Dockerfile）
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_REGISTRY_USER }}/backend:${{ github.sha }}
+            ${{ secrets.DOCKER_REGISTRY_USER }}/backend:latest
+
+      # 步骤3：构建并推送前端镜像
+      - name: 构建前端镜像
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend  # 前端代码目录（含Dockerfile）
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_REGISTRY_USER }}/frontend:${{ github.sha }}
+            ${{ secrets.DOCKER_REGISTRY_USER }}/frontend:latest
+
+      # 步骤4：配置kubectl
+      - name: 配置kubectl
+        run: |
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+          kubectl get nodes
+
+      # 步骤5：部署MySQL相关资源（初始化脚本和PVC）
+      - name: 部署MySQL依赖
+        run: |
+          kubectl apply -f k8s/mysql-init-configmap.yaml
+          kubectl apply -f k8s/mysql.yaml
+
+      # 步骤6：更新后端部署（使用新镜像）
+      - name: 部署后端
+        run: |
+          kubectl set image deployment/backend backend=${{ secrets.DOCKER_REGISTRY_USER }}/backend:${{ github.sha }}
+          kubectl rollout status deployment/backend
+
+      # 步骤7：更新前端部署（使用新镜像）
+      - name: 部署前端
+        run: |
+          kubectl set image deployment/frontend frontend=${{ secrets.DOCKER_REGISTRY_USER }}/frontend:${{ github.sha }}
+          kubectl rollout status deployment/frontend

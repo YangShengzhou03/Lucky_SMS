@@ -1,0 +1,11 @@
+# 存储MySQL初始化脚本
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-scripts
+data:
+  # 文件名: 脚本内容（若有多个脚本，按此格式添加）
+  init.sql: |
+    -- 示例：创建表或插入初始数据
+    CREATE TABLE IF NOT EXISTS test (id INT PRIMARY KEY);
+    INSERT INTO test VALUES (1);
