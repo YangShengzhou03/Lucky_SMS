@@ -21,7 +21,7 @@ jobs:
       - name: 构建后端镜像
         uses: docker/build-push-action@v5
         with:
-          context: ./backend  # 后端代码目录（含Dockerfile）
+          context: ./backend
           push: true
           tags: |
             ${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-backend:${{ github.sha }}
@@ -31,7 +31,7 @@ jobs:
       - name: 构建前端镜像
         uses: docker/build-push-action@v5
         with:
-          context: ./frontend  # 前端代码目录（含Dockerfile）
+          context: ./frontend
           push: true
           tags: |
             ${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-frontend:${{ github.sha }}
@@ -43,20 +43,20 @@ jobs:
           echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
           kubectl get nodes
 
-      # 步骤5：部署MySQL相关资源（初始化脚本和PVC）
+      # 步骤5：部署MySQL相关资源
       - name: 部署MySQL依赖
         run: |
           kubectl apply -f k8s/mysql-init-configmap.yaml
           kubectl apply -f k8s/mysql.yaml
 
-      # 步骤6：更新后端部署（使用新镜像）
+      # 步骤6：更新后端部署（修改镜像名称，与步骤2一致）
       - name: 部署后端
         run: |
-          kubectl set image deployment/backend backend=${{ secrets.DOCKER_REGISTRY_USER }}/backend:${{ github.sha }}
+          kubectl set image deployment/backend backend=${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-backend:${{ github.sha }}
           kubectl rollout status deployment/backend
 
-      # 步骤7：更新前端部署（使用新镜像）
+      # 步骤7：更新前端部署（修改镜像名称，与步骤3一致）
       - name: 部署前端
         run: |
-          kubectl set image deployment/frontend frontend=${{ secrets.DOCKER_REGISTRY_USER }}/frontend:${{ github.sha }}
+          kubectl set image deployment/frontend frontend=${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-frontend:${{ github.sha }}
           kubectl rollout status deployment/frontend

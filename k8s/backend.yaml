@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: backend
 spec:
-  replicas: 2  # 2个副本提高可用性
+  replicas: 2
   selector:
     matchLabels:
       app: backend
@@ -15,20 +15,20 @@ spec:
     spec:
       containers:
         - name: backend
-          image: <你的镜像仓库>/backend:latest  # 后续由CI/CD动态替换
+          # 关键修改：镜像地址替换为实际Docker Hub地址
+          image: yangshengzhou/lucky-sms-backend:latest  # 用户名/仓库名:标签（和Docker Hub一致）
           ports:
             - containerPort: 8081
-          # 环境变量（若后端配置中数据库地址为mysql:3306，无需修改）
-          # 健康检查（确保后端连接MySQL后就绪）
           readinessProbe:
             httpGet:
-              path: /actuator/health  # 若SpringBoot有健康检查端点
+              # 注意：如果你的SpringBoot应用没有actuator健康检查，需要删除这部分或改为实际端点
+              path: /actuator/health
               port: 8081
-            initialDelaySeconds: 60  # 给MySQL启动时间
+            initialDelaySeconds: 60
             periodSeconds: 10
 
 ---
-# 后端 Service（内部访问，供前端调用）
+# 后端 Service（无需修改，保持原样）
 apiVersion: v1
 kind: Service
 metadata:
