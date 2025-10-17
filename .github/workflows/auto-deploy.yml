@@ -63,11 +63,12 @@ jobs:
             ${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-frontend:${{ github.sha }}
             ${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-frontend:latest
 
-      # 步骤4：配置kubectl
+      # 步骤4：配置kubectl（新增创建目录的命令）
       - name: 配置kubectl
         run: |
-          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
-          kubectl get nodes
+          mkdir -p ~/.kube  # 先创建.kube目录，避免文件写入失败
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config  # 再写入配置文件
+          kubectl get nodes  # 验证配置是否生效
 
       # 步骤5：部署MySQL相关资源
       - name: 部署MySQL依赖
