@@ -1,4 +1,4 @@
-name: 自动部署多服务到k8s
+name: 自动部署服务到k8s
 on:
   push:
     branches: [ main ]
@@ -24,8 +24,8 @@ jobs:
           context: ./backend  # 后端代码目录（含Dockerfile）
           push: true
           tags: |
-            ${{ secrets.DOCKER_REGISTRY_USER }}/backend:${{ github.sha }}
-            ${{ secrets.DOCKER_REGISTRY_USER }}/backend:latest
+            ${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-backend:${{ github.sha }}
+            ${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-backend:latest
 
       # 步骤3：构建并推送前端镜像
       - name: 构建前端镜像
@@ -34,8 +34,8 @@ jobs:
           context: ./frontend  # 前端代码目录（含Dockerfile）
           push: true
           tags: |
-            ${{ secrets.DOCKER_REGISTRY_USER }}/frontend:${{ github.sha }}
-            ${{ secrets.DOCKER_REGISTRY_USER }}/frontend:latest
+            ${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-frontend:${{ github.sha }}
+            ${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-frontend:latest
 
       # 步骤4：配置kubectl
       - name: 配置kubectl
