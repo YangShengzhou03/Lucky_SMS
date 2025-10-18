@@ -43,7 +43,7 @@ jobs:
       - name: 配置Node环境（用于前端编译）
         uses: actions/setup-node@v4
         with:
-          node-version: '22'  # 改为与本地一致的v22
+          node-version: '22'  # 与本地一致的Node版本
           cache: 'npm'
           cache-dependency-path: ./frontend/package-lock.json
 
@@ -51,9 +51,9 @@ jobs:
         run: |
           npm install  # 安装依赖
           npm run build  # 执行打包命令（生成dist目录）
-        working-directory: ./frontend  # 前端代码目录（含package.json）
+        working-directory: ./frontend  # 前端代码目录
 
-      # 步骤3：构建并推送前端镜像（此时dist目录已生成）
+      # 步骤3：构建并推送前端镜像
       - name: 构建前端镜像
         uses: docker/build-push-action@v5
         with:
@@ -63,27 +63,35 @@ jobs:
             ${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-frontend:${{ github.sha }}
             ${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-frontend:latest
 
-      # 步骤4：配置kubectl（新增创建目录的命令）
+      # 步骤4：配置kubectl（确保能连接集群）
       - name: 配置kubectl
         run: |
-          mkdir -p ~/.kube  # 先创建.kube目录，避免文件写入失败
-          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config  # 再写入配置文件
-          kubectl get nodes  # 验证配置是否生效
+          mkdir -p ~/.kube  # 创建.kube目录
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config  # 写入集群配置
+          kubectl get nodes  # 验证连接是否成功
 
-      # 步骤5：部署MySQL相关资源
+      # 步骤5：部署MySQL相关资源（已有的配置）
       - name: 部署MySQL依赖
         run: |
-          kubectl apply -f k8s/mysql-init-configmap.yaml
-          kubectl apply -f k8s/mysql.yaml
+          kubectl apply -f k8s/mysql-init-configmap.yaml  # 初始化MySQL配置
+          kubectl apply -f k8s/mysql.yaml  # 部署MySQL
 
-      # 步骤6：更新后端部署
+      # 步骤6：部署后端Deployment和Service（新增，先创建再更新）
+      - name: 部署后端基础配置
+        run: kubectl apply -f k8s/backend.yaml  # 创建backend的Deployment和Service
+
+      # 步骤7：更新后端镜像（现在backend已存在，可正常更新）
       - name: 部署后端
         run: |
           kubectl set image deployment/backend backend=${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-backend:${{ github.sha }}
-          kubectl rollout status deployment/backend
+          kubectl rollout status deployment/backend  # 等待部署完成
 
-      # 步骤7：更新前端部署
+      # 步骤8：部署前端Deployment和Service（新增，先创建再更新）
+      - name: 部署前端基础配置
+        run: kubectl apply -f k8s/frontend.yaml  # 创建frontend的Deployment和Service
+
+      # 步骤9：更新前端镜像（现在frontend已存在，可正常更新）
       - name: 部署前端
         run: |
           kubectl set image deployment/frontend frontend=${{ secrets.DOCKER_REGISTRY_USER }}/lucky-sms-frontend:${{ github.sha }}
-          kubectl rollout status deployment/frontend
+          kubectl rollout status deployment/frontend  # 等待部署完成
