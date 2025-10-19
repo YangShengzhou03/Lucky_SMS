@@ -21,9 +21,9 @@ spec:
             - containerPort: 8081
           readinessProbe:
             httpGet:
-              path: /actuator/health  # 确保后端应用有这个健康检查端点，否则删除或修改
+              path: /api/actuator/health  # 确保后端应用有这个健康检查端点，否则删除或修改
               port: 8081
-            initialDelaySeconds: 60
+            initialDelaySeconds: 180
             periodSeconds: 10
 
 ---
