@@ -15,20 +15,19 @@ spec:
     spec:
       containers:
         - name: backend
-          # 关键修改：镜像地址替换为实际Docker Hub地址
-          image: yangshengzhou/lucky-sms-backend:latest  # 用户名/仓库名:标签（和Docker Hub一致）
+          # 关键修改：替换为 ACR 的完整镜像地址
+          image: crpi-kczczesrmgxok6ke.cn-hangzhou.personal.cr.aliyuncs.com/yangshengzhou/lucky-sms-backend:latest  # ACR 地址+仓库名+标签
           ports:
             - containerPort: 8081
           readinessProbe:
             httpGet:
-              # 注意：如果你的SpringBoot应用没有actuator健康检查，需要删除这部分或改为实际端点
-              path: /actuator/health
+              path: /actuator/health  # 确保后端应用有这个健康检查端点，否则删除或修改
               port: 8081
             initialDelaySeconds: 60
             periodSeconds: 10
 
 ---
-# 后端 Service（无需修改，保持原样）
+# 后端 Service（无需修改）
 apiVersion: v1
 kind: Service
 metadata:

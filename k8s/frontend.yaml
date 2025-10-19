@@ -15,19 +15,19 @@ spec:
     spec:
       containers:
         - name: frontend
-          # 关键修改：镜像地址替换为实际Docker Hub地址
-          image: yangshengzhou/lucky-sms-frontend:latest  # 用户名/仓库名:标签（和Docker Hub一致）
+          # 关键修改：替换为 ACR 前端仓库的完整地址
+          image: crpi-kczczesrmgxok6ke.cn-hangzhou.personal.cr.aliyuncs.com/yangshengzhou/lucky-sms-frontend:latest  # ACR地址+命名空间+前端仓库名+标签
           ports:
             - containerPort: 80
           readinessProbe:
             httpGet:
-              path: /  # 前端Nginx默认根路径，一般没问题
+              path: /
               port: 80
             initialDelaySeconds: 30
             periodSeconds: 10
 
 ---
-# 前端 Service（无需修改，保持原样）
+# 前端 Service（无需修改）
 apiVersion: v1
 kind: Service
 metadata:
@@ -38,4 +38,4 @@ spec:
   ports:
     - port: 80
       targetPort: 80
-  type: NodePort  # 测试用，通过NodePort暴露外部访问
+  type: NodePort
