@@ -5,7 +5,7 @@ import { ElMessage } from 'element-plus';
 
 // 1. 创建实例，配置基础信息
 const service = axios.create({
-  baseURL: process.env.VUE_APP_BASE_API || 'http://localhost:8081/api/', // 基础地址（从环境变量获取）
+  baseURL: process.env.VUE_APP_BASE_API || 'http://120.55.50.51:31479/api/', // 基础地址（从环境变量获取）
   // baseURL: '/api',
   timeout: 10000, // 超时时间（毫秒）
   headers: {
