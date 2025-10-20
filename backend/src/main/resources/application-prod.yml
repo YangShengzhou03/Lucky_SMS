@@ -1,46 +1,112 @@
-server:
-  port: 8081  # 后端服务使用的端口，这里用8081（前端用了8080）
-  servlet:
-    context-path: /api  # 接口加个前缀，比如调接口得用http://localhost:8081/api/xxx，省得和前端路径混了
-  # 👇 添加以下配置：强制使用 UTF-8 编码
-  encoding:
-    charset: UTF-8
-    enabled: true
-    force: true  # 强制对请求和响应都使用 UTF-8
+# 生产环境配置
+spring:
+  # 数据源配置 - 生产环境使用环境变量
+  datasource:
+    url: ${DATABASE_URL:jdbc:mysql://mysql:3306/lucky_sms?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8}
+    username: ${DATABASE_USERNAME:root}
+    password: ${DATABASE_PASSWORD:123456}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 50
+      minimum-idle: 10
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
+      leak-detection-threshold: 60000
+  
+  # Redis配置 - 生产环境使用环境变量
+  redis:
+    host: ${REDIS_HOST:redis}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    database: ${REDIS_DATABASE:0}
+    timeout: 5000
+    lettuce:
+      pool:
+        max-active: 20
+        max-idle: 10
+        min-idle: 5
+        max-wait: 30000
+      shutdown-timeout: 200
+  
+  # 生产环境禁用开发工具
+  devtools:
+    restart:
+      enabled: false
+    livereload:
+      enabled: false
+  
+  # 模板缓存开启
+  thymeleaf:
+    cache: true
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    servlet:
+      content-type: text/html
 
+# 生产环境日志配置
 logging:
   level:
-    root: INFO  # 日志级别设成INFO，别搞成DEBUG，不然日志太多看着乱
+    root: WARN
+    com.yangshengzhou.lucky_sms: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%15.15t] %-40.40logger{39} : %m%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%15.15t] %-40.40logger{39} : %m%n"
+  file:
+    name: /var/log/lucky-sms/lucky-sms.log
+    max-size: 50MB
+    max-history: 30
+    total-size-cap: 3GB
+  logback:
+    rollingpolicy:
+      max-file-size: 50MB
+      clean-history-on-start: false
 
-# 数据库连接配置 + Redis配置（都在 spring 下面，层级要对）
-spring:
-  datasource:
-    url: jdbc:mysql://mysql:3306/lucky_sms?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root  # 数据库用户名，默认是root
-    password: 123456  # 数据库登录密码
-    driver-class-name: com.mysql.cj.jdbc.Driver  # MySQL 8以上用这个驱动，老版本的话换成com.mysql.jdbc.Driver
-  # Redis配置：直接跟在 spring 下面，删掉多余的 data.redis 层级
-  redis:
-    host: localhost  # Redis 地址（本地就是localhost）
-    port: 6379       # Redis 默认端口（不用改，除非手动改了Redis配置）
-    password: ""     # Redis 密码（没设密码就填空字符串，设了就填实际密码）
-    database: 0      # Redis 数据库编号（默认0，不用改）
-    timeout: 3000    # 连接超时时间（3秒，单位毫秒）
-    lettuce:         # 连接池配置（Spring Boot 2.x 默认用 lettuce）
-      pool:
-        max-active: 8   # 连接池最大连接数
-        max-idle: 8     # 连接池最大空闲连接数
-        min-idle: 2     # 连接池最小空闲连接数
-        max-wait: -1    # 最大等待时间（-1表示无限等，直到拿到连接）
-
-# MyBatis的配置，xml文件和实体类的位置在这指定
-mybatis:
-  mapper-locations: classpath:mapper/*.xml  # 写SQL的xml文件放src/main/resources/mapper文件夹里
-  type-aliases-package: com.yangshengzhou.lucky_sms.entity  # 实体类放这个包下面
-  configuration:
-    map-underscore-to-camel-case: true  # 数据库字段下划线转实体类驼峰命名
-
-# JWT的基本配置
-jwt:
-  secret: 3f7d2a9b5e8c1d4f6h0j2k7m9n1p3q5r8t0v2x4y6z8b0d2f4h6j8l0n2p  # 至少 32 位
-  expiration: 86400000  # 过期时间（毫秒），24小时=86400000
+# 生产环境特殊配置
+app:
+  debug: false
+  show-sql: false
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:8080,http://127.0.0.1:8080}
+  
+  # 邮件配置（生产环境使用真实邮箱）
+  mail:
+    enabled: ${MAIL_ENABLED:false}
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    
+  # 短信配置（生产环境使用真实服务）
+  sms:
+    provider: ${SMS_PROVIDER:aliyun}
+    sign-name: ${SMS_SIGN_NAME:幸运学工}
+    access-key: ${SMS_ACCESS_KEY:}
+    secret-key: ${SMS_SECRET_KEY:}
+    
+  # 文件存储配置（生产环境使用云存储）
+  storage:
+    type: ${STORAGE_TYPE:local}
+    local:
+      path: ${STORAGE_PATH:/data/uploads}
+      url-prefix: ${STORAGE_URL_PREFIX:/uploads}
+    oss:
+      endpoint: ${OSS_ENDPOINT:}
+      access-key: ${OSS_ACCESS_KEY:}
+      secret-key: ${OSS_SECRET_KEY:}
+      bucket: ${OSS_BUCKET:}
+      
+  # 监控配置
+  monitoring:
+    enabled: true
+    endpoint: /actuator
+    metrics:
+      export:
+        prometheus:
+          enabled: true
+          step: 1m

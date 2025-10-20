@@ -62,32 +62,41 @@
           AND status = 'selected'
     </select>
 
-    <!-- 检查时间冲突 -->
-    <select id="checkTimeConflict" resultType="java.lang.Boolean">
+    <!-- 检查课程是否已选 -->
+    <select id="checkCourseSelected" parameterType="map" resultType="boolean">
         SELECT COUNT(*) > 0
         FROM course_selections cs
-        JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
-        JOIN courses c ON ta.course_id = c.course_id
-        WHERE cs.student_id = #{userId}
-          AND cs.status = 'selected'
-          AND c.day_of_week = (
-              SELECT day_of_week 
-              FROM courses 
-              WHERE course_id = (
-                  SELECT course_id 
-                  FROM teaching_assignments
-                  WHERE assignment_id = #{courseId}
-              )
-          )
-          AND c.time_slot = (
-              SELECT time_slot 
-              FROM courses 
-              WHERE course_id = (
-                  SELECT course_id 
-                  FROM teaching_assignments
-                  WHERE assignment_id = #{courseId}
-              )
-          )
+        INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
+        WHERE cs.student_id = #{studentId}
+        AND ta.assignment_id = #{assignmentId}
+        AND cs.status = 'SELECTED'
+    </select>
+
+    <!-- 检查时间冲突 - 简化逻辑 -->
+    <select id="checkTimeConflict" parameterType="map" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM course_selections cs
+        INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
+        INNER JOIN courses c ON ta.course_id = c.course_id
+        WHERE cs.student_id = #{studentId}
+        AND cs.status = 'SELECTED'
+        AND ta.semester_id = #{semesterId}
+        AND c.course_day = #{courseDay}
+        AND c.course_time = #{courseTime}
+    </select>
+
+    <!-- 检查教室冲突 -->
+    <select id="checkClassroomConflict" parameterType="map" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM course_selections cs
+        INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
+        INNER JOIN courses c ON ta.course_id = c.course_id
+        WHERE cs.student_id = #{studentId}
+        AND cs.status = 'SELECTED'
+        AND ta.semester_id = #{semesterId}
+        AND c.classroom = #{classroom}
+        AND c.course_day = #{courseDay}
+        AND c.course_time = #{courseTime}
     </select>
 
     <!-- 获取已选课程总学分 -->
