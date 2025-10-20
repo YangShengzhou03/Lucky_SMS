@@ -1038,67 +1038,7 @@ BEGIN
     END IF;
 END //
 
--- 触发器3：用户角色变更时同步学生记录
-CREATE TRIGGER trg_sync_student_after_insert_user_roles
-    AFTER INSERT ON user_roles
-    FOR EACH ROW
-BEGIN
-    DECLARE student_exists INT;
-    
-    -- 检查是否为学生角色（角色ID为3）
-    IF NEW.role_id = 3 THEN
-        -- 检查是否已存在学生记录
-        SELECT COUNT(*) INTO student_exists
-        FROM students 
-        WHERE user_id = NEW.user_id;
-        
-        -- 如果不存在学生记录，自动创建
-        IF student_exists = 0 THEN
-            INSERT INTO students (
-                user_id, 
-                department_id, 
-                major_id, 
-                class_id, 
-                enrollment_date, 
-                education_years, 
-                student_no, 
-                status_id, 
-                created_by
-            ) VALUES (
-                NEW.user_id,
-                1,  -- 默认计算机学院
-                1,  -- 默认计算机专业
-                1,  -- 默认班级
-                CURDATE(),  -- 当前日期作为入学日期
-                4,  -- 默认4年学制
-                CONCAT(DATE_FORMAT(CURDATE(), '%Y'), 'CS', LPAD(NEW.user_id, 4, '0')),  -- 自动生成学号
-                1,  -- 默认在读状态
-                NEW.assigned_by
-            );
-        END IF;
-    END IF;
-END //
 
--- 触发器4：删除学生角色时同步删除学生记录
-CREATE TRIGGER trg_sync_student_after_delete_user_roles
-    AFTER DELETE ON user_roles
-    FOR EACH ROW
-BEGIN
-    DECLARE remaining_student_roles INT;
-    
-    -- 检查是否为学生角色被删除
-    IF OLD.role_id = 3 THEN
-        -- 检查用户是否还有其他学生角色
-        SELECT COUNT(*) INTO remaining_student_roles
-        FROM user_roles 
-        WHERE user_id = OLD.user_id AND role_id = 3;
-        
-        -- 如果没有其他学生角色，删除学生记录
-        IF remaining_student_roles = 0 THEN
-            DELETE FROM students WHERE user_id = OLD.user_id;
-        END IF;
-    END IF;
-END //
 
 DELIMITER ;
 
@@ -1161,3 +1101,28 @@ DELIMITER ;
 
 -- 开启外键检查
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- 修复自增序列，避免重复插入问题
+-- 修复users表自增序列（从当前最大ID+1开始）
+SET @max_user_id = (SELECT MAX(user_id) FROM users);
+SET @sql_user = CONCAT('ALTER TABLE users AUTO_INCREMENT = ', IFNULL(@max_user_id + 1, 1));
+PREPARE stmt_user FROM @sql_user;
+EXECUTE stmt_user;
+DEALLOCATE PREPARE stmt_user;
+
+-- 修复students表自增序列（从当前最大ID+1开始）
+SET @max_student_id = (SELECT MAX(student_id) FROM students);
+SET @sql_student = CONCAT('ALTER TABLE students AUTO_INCREMENT = ', IFNULL(@max_student_id + 1, 1));
+PREPARE stmt_student FROM @sql_student;
+EXECUTE stmt_student;
+DEALLOCATE PREPARE stmt_student;
+
+-- 清理重复的students表数据（如果存在重复user_id）
+DELETE s1 FROM students s1
+INNER JOIN students s2 
+    ON s1.user_id = s2.user_id 
+    AND s1.student_id > s2.student_id;
+
+-- 测试新用户插入逻辑（验证修复效果）
+INSERT INTO users (username, password_hash, phone, status, created_by) 
+VALUES ('TEST_STUDENT', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '13800000004', 'ACTIVE', 1);
