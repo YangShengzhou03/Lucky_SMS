@@ -9,7 +9,7 @@
             u.user_id,
             u.username,
             u.phone,
-            r.role_name  -- 角色名称（TEACHER/STUDENT）
+            r.role_name
         FROM users u
                  LEFT JOIN user_roles ur ON u.user_id = ur.user_id
                  LEFT JOIN roles r ON ur.role_id = r.role_id
@@ -19,8 +19,8 @@
 
     <!-- 通过手机号注册用户 -->
     <insert id="registerByPhone" parameterType="String">
-        INSERT INTO users (phone, username, password_hash)
-        VALUES (#{phone}, 'Lucky', '12345678')
+        INSERT INTO users (phone, username)
+        VALUES (#{phone}, 'Lucky')
     </insert>
 
     <!-- 通过手机号重设密码 -->

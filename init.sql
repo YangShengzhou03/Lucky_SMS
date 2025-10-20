@@ -1,6 +1,9 @@
--- 1. 强制 SQL 执行错误时中断，暴露问题
+-- 1. 统一会话字符集和排序规则，避免比较操作冲突
+SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- 2. 强制 SQL 执行错误时中断，暴露问题
 SET SQL_MODE = 'STRICT_ALL_TABLES';
--- 2. 关闭外键检查，避免建表顺序导致的外键失败
+-- 3. 关闭外键检查，避免建表顺序导致的外键失败
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- 删除现有数据库并重新创建
@@ -727,6 +730,19 @@ GROUP BY
     b.book_id, b.isbn, b.book_title, b.author, bc.category_name,
     b.total_copies, b.available_copies;
 
+
+-- 创建触发器：当users表插入新用户时，自动与学生角色关联
+DELIMITER //
+CREATE TRIGGER auto_assign_student_role_after_insert
+    AFTER INSERT ON users
+    FOR EACH ROW
+BEGIN
+    -- 往user_roles表插入记录：新用户ID + 学生角色ID(3)
+    INSERT INTO user_roles (user_id, role_id, assigned_by)
+    VALUES (NEW.user_id, 3, 1);
+END //
+DELIMITER ;
+
 /*
 初始化数据
 */
@@ -856,10 +872,11 @@ INSERT INTO majors (major_name, department_id, major_code, required_credits) VAL
 
 -- 初始化班级表
 INSERT INTO class_info (class_name, major_id, enrollment_year, classroom) VALUES
-    ('计算机2021-1班', 1, 2021, '教学楼A201'),
-    ('计算机2021-2班', 1, 2021, '教学楼A202'),
-    ('软件2021-1班', 2, 2021, '教学楼B101'),
-    ('电子2021-1班', 3, 2021, '教学楼C301');
+    ('计算机2024-1班', 1, 2024, '教学楼A201'),
+    ('软件2024-1班', 2, 2024, '教学楼B101'),
+    ('电子2024-1班', 3, 2024, '教学楼C301'),
+    ('计算机默认班级', 1, 2024, '教学楼A301'),
+    ('软件默认班级', 2, 2024, '教学楼B201');
 
 -- 初始化图书分类表
 INSERT INTO book_categories (category_name, parent_id) VALUES
@@ -882,13 +899,6 @@ INSERT INTO users (username, password_hash, email, phone, gender, status, create
     ('STUDENT01', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student1@lucky-sms.com', '13800000002', 'M', 'ACTIVE', 1),
     ('STUDENT02', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student2@lucky-sms.com', '13800000003', 'F', 'ACTIVE', 1);
 
--- 为用户分配角色
-INSERT INTO user_roles (user_id, role_id, assigned_by) VALUES
-    (1, 1, 1),  -- ADMIN01 作为管理员
-    (2, 2, 1),  -- TEACHER01 作为教师
-    (3, 3, 1),  -- STUDENT01 作为学生
-    (4, 3, 1);  -- STUDENT02 作为学生
-
 -- 初始化教师表
 INSERT INTO teachers (user_id, department_id, title_id, hire_date, office_location, teacher_no, status_id, created_by) VALUES
     (2, 1, 4, '2020-09-01', '计算机学院A301', 'T2020001', 1, 1);
@@ -907,26 +917,19 @@ INSERT INTO students (user_id, department_id, major_id, class_id, enrollment_dat
 -- 初始化课程表
 INSERT INTO courses (course_code, course_name, course_description, department_id, credit, course_hours, course_type, exam_type, created_by) VALUES
     ('CS101', '计算机基础', '计算机科学基础课程', 1, 3.0, 48, 'COMPULSORY', 'CLOSED_BOOK', 1),
-    ('CS102', '数据结构', '数据结构与算法', 1, 4.0, 64, 'COMPULSORY', 'CLOSED_BOOK', 1),
-    ('CS201', 'Java程序设计', 'Java语言程序设计', 1, 3.0, 48, 'COMPULSORY', 'PRACTICAL', 1),
-    ('CS301', '数据库系统', '数据库原理与应用', 1, 3.0, 48, 'COMPULSORY', 'OPEN_BOOK', 1);
+    ('CS102', '数据结构', '数据结构与算法', 1, 4.0, 64, 'COMPULSORY', 'CLOSED_BOOK', 1);
 
 -- 初始化课程先修关系
 INSERT INTO course_prerequisites (course_id, prerequisite_course_id, is_mandatory) VALUES
-    (2, 1, TRUE),   -- 数据结构需要计算机基础
-    (3, 2, TRUE),   -- Java程序设计需要数据结构
-    (4, 2, TRUE);   -- 数据库系统需要数据结构
+    (2, 1, TRUE);   -- 数据结构需要计算机基础
 
 -- 初始化教师授课表
 INSERT INTO teaching_assignments (teacher_id, course_id, semester_id, classroom, schedule_info, max_students, current_students) VALUES
-    (1, 1, 2, '教学楼A101', '{"day": "MONDAY", "startTime": "08:00", "endTime": "09:40", "weeks": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]}', 50, 0),
-    (1, 2, 2, '教学楼A102', '{"day": "WEDNESDAY", "startTime": "10:00", "endTime": "11:40", "weeks": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]}', 40, 0);
+    (1, 1, 2, '教学楼A101', '{"day": "MONDAY", "startTime": "08:00", "endTime": "09:40", "weeks": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]}', 50, 0);
 
 -- 初始化学生选课表
 INSERT INTO course_selections (student_id, assignment_id, status) VALUES
-    (1, 1, 'SELECTED'),
-    (1, 2, 'SELECTED'),
-    (2, 1, 'SELECTED');
+    (1, 1, 'SELECTED');
 
 -- 更新课程当前人数
 UPDATE teaching_assignments SET current_students = 2 WHERE assignment_id = 1;
@@ -934,9 +937,7 @@ UPDATE teaching_assignments SET current_students = 1 WHERE assignment_id = 2;
 
 -- 初始化图书表
 INSERT INTO books (isbn, book_title, author, publisher, publish_year, category_id, location, total_copies, available_copies, created_by) VALUES
-    ('9787111213826', 'Java编程思想', 'Bruce Eckel', '机械工业出版社', 2020, 2, '图书馆A区101', 5, 5, 1),
-    ('9787121201212', '数据结构与算法', '严蔚敏', '清华大学出版社', 2019, 2, '图书馆A区102', 3, 3, 1),
-    ('9787302274624', '数据库系统概念', 'Abraham Silberschatz', '机械工业出版社', 2021, 3, '图书馆B区201', 4, 4, 1);
+    ('9787111213826', 'Java编程思想', 'Bruce Eckel', '机械工业出版社', 2020, 2, '图书馆A区101', 5, 5, 1);
 
 -- 初始化待办事项表数据
 INSERT INTO todos (user_id, text, completed, due_date, important, category) VALUES
@@ -957,6 +958,206 @@ ALTER TABLE users
         FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
     ADD CONSTRAINT fk_users_updated_by
         FOREIGN KEY (updated_by) REFERENCES users(user_id) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- 创建触发器：新增学生时自动分配默认班级
+DELIMITER //
+
+-- 触发器1：新增学生时自动分配默认班级（基于专业和入学年份）
+CREATE TRIGGER trg_auto_assign_class_after_insert_students
+    AFTER INSERT ON students
+    FOR EACH ROW
+BEGIN
+    DECLARE default_class_id INT;
+    DECLARE enrollment_year_val YEAR;
+    
+    -- 获取入学年份
+    SET enrollment_year_val = YEAR(NEW.enrollment_date);
+    
+    -- 查找匹配的默认班级（专业相同，入学年份相同，班级名称包含"默认"或"Default"）
+    SELECT class_id INTO default_class_id
+    FROM class_info 
+    WHERE major_id = NEW.major_id 
+      AND enrollment_year = enrollment_year_val
+      AND (class_name LIKE '%默认%' OR class_name LIKE '%Default%')
+    LIMIT 1;
+    
+    -- 如果没有找到默认班级，则查找该专业下入学年份相同的第一个班级
+    IF default_class_id IS NULL THEN
+        SELECT class_id INTO default_class_id
+        FROM class_info 
+        WHERE major_id = NEW.major_id 
+          AND enrollment_year = enrollment_year_val
+        ORDER BY class_id ASC
+        LIMIT 1;
+    END IF;
+    
+    -- 如果找到合适的班级，更新学生记录
+    IF default_class_id IS NOT NULL THEN
+        UPDATE students 
+        SET class_id = default_class_id 
+        WHERE student_id = NEW.student_id;
+    END IF;
+END //
+
+-- 触发器2：新增用户时自动创建学生记录（如果用户角色包含学生）
+CREATE TRIGGER trg_auto_create_student_after_insert_users
+    AFTER INSERT ON users
+    FOR EACH ROW
+BEGIN
+    DECLARE student_role_count INT;
+    
+    -- 检查用户是否被分配了学生角色（角色ID为3）
+    SELECT COUNT(*) INTO student_role_count
+    FROM user_roles 
+    WHERE user_id = NEW.user_id AND role_id = 3;
+    
+    -- 如果用户有学生角色，自动创建学生记录
+    IF student_role_count > 0 THEN
+        -- 插入默认学生记录（需要后续手动更新详细信息）
+        INSERT INTO students (
+            user_id, 
+            department_id, 
+            major_id, 
+            class_id, 
+            enrollment_date, 
+            education_years, 
+            student_no, 
+            status_id, 
+            created_by
+        ) VALUES (
+            NEW.user_id,
+            1,  -- 默认计算机学院
+            1,  -- 默认计算机专业
+            1,  -- 默认班级
+            CURDATE(),  -- 当前日期作为入学日期
+            4,  -- 默认4年学制
+            CONCAT(DATE_FORMAT(CURDATE(), '%Y'), 'CS', LPAD(NEW.user_id, 4, '0')),  -- 自动生成学号
+            1,  -- 默认在读状态
+            NEW.created_by
+        );
+    END IF;
+END //
+
+-- 触发器3：用户角色变更时同步学生记录
+CREATE TRIGGER trg_sync_student_after_insert_user_roles
+    AFTER INSERT ON user_roles
+    FOR EACH ROW
+BEGIN
+    DECLARE student_exists INT;
+    
+    -- 检查是否为学生角色（角色ID为3）
+    IF NEW.role_id = 3 THEN
+        -- 检查是否已存在学生记录
+        SELECT COUNT(*) INTO student_exists
+        FROM students 
+        WHERE user_id = NEW.user_id;
+        
+        -- 如果不存在学生记录，自动创建
+        IF student_exists = 0 THEN
+            INSERT INTO students (
+                user_id, 
+                department_id, 
+                major_id, 
+                class_id, 
+                enrollment_date, 
+                education_years, 
+                student_no, 
+                status_id, 
+                created_by
+            ) VALUES (
+                NEW.user_id,
+                1,  -- 默认计算机学院
+                1,  -- 默认计算机专业
+                1,  -- 默认班级
+                CURDATE(),  -- 当前日期作为入学日期
+                4,  -- 默认4年学制
+                CONCAT(DATE_FORMAT(CURDATE(), '%Y'), 'CS', LPAD(NEW.user_id, 4, '0')),  -- 自动生成学号
+                1,  -- 默认在读状态
+                NEW.assigned_by
+            );
+        END IF;
+    END IF;
+END //
+
+-- 触发器4：删除学生角色时同步删除学生记录
+CREATE TRIGGER trg_sync_student_after_delete_user_roles
+    AFTER DELETE ON user_roles
+    FOR EACH ROW
+BEGIN
+    DECLARE remaining_student_roles INT;
+    
+    -- 检查是否为学生角色被删除
+    IF OLD.role_id = 3 THEN
+        -- 检查用户是否还有其他学生角色
+        SELECT COUNT(*) INTO remaining_student_roles
+        FROM user_roles 
+        WHERE user_id = OLD.user_id AND role_id = 3;
+        
+        -- 如果没有其他学生角色，删除学生记录
+        IF remaining_student_roles = 0 THEN
+            DELETE FROM students WHERE user_id = OLD.user_id;
+        END IF;
+    END IF;
+END //
+
+DELIMITER ;
+
+-- 创建存储过程：修复学生数据一致性
+DELIMITER //
+
+CREATE PROCEDURE sp_repair_student_data_consistency()
+BEGIN
+    -- 修复1：删除没有对应用户的学生记录
+    DELETE s FROM students s
+    LEFT JOIN users u ON s.user_id = u.user_id
+    WHERE u.user_id IS NULL;
+    
+    -- 修复2：删除没有学生角色的学生记录
+    DELETE s FROM students s
+    LEFT JOIN user_roles ur ON s.user_id = ur.user_id AND ur.role_id = 3
+    WHERE ur.user_id IS NULL;
+    
+    -- 修复3：为有学生角色但没有学生记录的用户创建学生记录
+    INSERT INTO students (
+        user_id, department_id, major_id, class_id, 
+        enrollment_date, education_years, student_no, status_id, created_by
+    )
+    SELECT 
+        ur.user_id, 1, 1, 1, CURDATE(), 4, 
+        CONCAT(DATE_FORMAT(CURDATE(), '%Y'), 'CS', LPAD(ur.user_id, 4, '0')), 1, ur.assigned_by
+    FROM user_roles ur
+    LEFT JOIN students s ON ur.user_id = s.user_id
+    WHERE ur.role_id = 3 AND s.student_id IS NULL;
+    
+    -- 修复4：更新学生的班级信息（确保班级与专业一致）
+    UPDATE students s
+    INNER JOIN class_info c ON s.major_id = c.major_id 
+                           AND YEAR(s.enrollment_date) = c.enrollment_year
+    SET s.class_id = c.class_id
+    WHERE s.class_id != c.class_id;
+    
+    -- 修复5：更新学生的学院信息（确保与专业一致）
+    UPDATE students s
+    INNER JOIN majors m ON s.major_id = m.major_id
+    SET s.department_id = m.department_id
+    WHERE s.department_id != m.department_id;
+    
+END //
+
+DELIMITER ;
+
+-- 创建事件：定期检查数据一致性
+DELIMITER //
+
+CREATE EVENT IF NOT EXISTS event_check_student_data_consistency
+ON SCHEDULE EVERY 1 DAY
+STARTS CURRENT_TIMESTAMP
+DO
+BEGIN
+    CALL sp_repair_student_data_consistency();
+END //
+
+DELIMITER ;
 
 -- 开启外键检查
 SET FOREIGN_KEY_CHECKS = 1;

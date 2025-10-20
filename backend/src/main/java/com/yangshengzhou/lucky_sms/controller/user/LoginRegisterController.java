@@ -18,6 +18,9 @@ public class LoginRegisterController {
     @Resource
     private UserService userService;
 
+    /**
+     * 验证码登录
+     */
     @PostMapping("/phone")
     public Map<String, Object> loginByPhone(
             @RequestParam String phone,
@@ -42,6 +45,9 @@ public class LoginRegisterController {
         return loginResult;
     }
 
+    /**
+     * 密码登录
+     */
     @PostMapping("/password")
     public Map<String, Object> loginByPassword(
             @RequestParam String phone,
