@@ -17,7 +17,7 @@
               <p class="student-id">学号: {{ userProfile.studentId }}</p>
             </div>
           </div>
-          <el-button type="primary" size="small" @click="editProfile" class="edit-button" round>
+          <el-button type="primary" size="small" @click="openEditDialog" class="edit-button" round>
             <el-icon>
               <Edit />
             </el-icon> 编辑资料
@@ -121,20 +121,109 @@
         </div>
       </div>
     </div>
+
+    <!-- 编辑个人信息对话框 -->
+    <el-dialog v-model="editDialogVisible" title="编辑个人信息" width="600px" :before-close="handleDialogClose">
+      <el-form ref="editFormRef" :model="editForm" :rules="editFormRules" label-width="100px">
+        <el-form-item label="姓名" prop="name">
+          <el-input v-model="editForm.name" placeholder="请输入姓名" />
+        </el-form-item>
+        
+        <el-form-item label="性别" prop="gender">
+          <el-radio-group v-model="editForm.gender">
+            <el-radio label="male">男</el-radio>
+            <el-radio label="female">女</el-radio>
+            <el-radio label="other">其他</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        
+        <el-form-item label="出生日期" prop="birthdate">
+          <el-date-picker
+            v-model="editForm.birthdate"
+            type="date"
+            placeholder="选择出生日期"
+            value-format="YYYY-MM-DD"
+            style="width: 100%"
+          />
+        </el-form-item>
+        
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="editForm.email" placeholder="请输入邮箱地址" />
+        </el-form-item>
+        
+        <el-form-item label="手机号码" prop="phone">
+          <el-input v-model="editForm.phone" placeholder="请输入手机号码" />
+        </el-form-item>
+        
+        <!-- 移除不允许修改的字段：学院和班级 -->
+      </el-form>
+      
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="handleDialogClose">取消</el-button>
+          <el-button type="primary" @click="submitEditForm" :loading="submitLoading">
+            保存
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive,onMounted } from 'vue'
 import {
   Plus, User, Edit, ArrowRight, Lock,
   Calendar, Notification, Phone, Setting, Bell,
   FirstAidKit, QuestionFilled, School, Collection
 } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import service from '@/utils/request'
+
+// 编辑对话框相关状态
+const editDialogVisible = ref(false)
+const submitLoading = ref(false)
+const editFormRef = ref()
+
+// 编辑表单数据
+const editForm = reactive({
+  name: '',
+  gender: 'male',
+  birthdate: '',
+  email: '',
+  phone: ''
+})
+
+// 表单验证规则
+const editFormRules = {
+  gender: [
+    { required: true, message: '请选择性别', trigger: 'change' }
+  ],
+  birthdate: [
+    { required: true, message: '请选择出生日期', trigger: 'change' }
+  ],
+  email: [
+    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+  ],
+  phone: [
+    { required: true, message: '请输入手机号码', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }
+  ]
+}
 
 // 首先定义所有函数
-const editProfile = () => ElMessage.info('编辑个人信息功能将在未来版本中实现')
+const openEditDialog = () => {
+  // 将当前用户信息填充到编辑表单
+  Object.assign(editForm, {
+    gender: userProfile.gender,
+    birthdate: userProfile.birthdate,
+    email: userProfile.email,
+    phone: userProfile.phone
+  })
+  editDialogVisible.value = true
+}
+
 const changePassword = () => ElMessage.info('修改密码功能将在未来版本中实现')
 const notificationSettings = () => ElMessage.info('通知设置功能将在未来版本中实现')
 const securitySettings = () => ElMessage.info('安全设置功能将在未来版本中实现')
@@ -150,14 +239,14 @@ const quickActions = [
 
 // 个人信息
 const userProfile = reactive({
-  studentId: '20230001',
-  name: '张三',
-  gender: 'male',
-  birthdate: '2000-01-15',
-  email: 'zhangsan@example.com',
-  phone: '13800138000',
-  college: '计算机科学与技术学院',
-  class: '计算机科学与技术1班',
+  studentId: '--',
+  name: '--',
+  gender: '--',
+  birthdate: '--',
+  email: '--',
+  phone: '--',
+  college: '--',
+  class: '--',
   avatarUrl: 'https://picsum.photos/id/1005/200/200'
 })
 
@@ -184,6 +273,129 @@ const getGenderText = (gender) => {
   }
   return genderMap[gender] || '未知'
 }
+
+// 将英文性别转换为中文
+const convertGenderToChinese = (gender) => {
+  const genderMap = {
+    'male': '男',
+    'female': '女',
+    'other': '其他'
+  }
+  return genderMap[gender] || gender
+}
+
+// 编辑对话框关闭处理
+const handleDialogClose = () => {
+  editDialogVisible.value = false
+  editFormRef.value?.resetFields()
+}
+
+// 提交编辑表单
+const submitEditForm = async () => {
+  if (!editFormRef.value) return
+  
+  try {
+    // 验证表单
+    const valid = await editFormRef.value.validate()
+    if (!valid) return
+    
+    // 确认对话框
+    try {
+      await ElMessageBox.confirm(
+        '确定要保存个人信息修改吗？',
+        '确认修改',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }
+      )
+    } catch (cancel) {
+      // 用户取消操作
+      return
+    }
+    
+    submitLoading.value = true
+    
+    const birthDate = editForm.birthdate || ''
+    
+    await service.post('/student/setting/info', {
+      username: editForm.name,
+      email: editForm.email,
+      phone: editForm.phone,
+      gender: convertGenderToChinese(editForm.gender),
+      birthDate: birthDate,
+      emergencyContact: '',
+      emergencyPhone: ''
+    })
+    
+    // 更新本地用户信息 - 只更新允许修改的字段
+    Object.assign(userProfile, {
+      gender: editForm.gender,
+      birthdate: editForm.birthdate,
+      email: editForm.email,
+      phone: editForm.phone
+    })
+    
+    ElMessage.success({
+      message: '个人信息更新成功',
+      duration: 2000,
+      showClose: true
+    })
+    handleDialogClose()
+  } catch (error) {
+    console.error('更新个人信息失败:', error)
+    
+    // 错误处理由封装的service组件自动处理，这里只需要处理业务逻辑错误
+    if (error.message) {
+      ElMessage.error({
+        message: error.message,
+        duration: 3000,
+        showClose: true
+      })
+    }
+  } finally {
+    submitLoading.value = false
+  }
+}
+
+onMounted(async () => {
+  try {
+    // 使用封装的service组件获取个人信息
+    const result = await service.get('/student/settings')
+    
+    if (result.code === 200 && result.data) {
+      // 更新本地用户信息，正确映射后端字段名
+    Object.assign(userProfile, {
+      studentId: result.data.studentNo || userProfile.studentId,
+      name: result.data.username || userProfile.name,
+      gender: result.data.gender === '男' ? 'male' : 
+               result.data.gender === '女' ? 'female' : 
+               result.data.gender || userProfile.gender, // 将中文性别转换为英文格式
+      birthdate: result.data.birthDate || userProfile.birthdate,
+      email: result.data.email || userProfile.email,
+      phone: result.data.phone || userProfile.phone,
+      college: result.data.departmentName || userProfile.college,
+      class: result.data.className || userProfile.class,
+      avatarUrl: result.data.avatarUrl || userProfile.avatarUrl
+    })
+
+    } else {
+      throw new Error(result.message || '获取个人信息失败')
+    }
+  } catch (error) {
+    console.error('获取个人信息失败:', error)
+    
+    // 错误处理由封装的service组件自动处理，这里只需要处理业务逻辑错误
+    if (error.message && !error.message.includes('未登录')) {
+      ElMessage.warning({
+        message: `加载个人信息失败: ${error.message}`,
+        duration: 3000,
+        showClose: true
+      })
+    }
+  }
+})
 
 // 头像上传相关方法
 const handleAvatarSuccess = (res, file) => {

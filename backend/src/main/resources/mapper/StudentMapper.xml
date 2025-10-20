@@ -14,6 +14,34 @@
         <result column="course_count" property="course_count"/>
     </resultMap>
 
+    <!-- 定义StudentProfileVO的映射规则 -->
+    <resultMap id="StudentProfileVOMap" type="com.yangshengzhou.lucky_sms.vo.student.StudentProfileVO">
+        <!-- 用户表字段 -->
+        <result column="username" property="username"/>
+        <result column="email" property="email"/>
+        <result column="phone" property="phone"/>
+        <result column="gender" property="gender"/>
+        <result column="birth_date" property="birthDate"/>
+        <result column="avatar_url" property="avatarUrl"/>
+        
+        <!-- 学生表字段 -->
+        <result column="student_no" property="studentNo"/>
+        <result column="department_name" property="departmentName"/>
+        <result column="major_name" property="majorName"/>
+        <result column="class_name" property="className"/>
+        <result column="enrollment_date" property="enrollmentDate"/>
+        <result column="education_years" property="educationYears"/>
+        <result column="status_name" property="status"/>
+        <result column="emergency_contact" property="emergencyContact"/>
+        <result column="emergency_phone" property="emergencyPhone"/>
+        
+        <!-- 地址信息字段 -->
+        <result column="province" property="province"/>
+        <result column="city" property="city"/>
+        <result column="district" property="district"/>
+        <result column="detailed_address" property="detailedAddress"/>
+    </resultMap>
+
     <!-- 2. 使用 resultMap 替换 resultType -->
     <select id="selectStudentById" parameterType="Integer" resultMap="StudentVOMap">
         SELECT
@@ -302,6 +330,44 @@
                  s.semester_id, s.academic_year, s.semester_name, st.student_id, st.gpa, st.class_rank, st.total_credits
     </select>
 
+    <!-- 查询学生个人信息 -->
+    <select id="selectStudentProfileById" parameterType="Integer" resultMap="StudentProfileVOMap">
+        SELECT
+            u.username,
+            u.email,
+            u.phone,
+            CASE u.gender
+                WHEN 'M' THEN '男'
+                WHEN 'F' THEN '女'
+                ELSE '其他'
+            END AS gender,
+            u.birth_date,
+            u.avatar_url,
+            s.student_no,
+            d.department_name,
+            m.major_name,
+            ci.class_name,
+            s.enrollment_date,
+            s.education_years,
+            ss.status_name,
+            s.emergency_contact,
+            s.emergency_phone,
+            ua.province,
+            ua.city,
+            ua.district,
+            ua.detail_address
+        FROM
+            users u
+            INNER JOIN students s ON u.user_id = s.user_id
+            INNER JOIN departments d ON s.department_id = d.department_id
+            INNER JOIN majors m ON s.major_id = m.major_id
+            INNER JOIN class_info ci ON s.class_id = ci.class_id
+            INNER JOIN student_statuses ss ON s.status_id = ss.status_id
+            LEFT JOIN user_addresses ua ON u.user_id = ua.user_id
+        WHERE
+            u.user_id = #{userId}
+    </select>
+
     <!-- 查询分页的学生成绩数据 -->
     <select id="getGradesDataWithPagination" parameterType="java.util.Map" resultMap="GradesVOMap">
         SELECT 
@@ -457,5 +523,25 @@
         FROM students
         WHERE user_id = #{userId}
     </select>
+
+    <!-- 更新学生个人信息 -->
+    <update id="updateStudentProfile" parameterType="map">
+        UPDATE users u
+        INNER JOIN students s ON u.user_id = s.user_id
+        SET
+            u.username = #{username},
+            u.email = #{email},
+            u.phone = #{phone},
+            u.gender = CASE 
+                WHEN #{gender} = '男' THEN 'M'
+                WHEN #{gender} = '女' THEN 'F'
+                ELSE #{gender}
+            END,
+            u.birth_date = #{birthDate},
+            s.emergency_contact = #{emergencyContact},
+            s.emergency_phone = #{emergencyPhone},
+            u.updated_at = CURRENT_TIMESTAMP
+        WHERE u.user_id = #{userId}
+    </update>
 
 </mapper>

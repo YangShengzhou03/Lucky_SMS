@@ -5,6 +5,7 @@ import com.yangshengzhou.lucky_sms.pojo.Announcement;
 import com.yangshengzhou.lucky_sms.pojo.BasicInfo;
 import com.yangshengzhou.lucky_sms.pojo.Todos;
 import com.yangshengzhou.lucky_sms.vo.student.GradesVO;
+import com.yangshengzhou.lucky_sms.vo.student.StudentProfileVO;
 import com.yangshengzhou.lucky_sms.vo.student.StudentVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -40,6 +41,19 @@ public interface StudentMapper {
 
     // 9. 查询学生最大学分
     Integer getMaxCredits(Integer userId);
+
+    // 10. 查询学生个人信息
+    StudentProfileVO selectStudentProfileById(Integer userId);
+
+    // 11. 更新学生个人信息
+    int updateStudentProfile(@Param("userId") Integer userId,
+                             @Param("username") String username,
+                           @Param("email") String email,
+                           @Param("phone") String phone,
+                           @Param("gender") String gender,
+                           @Param("birthDate") String birthDate,
+                           @Param("emergencyContact") String emergencyContact,
+                           @Param("emergencyPhone") String emergencyPhone);
 
 //    List<AcademicHistory> selectAcademicHistoryList(Integer userId);
 }

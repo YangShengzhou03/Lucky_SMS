@@ -1,6 +1,7 @@
 package com.yangshengzhou.lucky_sms.controller.student;
 
 import com.yangshengzhou.lucky_sms.service.student.CourseSelectionService;
+import com.yangshengzhou.lucky_sms.service.student.ProfileService;
 import com.yangshengzhou.lucky_sms.service.student.impl.GradeServiceImpl;
 import com.yangshengzhou.lucky_sms.service.student.impl.HomeServiceImpl;
 import com.yangshengzhou.lucky_sms.service.student.impl.StatusServiceImpl;
@@ -10,6 +11,8 @@ import com.yangshengzhou.lucky_sms.vo.student.CourseSelectionVO;
 import com.yangshengzhou.lucky_sms.vo.student.GradesVO;
 import com.yangshengzhou.lucky_sms.vo.student.HomeVO;
 import com.yangshengzhou.lucky_sms.vo.student.StatusVO;
+import com.yangshengzhou.lucky_sms.vo.student.StudentProfileVO;
+import com.yangshengzhou.lucky_sms.vo.student.UpdateStudentProfileRequestVO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,6 +37,9 @@ public class StudentController {
     private GradeServiceImpl gradeServiceImpl;
     @Resource
     private CourseSelectionService courseSelectionService;
+    
+    @Resource
+    private ProfileService profileService;
 
     /**
      * 用来拿到学生端首页数据
@@ -327,5 +333,82 @@ public class StudentController {
         }
 
         return result;
+    }
+
+    /**
+     * 获取学生个人信息
+     * @param request HTTP请求
+     * @return 学生个人信息
+     */
+    @GetMapping("/settings")
+    public HashMap<String, Object> getStudentProfile(HttpServletRequest request) {
+        HashMap<String, Object> response = new HashMap<>();
+        
+        try {
+            // 从JWT token中获取用户ID
+            Integer userId = jwtUtil.getUidByRequest(request);
+            if (userId == null) {
+                response.put("code", 401);
+                response.put("message", "用户未登录");
+                return response;
+            }
+            
+            // 调用ProfileService获取学生个人信息
+            StudentProfileVO profile = profileService.getStudentProfile(userId);
+            
+            response.put("code", 200);
+            response.put("message", "获取个人信息成功");
+            response.put("data", profile);
+            
+        } catch (Exception e) {
+            response.put("code", 500);
+            response.put("message", "获取个人信息失败: " + e.getMessage());
+            response.put("data", null);
+        }
+        
+        return response;
+    }
+    
+    /**
+     * 更新学生个人信息
+     * @param requestVO 更新请求数据
+     * @param request HTTP请求
+     * @return 更新结果
+     */
+    @PostMapping("/setting/info")
+    public HashMap<String, Object> updateStudentProfile(
+            @RequestBody UpdateStudentProfileRequestVO requestVO,
+            HttpServletRequest request) {
+        HashMap<String, Object> response = new HashMap<>();
+        
+        try {
+            // 从JWT token中获取用户ID
+            Integer userId = jwtUtil.getUidByRequest(request);
+            if (userId == null) {
+                response.put("code", 401);
+                response.put("message", "用户未登录");
+                return response;
+            }
+
+            // 调用ProfileService更新学生个人信息
+            boolean success = profileService.updateStudentProfile(userId, requestVO);
+            
+            if (success) {
+                response.put("code", 200);
+                response.put("message", "更新个人信息成功");
+                response.put("data", null);
+            } else {
+                response.put("code", 500);
+                response.put("message", "更新个人信息失败");
+                response.put("data", null);
+            }
+            
+        } catch (Exception e) {
+            response.put("code", 500);
+            response.put("message", "更新个人信息失败: " + e.getMessage());
+            response.put("data", null);
+        }
+        
+        return response;
     }
 }
