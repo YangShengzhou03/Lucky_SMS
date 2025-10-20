@@ -102,14 +102,14 @@
             <template v-if="announcements?.length">
               <div class="announcement-item" v-for="item in announcements" :key="item.id"
                 @click="viewAnnouncement(item)">
-                <el-tag class="announcement-tag" size="small" :type="item.type || 'info'">
-                  {{ getAnnouncementType(item.type) }}
+                <el-tag class="announcement-tag" size="small" :type="item.announcement_type || 'INFO'">
+                  {{ getAnnouncementType(item.announcement_type) }}
                 </el-tag>
                 <div class="announcement-content">
                   <div class="title">{{ item.title }}</div>
                   <div class="meta">
-                    <span class="date">{{ formatDate(item.date) }}</span>
-                    <span class="department">{{ item.department }}</span>
+                    <span class="date">{{ formatDate(item.publish_date) }}</span>
+                    <span class="department">{{ item.department_name }}</span>
                   </div>
                 </div>
                 <el-icon class="arrow">
@@ -253,10 +253,10 @@ const getDueTagType = (dueDate) => {
 
 const getAnnouncementType = (type) => {
   const types = {
-    'important': '重要',
-    'notice': '通知',
-    'info': '资讯',
-    'activity': '活动'
+    'IMPORTANT': '重要',
+    'NOTICE': '通知',
+    'INFO': '资讯',
+    'ACTIVITY': '活动'
   }
   return types[type] || '公告'
 }
@@ -277,8 +277,6 @@ const fetchData = async () => {
   try {
     // 使用axios获取数据
     const res = await service.get('/student/home')
-
-    console.log(res)
 
     if (res.code === 200) {
       student.value = res.data.student || {}
@@ -351,7 +349,7 @@ const fetchData = async () => {
         "date": "2025-12-11",
         "department": "就业指导中心",
         "type": "info",
-        "priority": "low"
+        "priority": "high"
       }
     ]
   } finally {

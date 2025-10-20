@@ -4,9 +4,9 @@ public class Announcement {
     private String id;
     private String title;
     private String content;
-    private String date;
-    private String department;
-    private String type;
+    private String publish_date;
+    private String department_name;
+    private String announcement_type;
     private String priority;
 
     public String getId() {
@@ -33,28 +33,28 @@ public class Announcement {
         this.content = content;
     }
 
-    public String getDate() {
-        return date;
+    public String getPublish_date() {
+        return publish_date;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setPublish_date(String publish_date) {
+        this.publish_date = publish_date;
     }
 
-    public String getDepartment() {
-        return department;
+    public String getDepartment_name() {
+        return department_name;
     }
 
-    public void setDepartment(String department) {
-        this.department = department;
+    public void setDepartment_name(String department_name) {
+        this.department_name = department_name;
     }
 
-    public String getType() {
-        return type;
+    public String getAnnouncement_type() {
+        return announcement_type;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setAnnouncement_type(String announcement_type) {
+        this.announcement_type = announcement_type;
     }
 
     public String getPriority() {

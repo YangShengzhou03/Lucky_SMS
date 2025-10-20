@@ -297,7 +297,7 @@ CREATE TABLE courses (
 -- 学期表（添加选课时间窗口）
 CREATE TABLE semesters (
     semester_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '学期ID（主键）',
-    academic_year VARCHAR(9) NOT NULL COMMENT '学年（如2023-2024）',
+    academic_year VARCHAR(9) NOT NULL COMMENT '学年（如2023-2025）',
     semester_name VARCHAR(20) NOT NULL COMMENT '学期名称',
     start_date DATE NOT NULL COMMENT '开始日期',
     end_date DATE NOT NULL COMMENT '结束日期',
@@ -872,11 +872,11 @@ INSERT INTO majors (major_name, department_id, major_code, required_credits) VAL
 
 -- 初始化班级表
 INSERT INTO class_info (class_name, major_id, enrollment_year, classroom) VALUES
-    ('计算机2024-1班', 1, 2024, '教学楼A201'),
-    ('软件2024-1班', 2, 2024, '教学楼B101'),
-    ('电子2024-1班', 3, 2024, '教学楼C301'),
-    ('计算机默认班级', 1, 2024, '教学楼A301'),
-    ('软件默认班级', 2, 2024, '教学楼B201');
+    ('计算机2025-1班', 1, 2025, '教学楼A201'),
+    ('软件2025-1班', 2, 2025, '教学楼B101'),
+    ('电子2025-1班', 3, 2025, '教学楼C301'),
+    ('计算机默认班级', 1, 2025, '教学楼A301'),
+    ('软件默认班级', 2, 2025, '教学楼B201');
 
 -- 初始化图书分类表
 INSERT INTO book_categories (category_name, parent_id) VALUES
@@ -889,8 +889,8 @@ INSERT INTO book_categories (category_name, parent_id) VALUES
 
 -- 初始化学期表
 INSERT INTO semesters (academic_year, semester_name, start_date, end_date, course_selection_start, course_selection_end, grade_entry_start, grade_entry_end, is_current) VALUES
-    ('2023-2024', '第一学期', '2023-09-01', '2024-01-20', '2023-08-20', '2023-09-10', '2024-01-10', '2024-01-30', 0),
-    ('2023-2024', '第二学期', '2024-02-26', '2024-07-15', '2024-02-15', '2024-03-10', '2024-07-01', '2024-07-20', 1);
+    ('2023-2025', '第一学期', '2023-09-01', '2025-01-20', '2023-08-20', '2023-09-10', '2025-01-10', '2025-01-30', 0),
+    ('2023-2025', '第二学期', '2025-02-26', '2025-07-15', '2025-02-15', '2025-03-10', '2025-07-01', '2025-07-20', 1);
 
 -- 初始化用户表（管理员）
 INSERT INTO users (username, password_hash, email, phone, gender, status, created_by) VALUES
@@ -941,16 +941,16 @@ INSERT INTO books (isbn, book_title, author, publisher, publish_year, category_i
 
 -- 初始化待办事项表数据
 INSERT INTO todos (user_id, text, completed, due_date, important, category) VALUES
-    (3, '完成学生个人信息核对', FALSE, '2024-09-24', TRUE, '学工'),
-    (3, '查收新生开学必读须知', FALSE, '2024-06-25', FALSE, '通知'),
-    (3, '完成数据结构作业第二章', FALSE, '2024-06-25', FALSE, '作业');
+    (3, '完成学生个人信息核对', FALSE, '2025-09-24', TRUE, '学工'),
+    (3, '查收新生开学必读须知', FALSE, '2025-06-25', FALSE, '通知'),
+    (3, '完成数据结构作业第二章', FALSE, '2025-06-25', FALSE, '作业');
 
 -- 初始化公告表数据
 INSERT INTO announcements (title, content, publish_date, expiry_date, department_id, announcement_type, priority, created_by) VALUES
-    ('期末考试安排通知', '各位同学请注意，期末考试将于下周一开始，请做好充分准备。考试时间为上午9:00-11:00，地点在各班教室。', '2024-06-15', '2024-07-01', 1, 'IMPORTANT', 'HIGH', 1),
-    ('图书馆开放时间调整', '由于系统维护，图书馆本周三下午将临时关闭，请同学们合理安排借阅时间。', '2024-06-14', '2024-06-21', 1, 'NOTICE', 'MEDIUM', 1),
-    ('校园文化节活动预告', '我校将于下月举办校园文化节，欢迎各位同学积极参与各项活动。具体活动安排请关注后续通知。', '2024-06-13', '2024-07-13', 1, 'ACTIVITY', 'MEDIUM', 1),
-    ('校园招聘信息', '多家知名企业将于下周来校招聘，欢迎大四同学参加。请准备好个人简历和相关材料。', '2024-06-12', '2024-06-30', 1, 'INFO', 'LOW', 1);
+    ('期末考试安排通知', '各位同学请注意，期末考试将于下周一开始，请做好充分准备。考试时间为上午9:00-11:00，地点在各班教室。', '2025-06-15', '2025-07-01', 1, 'IMPORTANT', 'HIGH', 1),
+    ('图书馆开放时间调整', '由于系统维护，图书馆本周三下午将临时关闭，请同学们合理安排借阅时间。', '2025-06-14', '2025-06-21', 1, 'NOTICE', 'MEDIUM', 1),
+    ('校园文化节活动预告', '我校将于下月举办校园文化节，欢迎各位同学积极参与各项活动。具体活动安排请关注后续通知。', '2025-06-13', '2025-07-13', 1, 'ACTIVITY', 'MEDIUM', 1),
+    ('校园招聘信息', '多家知名企业将于下周来校招聘，欢迎大四同学参加。请准备好个人简历和相关材料。', '2025-06-12', '2025-06-30', 1, 'INFO', 'LOW', 1);
 
 -- 修复用户表的自引用外键约束（在表创建后添加，避免循环依赖）
 ALTER TABLE users
@@ -1006,14 +1006,11 @@ CREATE TRIGGER trg_auto_create_student_after_insert_users
 BEGIN
     DECLARE student_role_count INT;
     
-    -- 检查用户是否被分配了学生角色（角色ID为3）
     SELECT COUNT(*) INTO student_role_count
     FROM user_roles 
     WHERE user_id = NEW.user_id AND role_id = 3;
     
-    -- 如果用户有学生角色，自动创建学生记录
     IF student_role_count > 0 THEN
-        -- 插入默认学生记录（需要后续手动更新详细信息）
         INSERT INTO students (
             user_id, 
             department_id, 
@@ -1026,8 +1023,8 @@ BEGIN
             created_by
         ) VALUES (
             NEW.user_id,
-            1,  -- 默认计算机学院
-            1,  -- 默认计算机专业
+            1,  -- 默认学院
+            1,  -- 默认专业
             1,  -- 默认班级
             CURDATE(),  -- 当前日期作为入学日期
             4,  -- 默认4年学制
@@ -1042,22 +1039,18 @@ END //
 
 DELIMITER ;
 
--- 创建存储过程：修复学生数据一致性
 DELIMITER //
 
 CREATE PROCEDURE sp_repair_student_data_consistency()
 BEGIN
-    -- 修复1：删除没有对应用户的学生记录
     DELETE s FROM students s
     LEFT JOIN users u ON s.user_id = u.user_id
     WHERE u.user_id IS NULL;
     
-    -- 修复2：删除没有学生角色的学生记录
     DELETE s FROM students s
     LEFT JOIN user_roles ur ON s.user_id = ur.user_id AND ur.role_id = 3
     WHERE ur.user_id IS NULL;
     
-    -- 修复3：为有学生角色但没有学生记录的用户创建学生记录
     INSERT INTO students (
         user_id, department_id, major_id, class_id, 
         enrollment_date, education_years, student_no, status_id, created_by
@@ -1069,14 +1062,12 @@ BEGIN
     LEFT JOIN students s ON ur.user_id = s.user_id
     WHERE ur.role_id = 3 AND s.student_id IS NULL;
     
-    -- 修复4：更新学生的班级信息（确保班级与专业一致）
     UPDATE students s
     INNER JOIN class_info c ON s.major_id = c.major_id 
                            AND YEAR(s.enrollment_date) = c.enrollment_year
     SET s.class_id = c.class_id
     WHERE s.class_id != c.class_id;
     
-    -- 修复5：更新学生的学院信息（确保与专业一致）
     UPDATE students s
     INNER JOIN majors m ON s.major_id = m.major_id
     SET s.department_id = m.department_id
@@ -1086,7 +1077,6 @@ END //
 
 DELIMITER ;
 
--- 创建事件：定期检查数据一致性
 DELIMITER //
 
 CREATE EVENT IF NOT EXISTS event_check_student_data_consistency
@@ -1099,30 +1089,24 @@ END //
 
 DELIMITER ;
 
--- 开启外键检查
 SET FOREIGN_KEY_CHECKS = 1;
 
--- 修复自增序列，避免重复插入问题
--- 修复users表自增序列（从当前最大ID+1开始）
 SET @max_user_id = (SELECT MAX(user_id) FROM users);
 SET @sql_user = CONCAT('ALTER TABLE users AUTO_INCREMENT = ', IFNULL(@max_user_id + 1, 1));
 PREPARE stmt_user FROM @sql_user;
 EXECUTE stmt_user;
 DEALLOCATE PREPARE stmt_user;
 
--- 修复students表自增序列（从当前最大ID+1开始）
 SET @max_student_id = (SELECT MAX(student_id) FROM students);
 SET @sql_student = CONCAT('ALTER TABLE students AUTO_INCREMENT = ', IFNULL(@max_student_id + 1, 1));
 PREPARE stmt_student FROM @sql_student;
 EXECUTE stmt_student;
 DEALLOCATE PREPARE stmt_student;
 
--- 清理重复的students表数据（如果存在重复user_id）
 DELETE s1 FROM students s1
 INNER JOIN students s2 
     ON s1.user_id = s2.user_id 
     AND s1.student_id > s2.student_id;
 
--- 测试新用户插入逻辑（验证修复效果）
 INSERT INTO users (username, password_hash, phone, status, created_by) 
 VALUES ('TEST_STUDENT', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '13800000004', 'ACTIVE', 1);

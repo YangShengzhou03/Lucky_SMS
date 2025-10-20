@@ -19,8 +19,6 @@
         SELECT
             u.username,
             s.student_no AS student_no,
-            s.gpa,
-            s.class_rank,
             (SELECT COUNT(*) FROM students WHERE class_id = s.class_id) AS classSize,
             ci.class_name AS class_name,
             (
@@ -60,17 +58,26 @@
         WHERE user_id = #{userId}
     </select>
 
-    <!-- 选择出公告 -->
-    <select id="selectAnnouncementList" resultType="com.yangshengzhou.lucky_sms.pojo.Announcement">
+    <resultMap id="AnnouncementMap" type="com.yangshengzhou.lucky_sms.pojo.Announcement">
+        <result column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="publish_date" property="publish_date"/>
+        <result column="department_name" property="department_name"/>
+        <result column="announcement_type" property="announcement_type"/>
+        <result column="priority" property="priority"/>
+    </resultMap>
+
+    <select id="selectAnnouncementList" resultMap="AnnouncementMap">
         SELECT
-            id,
-            title,
-            content,
-            date,
-            department,
-            type,
-            priority
-        FROM announcements
+        a.id,
+        a.title,
+        a.content,
+        a.publish_date,
+        d.department_name,
+        a.announcement_type,
+        a.priority
+        FROM announcements a LEFT JOIN departments d ON a.department_id = d.department_id
     </select>
 
     <!-- 1. 定义 Todos 的显式映射规则 -->
@@ -442,15 +449,9 @@
         LIMIT #{offset}, #{size}
     </select>
 
-<!--    &lt;!&ndash; 选择出AcademicHistoryList数据 &ndash;&gt;-->
-<!--    <select id="selectAcademicHistoryList" parameterType="Integer" resultType="com.yangshengzhou.lucky_sms.pojo.AcademicHistory">-->
-<!--        SELECT-->
-
-<!--    </select>-->
-
     <!-- 查询学生最大学分 -->
     <select id="getMaxCredits" parameterType="Integer" resultType="Integer">
-        SELECT max_credits
+        SELECT *
         FROM students
         WHERE user_id = #{userId}
     </select>
