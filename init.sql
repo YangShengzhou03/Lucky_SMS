@@ -238,7 +238,7 @@ ALTER TABLE class_info
     ADD CONSTRAINT fk_class_advisor
         FOREIGN KEY (class_advisor_id) REFERENCES teachers(teacher_id) ON UPDATE SET NULL ON DELETE SET NULL;
 
--- 学生表（移除冗余字段，修正外键）
+-- 学生表
 CREATE TABLE students (
     student_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '学生ID（主键）',
     user_id INT UNIQUE NOT NULL COMMENT '用户ID（外键）',
@@ -294,10 +294,10 @@ CREATE TABLE courses (
     CONSTRAINT chk_course_hours CHECK (course_hours > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '课程表-存储课程基本信息';
 
--- 学期表（添加选课时间窗口）
+-- 学期表
 CREATE TABLE semesters (
     semester_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '学期ID（主键）',
-    academic_year VARCHAR(9) NOT NULL COMMENT '学年（如2023-2025）',
+    academic_year VARCHAR(9) NOT NULL COMMENT '学年（如2024-2025）',
     semester_name VARCHAR(20) NOT NULL COMMENT '学期名称',
     start_date DATE NOT NULL COMMENT '开始日期',
     end_date DATE NOT NULL COMMENT '结束日期',
@@ -317,7 +317,7 @@ CREATE TABLE semesters (
     CONSTRAINT chk_is_current CHECK (is_current IN (0, 1))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '学期表-定义学期信息及时间窗口';
 
--- 教师授课表（修正外键引用，添加唯一约束）
+-- 教师授课表
 CREATE TABLE teaching_assignments (
     assignment_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '授课ID（主键）',
     teacher_id INT NOT NULL COMMENT '教师ID（外键）',
@@ -341,7 +341,7 @@ CREATE TABLE teaching_assignments (
     CONSTRAINT chk_student_capacity CHECK (current_students <= max_students)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '教师授课表-记录教师授课安排';
 
--- 学生选课表（添加时间窗口检查）
+-- 学生选课表
 CREATE TABLE course_selections (
     selection_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '选课ID（主键）',
     student_id INT NOT NULL COMMENT '学生ID（外键）',
@@ -366,7 +366,7 @@ CREATE TABLE course_selections (
     )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '学生选课表-记录学生选课信息';
 
--- 成绩表（添加时间窗口和逻辑检查）
+-- 成绩表
 CREATE TABLE course_grades (
     grade_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '成绩ID（主键）',
     student_id INT NOT NULL COMMENT '学生ID（外键）',
@@ -855,42 +855,24 @@ INSERT INTO teacher_titles (title_name, title_level) VALUES
 
 -- 初始化学院表
 INSERT INTO departments (department_name, department_code) VALUES
-    ('计算机科学与技术学院', 'CS'),
-    ('电子工程学院', 'EE'),
-    ('机械工程学院', 'ME'),
-    ('管理学院', 'BM'),
-    ('外国语学院', 'FL');
+    ('默认学院', 'CS');
 
 -- 初始化专业表
 INSERT INTO majors (major_name, department_id, major_code, required_credits) VALUES
-    ('计算机科学与技术', 1, 'CS01', 160),
-    ('软件工程', 1, 'CS02', 165),
-    ('电子信息工程', 2, 'EE01', 155),
-    ('机械设计制造', 3, 'ME01', 158),
-    ('工商管理', 4, 'BM01', 150),
-    ('英语', 5, 'FL01', 145);
+    ('默认专业', 1, 'CS01', 160);
 
 -- 初始化班级表
 INSERT INTO class_info (class_name, major_id, enrollment_year, classroom) VALUES
-    ('计算机2025-1班', 1, 2025, '教学楼A201'),
-    ('软件2025-1班', 2, 2025, '教学楼B101'),
-    ('电子2025-1班', 3, 2025, '教学楼C301'),
-    ('计算机默认班级', 1, 2025, '教学楼A301'),
-    ('软件默认班级', 2, 2025, '教学楼B201');
+    ('默认班级', 1, 2025, '默认楼A201');
 
 -- 初始化图书分类表
 INSERT INTO book_categories (category_name, parent_id) VALUES
-    ('计算机科学', NULL),
-    ('编程语言', 1),
-    ('数据库', 1),
-    ('文学', NULL),
-    ('小说', 4),
-    ('历史', NULL);
+    ('默认图书', NULL);
 
 -- 初始化学期表
 INSERT INTO semesters (academic_year, semester_name, start_date, end_date, course_selection_start, course_selection_end, grade_entry_start, grade_entry_end, is_current) VALUES
-    ('2023-2025', '第一学期', '2023-09-01', '2025-01-20', '2023-08-20', '2023-09-10', '2025-01-10', '2025-01-30', 0),
-    ('2023-2025', '第二学期', '2025-02-26', '2025-07-15', '2025-02-15', '2025-03-10', '2025-07-01', '2025-07-20', 1);
+    ('2024-2025', '第一学期', '2024-09-01', '2025-01-20', '2024-08-20', '2024-09-10', '2025-01-10', '2025-01-30', 0),
+    ('2024-2025', '第二学期', '2025-02-26', '2025-07-15', '2025-02-15', '2025-03-10', '2025-07-01', '2025-07-20', 1);
 
 -- 初始化用户表（管理员）
 INSERT INTO users (username, password_hash, email, phone, gender, status, created_by) VALUES
@@ -901,7 +883,7 @@ INSERT INTO users (username, password_hash, email, phone, gender, status, create
 
 -- 初始化教师表
 INSERT INTO teachers (user_id, department_id, title_id, hire_date, office_location, teacher_no, status_id, created_by) VALUES
-    (2, 1, 4, '2020-09-01', '计算机学院A301', 'T2020001', 1, 1);
+    (2, 1, 4, '2020-09-01', '默认学院A301', 'T2020001', 1, 1);
 
 -- 设置计算机学院院长
 UPDATE departments SET dean_id = 1 WHERE department_id = 1;
@@ -962,9 +944,12 @@ ALTER TABLE users
 -- 创建触发器：新增学生时自动分配默认班级
 DELIMITER //
 
+-- 删除可能存在的冲突触发器
+DROP TRIGGER IF EXISTS trg_auto_assign_class_after_insert_students //
+
 -- 触发器1：新增学生时自动分配默认班级（基于专业和入学年份）
-CREATE TRIGGER trg_auto_assign_class_after_insert_students
-    AFTER INSERT ON students
+CREATE TRIGGER trg_auto_assign_class_before_insert_students
+    BEFORE INSERT ON students
     FOR EACH ROW
 BEGIN
     DECLARE default_class_id INT;
@@ -991,11 +976,9 @@ BEGIN
         LIMIT 1;
     END IF;
     
-    -- 如果找到合适的班级，更新学生记录
+    -- 如果找到合适的班级，直接设置NEW.class_id（关键：在插入前修改字段值）
     IF default_class_id IS NOT NULL THEN
-        UPDATE students 
-        SET class_id = default_class_id 
-        WHERE student_id = NEW.student_id;
+        SET NEW.class_id = default_class_id;
     END IF;
 END //
 
