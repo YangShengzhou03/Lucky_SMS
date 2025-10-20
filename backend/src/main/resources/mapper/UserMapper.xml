@@ -19,8 +19,8 @@
 
     <!-- 通过手机号注册用户 -->
     <insert id="registerByPhone" parameterType="String">
-        INSERT INTO users (phone)
-        VALUES (#{phone})
+        INSERT INTO users (phone, username, password_hash)
+        VALUES (#{phone}, 'Lucky', '12345678')
     </insert>
 
     <!-- 通过手机号重设密码 -->

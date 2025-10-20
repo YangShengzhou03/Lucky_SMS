@@ -53,15 +53,6 @@
             c.course_name
     </select>
 
-    <!-- 检查是否已选某课程 -->
-    <select id="checkCourseSelected" resultType="java.lang.Boolean">
-        SELECT COUNT(*) > 0
-        FROM course_selections
-        WHERE student_id = #{userId}
-          AND assignment_id = #{courseId}
-          AND status = 'selected'
-    </select>
-
     <!-- 检查课程是否已选 -->
     <select id="checkCourseSelected" parameterType="map" resultType="boolean">
         SELECT COUNT(*) > 0

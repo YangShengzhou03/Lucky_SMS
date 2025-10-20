@@ -15,8 +15,8 @@ USE Lucky_SMS;
 -- 用户表：存储系统所有用户的基础信息（先创建基础表，自引用外键稍后添加）
 CREATE TABLE users (
     user_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '用户ID（主键）',
-    username VARCHAR(50) UNIQUE NOT NULL COMMENT '用户名（全局唯一）',
-    password_hash VARCHAR(255) NOT NULL COMMENT '加密后的密码',
+    username VARCHAR(50) NOT NULL COMMENT '用户名',
+    password_hash VARCHAR(255) COMMENT '加密后的密码',
     email VARCHAR(100) UNIQUE COMMENT '电子邮箱',
     phone VARCHAR(20) UNIQUE NOT NULL COMMENT '手机号码',
     gender ENUM('M', 'F', 'O') DEFAULT 'O' COMMENT '性别（M-男，F-女，O-其他）',
