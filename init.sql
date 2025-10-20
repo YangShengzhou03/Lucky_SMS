@@ -5,7 +5,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 -- 删除现有数据库并重新创建
 DROP DATABASE IF EXISTS Lucky_SMS;
-CREATE DATABASE Lucky_SMS;
+CREATE DATABASE Lucky_SMS CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE Lucky_SMS;
 
 /*
@@ -36,7 +36,7 @@ CREATE TABLE users (
     INDEX idx_phone (phone),
     INDEX idx_status (status),
     CONSTRAINT chk_birth_date CHECK (birth_date IS NULL OR birth_date >= '1900-01-01')
-) COMMENT = '用户表-存储用户的基础信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户表-存储用户的基础信息';
 
 -- 角色表：定义系统中的不同角色
 CREATE TABLE roles (
@@ -46,7 +46,7 @@ CREATE TABLE roles (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_role_name (role_name)
-) COMMENT = '角色表-定义系统中的不同角色及权限范围';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '角色表-定义系统中的不同角色及权限范围';
 
 -- 权限表：定义系统中的各种操作权限
 CREATE TABLE permissions (
@@ -58,7 +58,7 @@ CREATE TABLE permissions (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_permission_name (permission_name),
     INDEX idx_module (module)
-) COMMENT = '权限表-定义系统操作权限';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '权限表-定义系统操作权限';
 
 -- 学生状态表
 CREATE TABLE student_statuses (
@@ -68,7 +68,7 @@ CREATE TABLE student_statuses (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_status_name (status_name)
-) COMMENT = '学生状态表-定义学生状态（在读、毕业、休学等）';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '学生状态表-定义学生状态（在读、毕业、休学等）';
 
 -- 教师状态表
 CREATE TABLE teacher_statuses (
@@ -78,7 +78,7 @@ CREATE TABLE teacher_statuses (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_status_name (status_name)
-) COMMENT = '教师状态表-定义教师状态（在职、休假、退休等）';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '教师状态表-定义教师状态（在职、休假、退休等）';
 
 -- 职称表
 CREATE TABLE teacher_titles (
@@ -90,7 +90,7 @@ CREATE TABLE teacher_titles (
     INDEX idx_title_name (title_name),
     INDEX idx_title_level (title_level),
     CONSTRAINT chk_title_level CHECK (title_level IN (1, 2, 3))
-) COMMENT = '教师职称表-定义教师职称及级别';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '教师职称表-定义教师职称及级别';
 
 -- 成绩审核状态表
 CREATE TABLE grade_review_statuses (
@@ -100,7 +100,7 @@ CREATE TABLE grade_review_statuses (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_status_name (status_name)
-) COMMENT = '成绩审核状态表-定义成绩审核状态（待审核、已通过、已拒绝）';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '成绩审核状态表-定义成绩审核状态（待审核、已通过、已拒绝）';
 
 -- 图书借阅状态表
 CREATE TABLE book_borrow_statuses (
@@ -110,7 +110,7 @@ CREATE TABLE book_borrow_statuses (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_status_name (status_name)
-) COMMENT = '图书借阅状态表-定义图书借阅状态（已借出、已归还、已逾期等）';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '图书借阅状态表-定义图书借阅状态（已借出、已归还、已逾期等）';
 
 -- 图书分类表（级联操作）
 CREATE TABLE book_categories (
@@ -121,7 +121,7 @@ CREATE TABLE book_categories (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     FOREIGN KEY (parent_id) REFERENCES book_categories(category_id) ON DELETE SET NULL ON UPDATE CASCADE,
     INDEX idx_parent_id (parent_id)
-) COMMENT = '图书分类表-定义图书分类层级结构';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '图书分类表-定义图书分类层级结构';
 
 /*
 第二阶段：基础业务表（依赖基础字典表）
@@ -136,7 +136,7 @@ CREATE TABLE departments (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_department_code (department_code)
-) COMMENT = '学院表-定义学校学院及负责人';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '学院表-定义学校学院及负责人';
 
 -- 专业表（级联操作）
 CREATE TABLE majors (
@@ -151,7 +151,7 @@ CREATE TABLE majors (
     INDEX idx_major_code (major_code),
     INDEX idx_department_id (department_id),
     CONSTRAINT chk_required_credits CHECK (required_credits >= 0)
-) COMMENT = '专业表-定义学院下的专业';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '专业表-定义学院下的专业';
 
 -- 班级表（级联操作，班主任外键稍后添加）
 CREATE TABLE class_info (
@@ -168,7 +168,7 @@ CREATE TABLE class_info (
     INDEX idx_major_id (major_id),
     INDEX idx_enrollment_year (enrollment_year),
     CONSTRAINT chk_enrollment_year CHECK (enrollment_year >= 2000)
-) COMMENT = '班级表-定义专业下的班级信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '班级表-定义专业下的班级信息';
 
 -- 用户角色关联表
 CREATE TABLE user_roles (
@@ -182,7 +182,7 @@ CREATE TABLE user_roles (
     FOREIGN KEY (assigned_by) REFERENCES users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
     INDEX idx_user_id (user_id),
     INDEX idx_role_id (role_id)
-) COMMENT = '用户角色关联表-记录用户与角色的对应关系';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户角色关联表-记录用户与角色的对应关系';
 
 -- 角色权限关联表
 CREATE TABLE role_permissions (
@@ -196,7 +196,7 @@ CREATE TABLE role_permissions (
     FOREIGN KEY (assigned_by) REFERENCES users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
     INDEX idx_role_id (role_id),
     INDEX idx_permission_id (permission_id)
-) COMMENT = '角色权限关联表-记录角色与权限的对应关系';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '角色权限关联表-记录角色与权限的对应关系';
 
 -- 教师表（修正外键引用）
 CREATE TABLE teachers (
@@ -223,7 +223,7 @@ CREATE TABLE teachers (
     INDEX idx_status_id (status_id),
     INDEX idx_teachers_department_status (department_id, status_id),
     CONSTRAINT chk_hire_date CHECK (hire_date >= '2000-01-01')
-) COMMENT = '教师表-存储教师详细信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '教师表-存储教师详细信息';
 
 -- 修正院长外键引用（在teachers表创建后）
 ALTER TABLE departments
@@ -266,7 +266,7 @@ CREATE TABLE students (
     INDEX idx_students_class_status (class_id, status_id),
     CONSTRAINT chk_education_years CHECK (education_years BETWEEN 1 AND 8),
     CONSTRAINT chk_enrollment_date CHECK (enrollment_date >= '2000-01-01')
-) COMMENT = '学生表-存储学生详细信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '学生表-存储学生详细信息';
 
 -- 课程表
 CREATE TABLE courses (
@@ -289,7 +289,7 @@ CREATE TABLE courses (
     INDEX idx_course_type (course_type),
     CONSTRAINT chk_credit CHECK (credit > 0),
     CONSTRAINT chk_course_hours CHECK (course_hours > 0)
-) COMMENT = '课程表-存储课程基本信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '课程表-存储课程基本信息';
 
 -- 学期表（添加选课时间窗口）
 CREATE TABLE semesters (
@@ -312,7 +312,7 @@ CREATE TABLE semesters (
     CONSTRAINT chk_selection_dates CHECK (course_selection_end > course_selection_start),
     CONSTRAINT chk_grade_dates CHECK (grade_entry_end > grade_entry_start),
     CONSTRAINT chk_is_current CHECK (is_current IN (0, 1))
-) COMMENT = '学期表-定义学期信息及时间窗口';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '学期表-定义学期信息及时间窗口';
 
 -- 教师授课表（修正外键引用，添加唯一约束）
 CREATE TABLE teaching_assignments (
@@ -336,7 +336,7 @@ CREATE TABLE teaching_assignments (
     CONSTRAINT chk_max_students CHECK (max_students > 0),
     CONSTRAINT chk_current_students CHECK (current_students >= 0),
     CONSTRAINT chk_student_capacity CHECK (current_students <= max_students)
-) COMMENT = '教师授课表-记录教师授课安排';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '教师授课表-记录教师授课安排';
 
 -- 学生选课表（添加时间窗口检查）
 CREATE TABLE course_selections (
@@ -361,7 +361,7 @@ CREATE TABLE course_selections (
         (status = 'DROPPED' AND dropped_time IS NOT NULL) OR
         (status = 'COMPLETED' AND completed_time IS NOT NULL)
     )
-) COMMENT = '学生选课表-记录学生选课信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '学生选课表-记录学生选课信息';
 
 -- 成绩表（添加时间窗口和逻辑检查）
 CREATE TABLE course_grades (
@@ -399,7 +399,7 @@ CREATE TABLE course_grades (
         (usual_score IS NULL AND final_grade IS NULL) OR
         (usual_score IS NOT NULL AND final_grade IS NOT NULL)
     )
-) COMMENT = '成绩表-记录学生课程成绩';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '成绩表-记录学生课程成绩';
 
 -- 课程先修关系表
 CREATE TABLE course_prerequisites (
@@ -410,7 +410,7 @@ CREATE TABLE course_prerequisites (
     PRIMARY KEY (course_id, prerequisite_course_id),
     FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (prerequisite_course_id) REFERENCES courses(course_id) ON DELETE CASCADE ON UPDATE CASCADE
-) COMMENT = '课程先修关系表-定义课程先修关系';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '课程先修关系表-定义课程先修关系';
 
 -- 图书表
 CREATE TABLE books (
@@ -437,7 +437,7 @@ CREATE TABLE books (
     CONSTRAINT chk_total_copies CHECK (total_copies > 0),
     CONSTRAINT chk_available_copies CHECK (available_copies >= 0),
     CONSTRAINT chk_available_vs_total CHECK (available_copies <= total_copies)
-) COMMENT = '图书表-记录图书馆藏书信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '图书表-记录图书馆藏书信息';
 
 -- 图书预约表
 CREATE TABLE book_reservations (
@@ -457,7 +457,7 @@ CREATE TABLE book_reservations (
     INDEX idx_book_id (book_id),
     INDEX idx_status (status),
     INDEX idx_expiry_time (expiry_time)
-) COMMENT = '图书预约表-记录图书预约信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '图书预约表-记录图书预约信息';
 
 -- 图书借阅表
 CREATE TABLE book_borrowings (
@@ -490,7 +490,7 @@ CREATE TABLE book_borrowings (
     CONSTRAINT chk_fine CHECK (fine >= 0),
     CONSTRAINT chk_renew_count CHECK (renew_count BETWEEN 0 AND 3),
     CONSTRAINT chk_compensation CHECK (compensation >= 0)
-) COMMENT = '图书借阅表-记录图书借阅信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '图书借阅表-记录图书借阅信息';
 
 -- 数据变更日志表
 CREATE TABLE id_changes (
@@ -505,7 +505,7 @@ CREATE TABLE id_changes (
     FOREIGN KEY (changed_by) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
     INDEX idx_table_record (table_name, record_id),
     INDEX idx_changed_at (changed_at)
-) COMMENT = 'ID变更表-记录重要ID变更历史';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = 'ID变更表-记录重要ID变更历史';
 
 -- 系统配置表
 CREATE TABLE system_config (
@@ -517,7 +517,7 @@ CREATE TABLE system_config (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_config_key (config_key)
-) COMMENT = '系统配置表-存储系统配置参数';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '系统配置表-存储系统配置参数';
 
 -- 系统操作日志表
 CREATE TABLE system_audit_log (
@@ -536,7 +536,7 @@ CREATE TABLE system_audit_log (
     INDEX idx_action_type (action_type),
     INDEX idx_created_at (created_at),
     INDEX idx_table_record (table_name, record_id)
-) COMMENT = '系统操作日志表-记录重要操作日志';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '系统操作日志表-记录重要操作日志';
 
 -- 选课时间冲突检查表
 CREATE TABLE course_schedule_conflicts (
@@ -553,7 +553,7 @@ CREATE TABLE course_schedule_conflicts (
     FOREIGN KEY (assignment_id2) REFERENCES teaching_assignments(assignment_id) ON DELETE CASCADE,
     INDEX idx_student_id (student_id),
     INDEX idx_detected_at (detected_at)
-) COMMENT = '选课冲突记录表-记录选课冲突信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '选课冲突记录表-记录选课冲突信息';
 
 -- 待办事项表
 CREATE TABLE todos (
@@ -571,7 +571,7 @@ CREATE TABLE todos (
     INDEX idx_completed (completed),
     INDEX idx_due_date (due_date),
     INDEX idx_important (important)
-) COMMENT = '待办事项表，存储用户的待办事项信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '待办事项表，存储用户的待办事项信息';
 
 -- 公告表
 CREATE TABLE announcements (
@@ -593,7 +593,7 @@ CREATE TABLE announcements (
     INDEX idx_priority (priority),
     INDEX idx_department_id (department_id),
     CONSTRAINT chk_expiry_date CHECK (expiry_date IS NULL OR expiry_date >= publish_date)
-) COMMENT = '公告表，存储系统公告和通知信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '公告表，存储系统公告和通知信息';
 
 -- 用户地址表（新增）
 CREATE TABLE user_addresses (
@@ -610,7 +610,7 @@ CREATE TABLE user_addresses (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     INDEX idx_user_id (user_id),
     INDEX idx_address_type (address_type)
-) COMMENT = '用户地址表-存储用户地址信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户地址表-存储用户地址信息';
 
 /*
 视图定义

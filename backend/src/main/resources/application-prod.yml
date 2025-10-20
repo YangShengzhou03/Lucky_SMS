@@ -15,7 +15,7 @@ logging:
 # 数据库连接配置 + Redis配置（都在 spring 下面，层级要对）
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/lucky_sms?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://mysql:3306/lucky_sms?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root  # 数据库用户名，默认是root
     password: 123456  # 数据库登录密码
     driver-class-name: com.mysql.cj.jdbc.Driver  # MySQL 8以上用这个驱动，老版本的话换成com.mysql.jdbc.Driver
