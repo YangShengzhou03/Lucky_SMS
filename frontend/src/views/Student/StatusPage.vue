@@ -172,8 +172,8 @@ const fetchStudentStatus = async () => {
       else if (gpa >= 1.0) performanceLevel.value = '及格'
       else performanceLevel.value = '不及格'
       
-      // 模拟出勤率（实际应用中应该从后端获取）
-      attendanceRate.value = Math.min(95, Math.max(60, Math.round(gpa * 25 + Math.random() * 10)))
+      // 出勤率（从后端获取）
+      attendanceRate.value = data.basicInfo.attendanceRate || 99
       
       // 保存历史数据用于趋势图（如果后端提供了历史数据）
       if (data.academicHistory && data.academicHistory.length > 0) {

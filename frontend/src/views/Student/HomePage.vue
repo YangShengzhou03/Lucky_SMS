@@ -291,24 +291,24 @@ const fetchData = async () => {
     // 如果API请求失败，使用模拟数据作为后备
     student.value = {
       username: '--',
-      student_no: '2025CS0002',
-      class_name: '示例班级',
+      student_no: '--',
+      class_name: '--班级',
       gpa: '4.00',
       class_rank: '1',
-      classSize: '2',
+      classSize: '1',
       course_count: '1',
       nextCourse: {
         "id": "CS301",
-        "name": "数据结构与算法",
+        "name": "Web全栈开发",
         "time": "08:00-09:40",
-        "location": "计算机楼A305",
-        "teacher": "李教授",
+        "location": "逸夫楼",
+        "teacher": "杨教授",
         "day": "周一"
       },
       todos: [
         {
           "id": 1,
-          "text": "完成数据结构作业第三章",
+          "text": "完成数据结构作业第一章",
           "completed": false,
           "dueDate": "2025-06-24",
           "important": true,
@@ -321,22 +321,6 @@ const fetchData = async () => {
           "dueDate": "2025-06-25",
           "important": false,
           "category": "作业"
-        },
-        {
-          "id": 3,
-          "text": "完成数据结构作业第二章",
-          "completed": false,
-          "dueDate": "2025-06-25",
-          "important": false,
-          "category": "作业"
-        },
-        {
-          "id": 4,
-          "text": "提交数学建模报告",
-          "completed": false,
-          "dueDate": "2025-06-20",
-          "important": true,
-          "category": "报告"
         }
       ]
     }
@@ -346,9 +330,9 @@ const fetchData = async () => {
         "id": "ann5",
         "title": "校园招聘信息",
         "content": "多家知名企业将于下周来校招聘，欢迎大四同学参加...",
-        "date": "2025-12-11",
-        "department": "就业指导中心",
-        "type": "info",
+        "publish_date": "2025-12-11",
+        "department_name": "就业指导中心",
+        "announcement_type": "INFO",
         "priority": "high"
       }
     ]

@@ -5,8 +5,10 @@ public class BasicInfo {
     private String gpa;
     private int totalCredits;
     private int completedCredits;
-    public String enrollmentDate;
-    public String expectedGraduationDate;
+    private String enrollmentDate;
+    private String expectedGraduationDate;
+    private int attendanceRate;
+
 
     public String getStatus() {
         return status;
@@ -54,5 +56,13 @@ public class BasicInfo {
 
     public void setExpectedGraduationDate(String expectedGraduationDate) {
         this.expectedGraduationDate = expectedGraduationDate;
+    }
+
+    public int getAttendanceRate() {
+        return attendanceRate;
+    }
+
+    public void setAttendanceRate(int attendanceRate) {
+        this.attendanceRate = attendanceRate;
     }
 }

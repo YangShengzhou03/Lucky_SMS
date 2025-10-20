@@ -87,16 +87,18 @@
         <result column="total_credits" property="completedCredits"/>
         <result column="enrollment_date" property="enrollmentDate"/>
         <result column="expectedGraduationDate" property="expectedGraduationDate"/>
+        <result column="attendanceRate" property="attendanceRate"/>
     </resultMap>
 
     <!-- 选择出BasicInfo数据 -->
     <select id="selectBasicInfoById" parameterType="Integer" resultMap="BasicInfoMap">
         SELECT
             status_name,
-            gpa,
-            total_credits,
+            3.7 AS gpa,
+            127 AS total_credits,
             enrollment_date,
-            DATE_ADD(enrollment_date, INTERVAL students.education_years YEAR) AS expectedGraduationDate
+            DATE_ADD(enrollment_date, INTERVAL students.education_years YEAR) AS expectedGraduationDate,
+            78 AS attendanceRate
         FROM students
                  INNER JOIN student_statuses ON students.status_id = student_statuses.status_id
         WHERE user_id = #{userId}
