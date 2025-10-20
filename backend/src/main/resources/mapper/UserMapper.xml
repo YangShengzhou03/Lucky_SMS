@@ -31,7 +31,7 @@
     </insert>
 
     <!-- 通过手机号密码登录 -->
-    <select id="loginByPassword" parameterType="java.util.Map">
+    <select id="loginByPassword" parameterType="java.util.Map" resultType="com.yangshengzhou.lucky_sms.vo.user.LoginVO">
         SELECT
             u.user_id,
             u.username,
