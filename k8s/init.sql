@@ -1,26 +1,22 @@
-# 存储MySQL初始化脚本
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: mysql-init-scripts
-data:
-  # 完整的数据库初始化脚本
-  init.sql: |
-    -- 1. 统一会话字符集和排序规则，避免比较操作冲突
-    SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
-    
-    -- 2. 强制 SQL 执行错误时中断，暴露问题
-    SET SQL_MODE = 'STRICT_ALL_TABLES';
-    -- 3. 关闭外键检查，避免建表顺序导致的外键失败
-    SET FOREIGN_KEY_CHECKS = 0;
-    
-    -- 删除现有数据库并重新创建
-    DROP DATABASE IF EXISTS Lucky_SMS;
-    CREATE DATABASE Lucky_SMS CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-    USE Lucky_SMS;
-    
-    -- 用户表：存储系统所有用户的基础信息（先创建基础表，自引用外键稍后添加）
-    CREATE TABLE users (
+-- 1. 统一会话字符集和排序规则，避免比较操作冲突
+SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- 2. 强制 SQL 执行错误时中断，暴露问题
+SET SQL_MODE = 'STRICT_ALL_TABLES';
+-- 3. 关闭外键检查，避免建表顺序导致的外键失败
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- 删除现有数据库并重新创建
+DROP DATABASE IF EXISTS Lucky_SMS;
+CREATE DATABASE Lucky_SMS CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE Lucky_SMS;
+
+/*
+第一阶段：基础字典表（无外键依赖）
+*/
+
+-- 用户表：存储系统所有用户的基础信息（先创建基础表，自引用外键稍后添加）
+CREATE TABLE users (
     user_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '用户ID（主键）',
     username VARCHAR(50) NOT NULL COMMENT '用户名',
     password_hash VARCHAR(255) COMMENT '加密后的密码',
@@ -43,20 +39,20 @@ data:
     INDEX idx_phone (phone),
     INDEX idx_status (status),
     CONSTRAINT chk_birth_date CHECK (birth_date IS NULL OR birth_date >= '1900-01-01')
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户表-存储用户的基础信息';
-    
-    -- 角色表：定义系统中的不同角色
-    CREATE TABLE roles (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户表-存储用户的基础信息';
+
+-- 角色表：定义系统中的不同角色
+CREATE TABLE roles (
     role_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '角色ID（主键）',
     role_name VARCHAR(50) UNIQUE NOT NULL COMMENT '角色名称（全局唯一）',
     description VARCHAR(255) COMMENT '角色描述',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_role_name (role_name)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '角色表-定义系统中的不同角色及权限范围';
-    
-    -- 权限表：定义系统中的各种操作权限
-    CREATE TABLE permissions (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '角色表-定义系统中的不同角色及权限范围';
+
+-- 权限表：定义系统中的各种操作权限
+CREATE TABLE permissions (
     permission_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '权限ID（主键）',
     permission_name VARCHAR(50) UNIQUE NOT NULL COMMENT '权限名称（全局唯一）',
     description VARCHAR(255) COMMENT '权限描述',
@@ -65,30 +61,30 @@ data:
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_permission_name (permission_name),
     INDEX idx_module (module)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '权限表-定义系统操作权限';
-    
-    -- 学生状态表
-    CREATE TABLE student_statuses (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '权限表-定义系统操作权限';
+
+-- 学生状态表
+CREATE TABLE student_statuses (
     status_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '状态ID（主键）',
     status_name VARCHAR(50) UNIQUE NOT NULL COMMENT '状态名称（全局唯一）',
     description VARCHAR(255) COMMENT '状态描述',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_status_name (status_name)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '学生状态表-定义学生状态（在读、毕业、休学等）';
-    
-    -- 教师状态表
-    CREATE TABLE teacher_statuses (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '学生状态表-定义学生状态（在读、毕业、休学等）';
+
+-- 教师状态表
+CREATE TABLE teacher_statuses (
     status_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '状态ID（主键）',
     status_name VARCHAR(50) UNIQUE NOT NULL COMMENT '状态名称（全局唯一）',
     description VARCHAR(255) COMMENT '状态描述',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_status_name (status_name)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '教师状态表-定义教师状态（在职、休假、退休等）';
-    
-    -- 职称表
-    CREATE TABLE teacher_titles (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '教师状态表-定义教师状态（在职、休假、退休等）';
+
+-- 职称表
+CREATE TABLE teacher_titles (
     title_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '职称ID（主键）',
     title_name VARCHAR(50) UNIQUE NOT NULL COMMENT '职称名称（全局唯一）',
     title_level TINYINT NOT NULL COMMENT '职称级别（1-初级，2-中级，3-高级）',
@@ -97,30 +93,30 @@ data:
     INDEX idx_title_name (title_name),
     INDEX idx_title_level (title_level),
     CONSTRAINT chk_title_level CHECK (title_level IN (1, 2, 3))
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '教师职称表-定义教师职称及级别';
-    
-    -- 成绩审核状态表
-    CREATE TABLE grade_review_statuses (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '教师职称表-定义教师职称及级别';
+
+-- 成绩审核状态表
+CREATE TABLE grade_review_statuses (
     status_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '状态ID（主键）',
     status_name VARCHAR(50) UNIQUE NOT NULL COMMENT '状态名称（全局唯一）',
     description VARCHAR(255) COMMENT '状态描述',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_status_name (status_name)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '成绩审核状态表-定义成绩审核状态（待审核、已通过、已拒绝）';
-    
-    -- 图书借阅状态表
-    CREATE TABLE book_borrow_statuses (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '成绩审核状态表-定义成绩审核状态（待审核、已通过、已拒绝）';
+
+-- 图书借阅状态表
+CREATE TABLE book_borrow_statuses (
     status_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '状态ID（主键）',
     status_name VARCHAR(50) UNIQUE NOT NULL COMMENT '状态名称（全局唯一）',
     description VARCHAR(255) COMMENT '状态描述',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_status_name (status_name)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '图书借阅状态表-定义图书借阅状态（已借出、已归还、已逾期等）';
-    
-    -- 图书分类表（级联操作）
-    CREATE TABLE book_categories (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '图书借阅状态表-定义图书借阅状态（已借出、已归还、已逾期等）';
+
+-- 图书分类表（级联操作）
+CREATE TABLE book_categories (
     category_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '分类ID（主键）',
     category_name VARCHAR(50) UNIQUE NOT NULL COMMENT '分类名称（全局唯一）',
     parent_id INT COMMENT '父分类ID（外键），NULL表示顶级分类',
@@ -128,14 +124,14 @@ data:
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     FOREIGN KEY (parent_id) REFERENCES book_categories(category_id) ON DELETE SET NULL ON UPDATE CASCADE,
     INDEX idx_parent_id (parent_id)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '图书分类表-定义图书分类层级结构';
-    
-    /*
-    第二阶段：基础业务表（依赖基础字典表）
-  */
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '图书分类表-定义图书分类层级结构';
 
-    -- 学院表（先创建基础表，院长外键稍后添加）
-    CREATE TABLE departments (
+/*
+第二阶段：基础业务表（依赖基础字典表）
+*/
+
+-- 学院表（先创建基础表，院长外键稍后添加）
+CREATE TABLE departments (
     department_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '学院ID（主键）',
     department_name VARCHAR(50) UNIQUE NOT NULL COMMENT '学院名称（全局唯一）',
     department_code VARCHAR(10) UNIQUE NOT NULL COMMENT '学院代码（全局唯一）',
@@ -143,10 +139,10 @@ data:
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_department_code (department_code)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '学院表-定义学校学院及负责人';
-    
-    -- 专业表（级联操作）
-    CREATE TABLE majors (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '学院表-定义学校学院及负责人';
+
+-- 专业表（级联操作）
+CREATE TABLE majors (
     major_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '专业ID（主键）',
     major_name VARCHAR(50) NOT NULL COMMENT '专业名称',
     department_id INT NOT NULL COMMENT '所属学院ID（外键）',
@@ -158,10 +154,10 @@ data:
     INDEX idx_major_code (major_code),
     INDEX idx_department_id (department_id),
     CONSTRAINT chk_required_credits CHECK (required_credits >= 0)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '专业表-定义学院下的专业';
-    
-    -- 班级表（级联操作，班主任外键稍后添加）
-    CREATE TABLE class_info (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '专业表-定义学院下的专业';
+
+-- 班级表（级联操作，班主任外键稍后添加）
+CREATE TABLE class_info (
     class_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '班级ID（主键）',
     class_name VARCHAR(50) UNIQUE NOT NULL COMMENT '班级名称（全局唯一）',
     major_id INT NOT NULL COMMENT '所属专业ID（外键）',
@@ -175,10 +171,10 @@ data:
     INDEX idx_major_id (major_id),
     INDEX idx_enrollment_year (enrollment_year),
     CONSTRAINT chk_enrollment_year CHECK (enrollment_year >= 2000)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '班级表-定义专业下的班级信息';
-    
-    -- 用户角色关联表
-    CREATE TABLE user_roles (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '班级表-定义专业下的班级信息';
+
+-- 用户角色关联表
+CREATE TABLE user_roles (
     user_id INT NOT NULL COMMENT '用户ID（外键）',
     role_id INT NOT NULL COMMENT '角色ID（外键）',
     assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '分配时间',
@@ -189,10 +185,10 @@ data:
     FOREIGN KEY (assigned_by) REFERENCES users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
     INDEX idx_user_id (user_id),
     INDEX idx_role_id (role_id)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户角色关联表-记录用户与角色的对应关系';
-    
-    -- 角色权限关联表
-    CREATE TABLE role_permissions (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户角色关联表-记录用户与角色的对应关系';
+
+-- 角色权限关联表
+CREATE TABLE role_permissions (
     role_id INT NOT NULL COMMENT '角色ID（外键）',
     permission_id INT NOT NULL COMMENT '权限ID（外键）',
     assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '分配时间',
@@ -203,10 +199,10 @@ data:
     FOREIGN KEY (assigned_by) REFERENCES users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
     INDEX idx_role_id (role_id),
     INDEX idx_permission_id (permission_id)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '角色权限关联表-记录角色与权限的对应关系';
-    
-    -- 教师表（修正外键引用）
-    CREATE TABLE teachers (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '角色权限关联表-记录角色与权限的对应关系';
+
+-- 教师表（修正外键引用）
+CREATE TABLE teachers (
     teacher_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '教师ID（主键）',
     user_id INT UNIQUE NOT NULL COMMENT '用户ID（外键）',
     department_id INT NOT NULL COMMENT '学院ID（外键）',
@@ -230,20 +226,20 @@ data:
     INDEX idx_status_id (status_id),
     INDEX idx_teachers_department_status (department_id, status_id),
     CONSTRAINT chk_hire_date CHECK (hire_date >= '2000-01-01')
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '教师表-存储教师详细信息';
-    
-    -- 修正院长外键引用（在teachers表创建后）
-    ALTER TABLE departments
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '教师表-存储教师详细信息';
+
+-- 修正院长外键引用（在teachers表创建后）
+ALTER TABLE departments
     ADD CONSTRAINT fk_departments_dean
-    FOREIGN KEY (dean_id) REFERENCES teachers(teacher_id) ON UPDATE SET NULL ON DELETE SET NULL;
-    
-    -- 修正班级表的班主任外键（在teachers表创建后）
-    ALTER TABLE class_info
+        FOREIGN KEY (dean_id) REFERENCES teachers(teacher_id) ON UPDATE SET NULL ON DELETE SET NULL;
+
+-- 修正班级表的班主任外键（在teachers表创建后）
+ALTER TABLE class_info
     ADD CONSTRAINT fk_class_advisor
-    FOREIGN KEY (class_advisor_id) REFERENCES teachers(teacher_id) ON UPDATE SET NULL ON DELETE SET NULL;
-    
-    -- 学生表
-    CREATE TABLE students (
+        FOREIGN KEY (class_advisor_id) REFERENCES teachers(teacher_id) ON UPDATE SET NULL ON DELETE SET NULL;
+
+-- 学生表
+CREATE TABLE students (
     student_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '学生ID（主键）',
     user_id INT UNIQUE NOT NULL COMMENT '用户ID（外键）',
     department_id INT NOT NULL COMMENT '学院ID（外键）',
@@ -273,10 +269,10 @@ data:
     INDEX idx_students_class_status (class_id, status_id),
     CONSTRAINT chk_education_years CHECK (education_years BETWEEN 1 AND 8),
     CONSTRAINT chk_enrollment_date CHECK (enrollment_date >= '2000-01-01')
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '学生表-存储学生详细信息';
-    
-    -- 课程表
-    CREATE TABLE courses (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '学生表-存储学生详细信息';
+
+-- 课程表
+CREATE TABLE courses (
     course_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '课程ID（主键）',
     course_code VARCHAR(20) UNIQUE NOT NULL COMMENT '课程代码（全局唯一）',
     course_name VARCHAR(100) NOT NULL COMMENT '课程名称',
@@ -296,10 +292,10 @@ data:
     INDEX idx_course_type (course_type),
     CONSTRAINT chk_credit CHECK (credit > 0),
     CONSTRAINT chk_course_hours CHECK (course_hours > 0)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '课程表-存储课程基本信息';
-    
-    -- 学期表
-    CREATE TABLE semesters (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '课程表-存储课程基本信息';
+
+-- 学期表
+CREATE TABLE semesters (
     semester_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '学期ID（主键）',
     academic_year VARCHAR(9) NOT NULL COMMENT '学年（如2024-2025）',
     semester_name VARCHAR(20) NOT NULL COMMENT '学期名称',
@@ -319,10 +315,10 @@ data:
     CONSTRAINT chk_selection_dates CHECK (course_selection_end > course_selection_start),
     CONSTRAINT chk_grade_dates CHECK (grade_entry_end > grade_entry_start),
     CONSTRAINT chk_is_current CHECK (is_current IN (0, 1))
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '学期表-定义学期信息及时间窗口';
-    
-    -- 教师授课表
-    CREATE TABLE teaching_assignments (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '学期表-定义学期信息及时间窗口';
+
+-- 教师授课表
+CREATE TABLE teaching_assignments (
     assignment_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '授课ID（主键）',
     teacher_id INT NOT NULL COMMENT '教师ID（外键）',
     course_id INT NOT NULL COMMENT '课程ID（外键）',
@@ -343,10 +339,10 @@ data:
     CONSTRAINT chk_max_students CHECK (max_students > 0),
     CONSTRAINT chk_current_students CHECK (current_students >= 0),
     CONSTRAINT chk_student_capacity CHECK (current_students <= max_students)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '教师授课表-记录教师授课安排';
-    
-    -- 学生选课表
-    CREATE TABLE course_selections (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '教师授课表-记录教师授课安排';
+
+-- 学生选课表
+CREATE TABLE course_selections (
     selection_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '选课ID（主键）',
     student_id INT NOT NULL COMMENT '学生ID（外键）',
     assignment_id INT NOT NULL COMMENT '授课ID（外键）',
@@ -364,24 +360,24 @@ data:
     INDEX idx_status (status),
     INDEX idx_selection_time (selection_time),
     CONSTRAINT chk_status_flow CHECK (
-    (status = 'SELECTED' AND dropped_time IS NULL AND completed_time IS NULL) OR
-    (status = 'DROPPED' AND dropped_time IS NOT NULL) OR
-    (status = 'COMPLETED' AND completed_time IS NOT NULL)
+        (status = 'SELECTED' AND dropped_time IS NULL AND completed_time IS NULL) OR
+        (status = 'DROPPED' AND dropped_time IS NOT NULL) OR
+        (status = 'COMPLETED' AND completed_time IS NOT NULL)
     )
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '学生选课表-记录学生选课信息';
-    
-    -- 成绩表
-    CREATE TABLE course_grades (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '学生选课表-记录学生选课信息';
+
+-- 成绩表
+CREATE TABLE course_grades (
     grade_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '成绩ID（主键）',
     student_id INT NOT NULL COMMENT '学生ID（外键）',
     assignment_id INT NOT NULL COMMENT '授课ID（外键）',
     usual_score DECIMAL(5,2) COMMENT '平时成绩（0-100）',
     final_grade DECIMAL(5,2) COMMENT '期末成绩（0-100）',
     total_grade DECIMAL(5,2) GENERATED ALWAYS AS (
-    CASE
-    WHEN usual_score IS NULL AND final_grade IS NULL THEN NULL
-    ELSE COALESCE(usual_score * 0.3, 0) + COALESCE(final_grade * 0.7, 0)
-    END
+        CASE 
+            WHEN usual_score IS NULL AND final_grade IS NULL THEN NULL
+            ELSE COALESCE(usual_score * 0.3, 0) + COALESCE(final_grade * 0.7, 0)
+        END
     ) STORED COMMENT '总评成绩（计算列）',
     gpa_grade DECIMAL(3,2) COMMENT '绩点（0-4.0）',
     review_status_id INT NOT NULL DEFAULT 1 COMMENT '审核状态（外键）',
@@ -403,13 +399,13 @@ data:
     CONSTRAINT chk_final_grade_range CHECK (final_grade IS NULL OR (final_grade >= 0 AND final_grade <= 100)),
     CONSTRAINT chk_gpa_grade_range CHECK (gpa_grade IS NULL OR (gpa_grade >= 0 AND gpa_grade <= 4.0)),
     CONSTRAINT chk_grade_consistency CHECK (
-    (usual_score IS NULL AND final_grade IS NULL) OR
-    (usual_score IS NOT NULL AND final_grade IS NOT NULL)
+        (usual_score IS NULL AND final_grade IS NULL) OR
+        (usual_score IS NOT NULL AND final_grade IS NOT NULL)
     )
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '成绩表-记录学生课程成绩';
-    
-    -- 课程先修关系表
-    CREATE TABLE course_prerequisites (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '成绩表-记录学生课程成绩';
+
+-- 课程先修关系表
+CREATE TABLE course_prerequisites (
     course_id INT NOT NULL COMMENT '课程ID（外键）',
     prerequisite_course_id INT NOT NULL COMMENT '先修课程ID（外键）',
     is_mandatory BOOLEAN DEFAULT TRUE COMMENT '是否强制先修',
@@ -417,10 +413,10 @@ data:
     PRIMARY KEY (course_id, prerequisite_course_id),
     FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (prerequisite_course_id) REFERENCES courses(course_id) ON DELETE CASCADE ON UPDATE CASCADE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '课程先修关系表-定义课程先修关系';
-    
-    -- 图书表
-    CREATE TABLE books (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '课程先修关系表-定义课程先修关系';
+
+-- 图书表
+CREATE TABLE books (
     book_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '图书ID（主键）',
     isbn VARCHAR(20) UNIQUE NOT NULL COMMENT '国际标准书号（ISBN）',
     book_title VARCHAR(255) NOT NULL COMMENT '书名',
@@ -444,10 +440,10 @@ data:
     CONSTRAINT chk_total_copies CHECK (total_copies > 0),
     CONSTRAINT chk_available_copies CHECK (available_copies >= 0),
     CONSTRAINT chk_available_vs_total CHECK (available_copies <= total_copies)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '图书表-记录图书馆藏书信息';
-    
-    -- 图书预约表
-    CREATE TABLE book_reservations (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '图书表-记录图书馆藏书信息';
+
+-- 图书预约表
+CREATE TABLE book_reservations (
     reservation_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '预约记录ID（主键）',
     user_id INT NOT NULL COMMENT '预约用户ID（外键）',
     book_id INT NOT NULL COMMENT '图书ID（外键）',
@@ -464,10 +460,10 @@ data:
     INDEX idx_book_id (book_id),
     INDEX idx_status (status),
     INDEX idx_expiry_time (expiry_time)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '图书预约表-记录图书预约信息';
-    
-    -- 图书借阅表
-    CREATE TABLE book_borrowings (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '图书预约表-记录图书预约信息';
+
+-- 图书借阅表
+CREATE TABLE book_borrowings (
     borrowing_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '借阅记录ID（主键）',
     user_id INT NOT NULL COMMENT '借阅用户ID（外键）',
     book_id INT NOT NULL COMMENT '图书ID（外键）',
@@ -497,10 +493,10 @@ data:
     CONSTRAINT chk_fine CHECK (fine >= 0),
     CONSTRAINT chk_renew_count CHECK (renew_count BETWEEN 0 AND 3),
     CONSTRAINT chk_compensation CHECK (compensation >= 0)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '图书借阅表-记录图书借阅信息';
-    
-    -- 数据变更日志表
-    CREATE TABLE id_changes (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '图书借阅表-记录图书借阅信息';
+
+-- 数据变更日志表
+CREATE TABLE id_changes (
     change_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '变更记录ID（主键）',
     table_name VARCHAR(50) NOT NULL COMMENT '变更的表名',
     record_id INT NOT NULL COMMENT '记录ID',
@@ -512,10 +508,10 @@ data:
     FOREIGN KEY (changed_by) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
     INDEX idx_table_record (table_name, record_id),
     INDEX idx_changed_at (changed_at)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = 'ID变更表-记录重要ID变更历史';
-    
-    -- 系统配置表
-    CREATE TABLE system_config (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = 'ID变更表-记录重要ID变更历史';
+
+-- 系统配置表
+CREATE TABLE system_config (
     config_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '配置ID（主键）',
     config_key VARCHAR(50) UNIQUE NOT NULL COMMENT '配置键（全局唯一）',
     config_value VARCHAR(500) NOT NULL COMMENT '配置值',
@@ -524,10 +520,10 @@ data:
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_config_key (config_key)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '系统配置表-存储系统配置参数';
-    
-    -- 系统操作日志表
-    CREATE TABLE system_audit_log (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '系统配置表-存储系统配置参数';
+
+-- 系统操作日志表
+CREATE TABLE system_audit_log (
     log_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '日志ID（主键）',
     user_id INT NOT NULL COMMENT '操作用户ID（外键）',
     action_type VARCHAR(50) NOT NULL COMMENT '操作类型',
@@ -543,10 +539,10 @@ data:
     INDEX idx_action_type (action_type),
     INDEX idx_created_at (created_at),
     INDEX idx_table_record (table_name, record_id)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '系统操作日志表-记录重要操作日志';
-    
-    -- 选课时间冲突检查表
-    CREATE TABLE course_schedule_conflicts (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '系统操作日志表-记录重要操作日志';
+
+-- 选课时间冲突检查表
+CREATE TABLE course_schedule_conflicts (
     conflict_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '冲突ID（主键）',
     student_id INT NOT NULL COMMENT '学生ID（外键）',
     assignment_id1 INT NOT NULL COMMENT '课程安排1ID（外键）',
@@ -560,10 +556,10 @@ data:
     FOREIGN KEY (assignment_id2) REFERENCES teaching_assignments(assignment_id) ON DELETE CASCADE,
     INDEX idx_student_id (student_id),
     INDEX idx_detected_at (detected_at)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '选课冲突记录表-记录选课冲突信息';
-    
-    -- 待办事项表
-    CREATE TABLE todos (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '选课冲突记录表-记录选课冲突信息';
+
+-- 待办事项表
+CREATE TABLE todos (
     id INT PRIMARY KEY AUTO_INCREMENT COMMENT '待办事项ID，主键，自增',
     user_id INT NOT NULL COMMENT '用户ID，关联用户表',
     text VARCHAR(500) NOT NULL COMMENT '待办事项内容',
@@ -578,10 +574,10 @@ data:
     INDEX idx_completed (completed),
     INDEX idx_due_date (due_date),
     INDEX idx_important (important)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '待办事项表，存储用户的待办事项信息';
-    
-    -- 公告表
-    CREATE TABLE announcements (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '待办事项表，存储用户的待办事项信息';
+
+-- 公告表
+CREATE TABLE announcements (
     id INT PRIMARY KEY AUTO_INCREMENT COMMENT '公告ID，主键，自增',
     title VARCHAR(200) NOT NULL COMMENT '公告标题',
     content TEXT NOT NULL COMMENT '公告内容',
@@ -600,10 +596,10 @@ data:
     INDEX idx_priority (priority),
     INDEX idx_department_id (department_id),
     CONSTRAINT chk_expiry_date CHECK (expiry_date IS NULL OR expiry_date >= publish_date)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '公告表，存储系统公告和通知信息';
-    
-    -- 用户地址表（新增）
-    CREATE TABLE user_addresses (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '公告表，存储系统公告和通知信息';
+
+-- 用户地址表（新增）
+CREATE TABLE user_addresses (
     address_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '地址ID（主键）',
     user_id INT NOT NULL COMMENT '用户ID（外键）',
     address_type ENUM('HOME', 'SCHOOL', 'WORK') DEFAULT 'HOME' COMMENT '地址类型',
@@ -617,15 +613,15 @@ data:
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     INDEX idx_user_id (user_id),
     INDEX idx_address_type (address_type)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户地址表-存储用户地址信息';
-    
-    /*
-    视图定义
-  */
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT = '用户地址表-存储用户地址信息';
 
-    -- 学生学术统计视图
-    CREATE OR REPLACE VIEW student_academic_stats AS
-    SELECT
+/*
+视图定义
+*/
+
+-- 学生学术统计视图
+CREATE OR REPLACE VIEW student_academic_stats AS
+SELECT
     s.student_id,
     s.student_no,
     u.username,
@@ -635,22 +631,22 @@ data:
     ss.status_name AS student_status,
     s.enrollment_date,
     s.education_years
-    FROM
+FROM
     students s
-    JOIN
+        JOIN
     users u ON s.user_id = u.user_id
-    JOIN
+        JOIN
     departments d ON s.department_id = d.department_id
-    JOIN
+        JOIN
     majors m ON s.major_id = m.major_id
-    JOIN
+        JOIN
     class_info ci ON s.class_id = ci.class_id
-    JOIN
+        JOIN
     student_statuses ss ON s.status_id = ss.status_id;
-    
-    -- 课程统计视图
-    CREATE OR REPLACE VIEW course_statistics AS
-    SELECT
+
+-- 课程统计视图
+CREATE OR REPLACE VIEW course_statistics AS
+SELECT
     c.course_id,
     c.course_code,
     c.course_name,
@@ -665,25 +661,25 @@ data:
     MAX(cg.final_grade) AS max_final_grade,
     COUNT(CASE WHEN cg.final_grade >= 60 THEN 1 END) AS passed_students,
     COUNT(CASE WHEN cg.final_grade < 60 THEN 1 END) AS failed_students
-    FROM
+FROM
     courses c
-    JOIN
+        JOIN
     departments d ON c.department_id = d.department_id
-    JOIN
+        JOIN
     teaching_assignments ta ON c.course_id = ta.course_id
-    JOIN
+        JOIN
     semesters s ON ta.semester_id = s.semester_id
-    LEFT JOIN
+        LEFT JOIN
     course_grades cg ON ta.assignment_id = cg.assignment_id
-    WHERE
+WHERE
     cg.review_status_id = 2  -- 仅包含已审核通过的成绩
-    GROUP BY
+GROUP BY
     c.course_id, c.course_code, c.course_name, d.department_name,
     s.semester_id, s.academic_year, s.semester_name;
-    
-    -- 教师授课统计视图
-    CREATE OR REPLACE VIEW teacher_course_stats AS
-    SELECT
+
+-- 教师授课统计视图
+CREATE OR REPLACE VIEW teacher_course_stats AS
+SELECT
     t.teacher_id,
     t.teacher_no,
     u.username,
@@ -695,25 +691,25 @@ data:
     AVG(ta.current_students) AS avg_students_per_course,
     MIN(ta.current_students) AS min_students,
     MAX(ta.current_students) AS max_students
-    FROM
+FROM
     teachers t
-    JOIN
+        JOIN
     users u ON t.user_id = u.user_id
-    JOIN
+        JOIN
     departments d ON t.department_id = d.department_id
-    JOIN
+        JOIN
     teacher_titles tt ON t.title_id = tt.title_id
-    JOIN
+        JOIN
     teacher_statuses ts ON t.status_id = ts.status_id
-    LEFT JOIN
+        LEFT JOIN
     teaching_assignments ta ON t.teacher_id = ta.teacher_id
-    GROUP BY
+GROUP BY
     t.teacher_id, t.teacher_no, u.username, d.department_name,
     tt.title_name, ts.status_name;
-    
-    -- 图书借阅统计视图
-    CREATE OR REPLACE VIEW book_borrowing_stats AS
-    SELECT
+
+-- 图书借阅统计视图
+CREATE OR REPLACE VIEW book_borrowing_stats AS
+SELECT
     b.book_id,
     b.isbn,
     b.book_title,
@@ -724,35 +720,35 @@ data:
     COUNT(bb.borrowing_id) AS total_borrowings,
     COUNT(CASE WHEN bb.return_date IS NULL THEN 1 END) AS current_borrowings,
     AVG(DATEDIFF(bb.return_date, bb.borrow_date)) AS avg_borrow_days
-    FROM
+FROM
     books b
-    JOIN
+        JOIN
     book_categories bc ON b.category_id = bc.category_id
-    LEFT JOIN
+        LEFT JOIN
     book_borrowings bb ON b.book_id = bb.book_id
-    GROUP BY
+GROUP BY
     b.book_id, b.isbn, b.book_title, b.author, bc.category_name,
     b.total_copies, b.available_copies;
-    
-    
-    -- 创建触发器：当users表插入新用户时，自动与学生角色关联
-    DELIMITER //
-    CREATE TRIGGER auto_assign_student_role_after_insert
+
+
+-- 创建触发器：当users表插入新用户时，自动与学生角色关联
+DELIMITER //
+CREATE TRIGGER auto_assign_student_role_after_insert
     AFTER INSERT ON users
     FOR EACH ROW
-    BEGIN
+BEGIN
     -- 往user_roles表插入记录：新用户ID + 学生角色ID(3)
     INSERT INTO user_roles (user_id, role_id, assigned_by)
     VALUES (NEW.user_id, 3, 1);
-    END //
-    DELIMITER ;
-    
-    /*
-    初始化数据
-  */
+END //
+DELIMITER ;
 
-    -- 初始化系统配置
-    INSERT INTO system_config (config_key, config_value, config_type, description) VALUES
+/*
+初始化数据
+*/
+
+-- 初始化系统配置
+INSERT INTO system_config (config_key, config_value, config_type, description) VALUES
     ('student_id_format', 'YYYY{dept}{major}####', 'STRING', '学号格式：入学年份+学院代码+专业代码+4位序号'),
     ('teacher_id_format', 'YY{dept}####', 'STRING', '教师编号格式：入职年份后两位+学院代码+4位序号'),
     ('max_books_per_student', '5', 'NUMBER', '每个学生最多可借图书数量'),
@@ -766,62 +762,62 @@ data:
     ('auto_approve_threshold', '85', 'NUMBER', '成绩自动审核通过的分数阈值'),
     ('course_drop_deadline_weeks', '2', 'NUMBER', '退课截止周数（开课后）'),
     ('reservation_expiry_days', '3', 'NUMBER', '图书预约过期天数');
-    
-    -- 初始化角色数据
-    INSERT INTO roles (role_name, description) VALUES
+
+-- 初始化角色数据
+INSERT INTO roles (role_name, description) VALUES
     ('ADMIN', '系统管理员'),
     ('TEACHER', '教师'),
     ('STUDENT', '学生');
-    
-    -- 初始化权限数据
-    INSERT INTO permissions (permission_name, description, module) VALUES
-    -- 用户管理模块
-    ('USER_CREATE', '创建用户', 'USER_MANAGEMENT'),
-    ('USER_EDIT', '编辑用户', 'USER_MANAGEMENT'),
-    ('USER_DELETE', '删除用户', 'USER_MANAGEMENT'),
-    ('USER_VIEW', '查看用户', 'USER_MANAGEMENT'),
-    -- 权限管理模块
-    ('ROLE_CREATE', '创建角色', 'PERMISSION_MANAGEMENT'),
-    ('ROLE_EDIT', '编辑角色', 'PERMISSION_MANAGEMENT'),
-    ('ROLE_DELETE', '删除角色', 'PERMISSION_MANAGEMENT'),
-    ('PERMISSION_ASSIGN', '分配权限', 'PERMISSION_MANAGEMENT'),
-    -- 教学管理模块（课程）
-    ('COURSE_CREATE', '创建课程', 'TEACHING_MANAGEMENT'),
-    ('COURSE_EDIT', '编辑课程', 'TEACHING_MANAGEMENT'),
-    ('COURSE_DELETE', '删除课程', 'TEACHING_MANAGEMENT'),
-    ('COURSE_VIEW', '查看课程', 'TEACHING_MANAGEMENT'),
-    -- 教学管理模块（成绩）
-    ('GRADE_INPUT', '录入成绩', 'TEACHING_MANAGEMENT'),
-    ('GRADE_EDIT', '编辑成绩', 'TEACHING_MANAGEMENT'),
-    ('GRADE_REVIEW', '审核成绩', 'TEACHING_MANAGEMENT'),
-    ('GRADE_VIEW', '查看成绩', 'TEACHING_MANAGEMENT'),
-    -- 图书馆管理模块（图书）
-    ('BOOK_CREATE', '新增图书', 'LIBRARY_MANAGEMENT'),
-    ('BOOK_EDIT', '编辑图书', 'LIBRARY_MANAGEMENT'),
-    ('BOOK_DELETE', '删除图书', 'LIBRARY_MANAGEMENT'),
-    ('BOOK_VIEW', '查看图书', 'LIBRARY_MANAGEMENT'),
-    -- 图书馆管理模块（借阅）
-    ('BOOK_BORROW', '借阅图书', 'LIBRARY_MANAGEMENT'),
-    ('BOOK_RETURN', '归还图书', 'LIBRARY_MANAGEMENT'),
-    ('BOOK_RENEW', '续借图书', 'LIBRARY_MANAGEMENT'),
-    -- 系统分析模块
-    ('STATISTICS_VIEW', '查看统计数据', 'SYSTEM_ANALYTICS'),
-    -- 系统管理模块
-    ('SYSTEM_CONFIG', '系统配置管理', 'SYSTEM_ADMIN');
-    
-    -- 初始化角色-权限映射
-    INSERT INTO role_permissions (role_id, permission_id) VALUES
-    -- 管理员（1）：所有权限
-    (1,1), (1,2), (1,3), (1,4), (1,5), (1,6), (1,7), (1,8),
-    (1,9), (1,10), (1,11), (1,12), (1,13), (1,14), (1,15), (1,16),
-    (1,17), (1,18), (1,19), (1,20), (1,21), (1,22), (1,23), (1,24),
-    -- 教师（2）：课程+成绩+统计权限
-    (2,12), (2,13), (2,14), (2,15), (2,16), (2,20), (2,23),
-    -- 学生（3）：查看课程+成绩+借阅权限
-    (3,12), (3,16), (3,20), (3,21), (3,22), (3,23);
-    
-    -- 初始化学生状态
-    INSERT INTO student_statuses (status_name, description) VALUES
+
+-- 初始化权限数据
+INSERT INTO permissions (permission_name, description, module) VALUES
+-- 用户管理模块
+('USER_CREATE', '创建用户', 'USER_MANAGEMENT'),
+('USER_EDIT', '编辑用户', 'USER_MANAGEMENT'),
+('USER_DELETE', '删除用户', 'USER_MANAGEMENT'),
+('USER_VIEW', '查看用户', 'USER_MANAGEMENT'),
+-- 权限管理模块
+('ROLE_CREATE', '创建角色', 'PERMISSION_MANAGEMENT'),
+('ROLE_EDIT', '编辑角色', 'PERMISSION_MANAGEMENT'),
+('ROLE_DELETE', '删除角色', 'PERMISSION_MANAGEMENT'),
+('PERMISSION_ASSIGN', '分配权限', 'PERMISSION_MANAGEMENT'),
+-- 教学管理模块（课程）
+('COURSE_CREATE', '创建课程', 'TEACHING_MANAGEMENT'),
+('COURSE_EDIT', '编辑课程', 'TEACHING_MANAGEMENT'),
+('COURSE_DELETE', '删除课程', 'TEACHING_MANAGEMENT'),
+('COURSE_VIEW', '查看课程', 'TEACHING_MANAGEMENT'),
+-- 教学管理模块（成绩）
+('GRADE_INPUT', '录入成绩', 'TEACHING_MANAGEMENT'),
+('GRADE_EDIT', '编辑成绩', 'TEACHING_MANAGEMENT'),
+('GRADE_REVIEW', '审核成绩', 'TEACHING_MANAGEMENT'),
+('GRADE_VIEW', '查看成绩', 'TEACHING_MANAGEMENT'),
+-- 图书馆管理模块（图书）
+('BOOK_CREATE', '新增图书', 'LIBRARY_MANAGEMENT'),
+('BOOK_EDIT', '编辑图书', 'LIBRARY_MANAGEMENT'),
+('BOOK_DELETE', '删除图书', 'LIBRARY_MANAGEMENT'),
+('BOOK_VIEW', '查看图书', 'LIBRARY_MANAGEMENT'),
+-- 图书馆管理模块（借阅）
+('BOOK_BORROW', '借阅图书', 'LIBRARY_MANAGEMENT'),
+('BOOK_RETURN', '归还图书', 'LIBRARY_MANAGEMENT'),
+('BOOK_RENEW', '续借图书', 'LIBRARY_MANAGEMENT'),
+-- 系统分析模块
+('STATISTICS_VIEW', '查看统计数据', 'SYSTEM_ANALYTICS'),
+-- 系统管理模块
+('SYSTEM_CONFIG', '系统配置管理', 'SYSTEM_ADMIN');
+
+-- 初始化角色-权限映射
+INSERT INTO role_permissions (role_id, permission_id) VALUES
+-- 管理员（1）：所有权限
+(1,1), (1,2), (1,3), (1,4), (1,5), (1,6), (1,7), (1,8),
+(1,9), (1,10), (1,11), (1,12), (1,13), (1,14), (1,15), (1,16),
+(1,17), (1,18), (1,19), (1,20), (1,21), (1,22), (1,23), (1,24),
+-- 教师（2）：课程+成绩+统计权限
+(2,12), (2,13), (2,14), (2,15), (2,16), (2,20), (2,23),
+-- 学生（3）：查看课程+成绩+借阅权限
+(3,12), (3,16), (3,20), (3,21), (3,22), (3,23);
+
+-- 初始化学生状态
+INSERT INTO student_statuses (status_name, description) VALUES
     ('ACTIVE', '在读'),
     ('GRADUATED', '已毕业'),
     ('SUSPENDED', '休学'),
@@ -829,133 +825,133 @@ data:
     ('LEAVE_SICK', '病假'),
     ('LEAVE_PERSONAL', '事假'),
     ('DROP_OUT', '退学');
-    
-    -- 初始化教师状态
-    INSERT INTO teacher_statuses (status_name, description) VALUES
+
+-- 初始化教师状态
+INSERT INTO teacher_statuses (status_name, description) VALUES
     ('ACTIVE', '在职'),
     ('INACTIVE', '待岗'),
     ('RETIRED', '退休'),
     ('ON_LEAVE', '休假');
-    
-    -- 初始化成绩审核状态
-    INSERT INTO grade_review_statuses (status_name, description) VALUES
+
+-- 初始化成绩审核状态
+INSERT INTO grade_review_statuses (status_name, description) VALUES
     ('PENDING', '待审核'),
     ('APPROVED', '已通过'),
     ('REJECTED', '已拒绝');
-    
-    -- 初始化图书借阅状态
-    INSERT INTO book_borrow_statuses (status_name, description) VALUES
+
+-- 初始化图书借阅状态
+INSERT INTO book_borrow_statuses (status_name, description) VALUES
     ('BORROWED', '已借出'),
     ('RETURNED', '已归还'),
     ('OVERDUE', '已逾期'),
     ('LOST', '已丢失');
-    
-    -- 初始化职称表
-    INSERT INTO teacher_titles (title_name, title_level) VALUES
+
+-- 初始化职称表
+INSERT INTO teacher_titles (title_name, title_level) VALUES
     ('助教', 1),
     ('讲师', 2),
     ('副教授', 2),
     ('教授', 3);
-    
-    -- 初始化学院表
-    INSERT INTO departments (department_name, department_code) VALUES
+
+-- 初始化学院表
+INSERT INTO departments (department_name, department_code) VALUES
     ('默认学院', 'CS');
-    
-    -- 初始化专业表
-    INSERT INTO majors (major_name, department_id, major_code, required_credits) VALUES
+
+-- 初始化专业表
+INSERT INTO majors (major_name, department_id, major_code, required_credits) VALUES
     ('默认专业', 1, 'CS01', 160);
-    
-    -- 初始化班级表
-    INSERT INTO class_info (class_name, major_id, enrollment_year, classroom) VALUES
+
+-- 初始化班级表
+INSERT INTO class_info (class_name, major_id, enrollment_year, classroom) VALUES
     ('默认班级', 1, 2025, '默认楼A201');
-    
-    -- 初始化图书分类表
-    INSERT INTO book_categories (category_name, parent_id) VALUES
+
+-- 初始化图书分类表
+INSERT INTO book_categories (category_name, parent_id) VALUES
     ('默认图书', NULL);
-    
-    -- 初始化学期表
-    INSERT INTO semesters (academic_year, semester_name, start_date, end_date, course_selection_start, course_selection_end, grade_entry_start, grade_entry_end, is_current) VALUES
+
+-- 初始化学期表
+INSERT INTO semesters (academic_year, semester_name, start_date, end_date, course_selection_start, course_selection_end, grade_entry_start, grade_entry_end, is_current) VALUES
     ('2024-2025', '第一学期', '2024-09-01', '2025-01-20', '2024-08-20', '2024-09-10', '2025-01-10', '2025-01-30', 0),
     ('2024-2025', '第二学期', '2025-02-26', '2025-07-15', '2025-02-15', '2025-03-10', '2025-07-01', '2025-07-20', 1);
-    
-    -- 初始化用户表（管理员）
-    INSERT INTO users (username, password_hash, email, phone, gender, status, created_by) VALUES
+
+-- 初始化用户表（管理员）
+INSERT INTO users (username, password_hash, email, phone, gender, status, created_by) VALUES
     ('ADMIN01', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@lucky-sms.com', '13300000000', 'M', 'ACTIVE', 1),
     ('TEACHER01', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'teacher1@lucky-sms.com', '13300000001', 'M', 'ACTIVE', 1),
     ('STUDENT01', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student1@lucky-sms.com', '13800000002', 'M', 'ACTIVE', 1),
     ('STUDENT02', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student2@lucky-sms.com', '13800000003', 'F', 'ACTIVE', 1);
-    
-    -- 初始化教师表
-    INSERT INTO teachers (user_id, department_id, title_id, hire_date, office_location, teacher_no, status_id, created_by) VALUES
+
+-- 初始化教师表
+INSERT INTO teachers (user_id, department_id, title_id, hire_date, office_location, teacher_no, status_id, created_by) VALUES
     (2, 1, 4, '2020-09-01', '默认学院A301', 'T2020001', 1, 1);
-    
-    -- 设置计算机学院院长
-    UPDATE departments SET dean_id = 1 WHERE department_id = 1;
-    
-    -- 设置班级班主任
-    UPDATE class_info SET class_advisor_id = 1 WHERE class_id IN (1, 2);
-    
-    -- 初始化学生表
-    INSERT INTO students (user_id, department_id, major_id, class_id, enrollment_date, education_years, student_no, status_id, emergency_contact, emergency_phone, created_by) VALUES
+
+-- 设置计算机学院院长
+UPDATE departments SET dean_id = 1 WHERE department_id = 1;
+
+-- 设置班级班主任
+UPDATE class_info SET class_advisor_id = 1 WHERE class_id IN (1, 2);
+
+-- 初始化学生表
+INSERT INTO students (user_id, department_id, major_id, class_id, enrollment_date, education_years, student_no, status_id, emergency_contact, emergency_phone, created_by) VALUES
     (3, 1, 1, 1, '2021-09-01', 4, '2021CS0001', 1, '张爸爸', '13800000010', 1),
     (4, 1, 1, 2, '2021-09-01', 4, '2021CS0002', 1, '李妈妈', '13800000011', 1);
-    
-    -- 初始化课程表
-    INSERT INTO courses (course_code, course_name, course_description, department_id, credit, course_hours, course_type, exam_type, created_by) VALUES
+
+-- 初始化课程表
+INSERT INTO courses (course_code, course_name, course_description, department_id, credit, course_hours, course_type, exam_type, created_by) VALUES
     ('CS101', '计算机基础', '计算机科学基础课程', 1, 3.0, 48, 'COMPULSORY', 'CLOSED_BOOK', 1),
     ('CS102', '数据结构', '数据结构与算法', 1, 4.0, 64, 'COMPULSORY', 'CLOSED_BOOK', 1);
-    
-    -- 初始化课程先修关系
-    INSERT INTO course_prerequisites (course_id, prerequisite_course_id, is_mandatory) VALUES
+
+-- 初始化课程先修关系
+INSERT INTO course_prerequisites (course_id, prerequisite_course_id, is_mandatory) VALUES
     (2, 1, TRUE);   -- 数据结构需要计算机基础
-    
-    -- 初始化教师授课表
-    INSERT INTO teaching_assignments (teacher_id, course_id, semester_id, classroom, schedule_info, max_students, current_students) VALUES
-(1, 1, 2, '教学楼A101', '{"day": "MONDAY", "startTime": "08:00", "endTime": "09:40", "weeks": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]}', 50, 0);
+
+-- 初始化教师授课表
+INSERT INTO teaching_assignments (teacher_id, course_id, semester_id, classroom, schedule_info, max_students, current_students) VALUES
+    (1, 1, 2, '教学楼A101', '{"day": "MONDAY", "startTime": "08:00", "endTime": "09:40", "weeks": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]}', 50, 0);
 
 -- 初始化学生选课表
 INSERT INTO course_selections (student_id, assignment_id, status) VALUES
     (1, 1, 'SELECTED');
-    
-    -- 更新课程当前人数
-    UPDATE teaching_assignments SET current_students = 2 WHERE assignment_id = 1;
-    UPDATE teaching_assignments SET current_students = 1 WHERE assignment_id = 2;
-    
-    -- 初始化图书表
-    INSERT INTO books (isbn, book_title, author, publisher, publish_year, category_id, location, total_copies, available_copies, created_by) VALUES
+
+-- 更新课程当前人数
+UPDATE teaching_assignments SET current_students = 2 WHERE assignment_id = 1;
+UPDATE teaching_assignments SET current_students = 1 WHERE assignment_id = 2;
+
+-- 初始化图书表
+INSERT INTO books (isbn, book_title, author, publisher, publish_year, category_id, location, total_copies, available_copies, created_by) VALUES
     ('9787111213826', 'Java编程思想', 'Bruce Eckel', '机械工业出版社', 2020, 2, '图书馆A区101', 5, 5, 1);
-    
-    -- 初始化待办事项表数据
-    INSERT INTO todos (user_id, text, completed, due_date, important, category) VALUES
+
+-- 初始化待办事项表数据
+INSERT INTO todos (user_id, text, completed, due_date, important, category) VALUES
     (3, '完成学生个人信息核对', FALSE, '2025-09-24', TRUE, '学工'),
     (3, '查收新生开学必读须知', FALSE, '2025-06-25', FALSE, '通知'),
     (3, '完成数据结构作业第二章', FALSE, '2025-06-25', FALSE, '作业');
-    
-    -- 初始化公告表数据
-    INSERT INTO announcements (title, content, publish_date, expiry_date, department_id, announcement_type, priority, created_by) VALUES
+
+-- 初始化公告表数据
+INSERT INTO announcements (title, content, publish_date, expiry_date, department_id, announcement_type, priority, created_by) VALUES
     ('期末考试安排通知', '各位同学请注意，期末考试将于下周一开始，请做好充分准备。考试时间为上午9:00-11:00，地点在各班教室。', '2025-06-15', '2025-07-01', 1, 'IMPORTANT', 'HIGH', 1),
     ('图书馆开放时间调整', '由于系统维护，图书馆本周三下午将临时关闭，请同学们合理安排借阅时间。', '2025-06-14', '2025-06-21', 1, 'NOTICE', 'MEDIUM', 1),
     ('校园文化节活动预告', '我校将于下月举办校园文化节，欢迎各位同学积极参与各项活动。具体活动安排请关注后续通知。', '2025-06-13', '2025-07-13', 1, 'ACTIVITY', 'MEDIUM', 1),
     ('校园招聘信息', '多家知名企业将于下周来校招聘，欢迎大四同学参加。请准备好个人简历和相关材料。', '2025-06-12', '2025-06-30', 1, 'INFO', 'LOW', 1);
-    
-    -- 修复用户表的自引用外键约束（在表创建后添加，避免循环依赖）
-    ALTER TABLE users
+
+-- 修复用户表的自引用外键约束（在表创建后添加，避免循环依赖）
+ALTER TABLE users
     ADD CONSTRAINT fk_users_created_by
-    FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
     ADD CONSTRAINT fk_users_updated_by
-    FOREIGN KEY (updated_by) REFERENCES users(user_id) ON DELETE SET NULL ON UPDATE CASCADE;
-    
-    -- 创建触发器：新增学生时自动分配默认班级
-    DELIMITER //
-    
-    -- 删除可能存在的冲突触发器
-    DROP TRIGGER IF EXISTS trg_auto_assign_class_after_insert_students //
-    
-    -- 触发器1：新增学生时自动分配默认班级（基于专业和入学年份）
-    CREATE TRIGGER trg_auto_assign_class_before_insert_students
+        FOREIGN KEY (updated_by) REFERENCES users(user_id) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- 创建触发器：新增学生时自动分配默认班级
+DELIMITER //
+
+-- 删除可能存在的冲突触发器
+DROP TRIGGER IF EXISTS trg_auto_assign_class_after_insert_students //
+
+-- 触发器1：新增学生时自动分配默认班级（基于专业和入学年份）
+CREATE TRIGGER trg_auto_assign_class_before_insert_students
     BEFORE INSERT ON students
     FOR EACH ROW
-    BEGIN
+BEGIN
     DECLARE default_class_id INT;
     DECLARE enrollment_year_val YEAR;
     
@@ -964,72 +960,72 @@ INSERT INTO course_selections (student_id, assignment_id, status) VALUES
     
     -- 查找匹配的默认班级（专业相同，入学年份相同，班级名称包含"默认"或"Default"）
     SELECT class_id INTO default_class_id
-    FROM class_info
-    WHERE major_id = NEW.major_id
-    AND enrollment_year = enrollment_year_val
-    AND (class_name LIKE '%默认%' OR class_name LIKE '%Default%')
+    FROM class_info 
+    WHERE major_id = NEW.major_id 
+      AND enrollment_year = enrollment_year_val
+      AND (class_name LIKE '%默认%' OR class_name LIKE '%Default%')
     LIMIT 1;
     
     -- 如果没有找到默认班级，则查找该专业下入学年份相同的第一个班级
     IF default_class_id IS NULL THEN
-    SELECT class_id INTO default_class_id
-    FROM class_info
-    WHERE major_id = NEW.major_id
-    AND enrollment_year = enrollment_year_val
-    ORDER BY class_id ASC
-    LIMIT 1;
+        SELECT class_id INTO default_class_id
+        FROM class_info 
+        WHERE major_id = NEW.major_id 
+          AND enrollment_year = enrollment_year_val
+        ORDER BY class_id ASC
+        LIMIT 1;
     END IF;
     
     -- 如果找到合适的班级，直接设置NEW.class_id（关键：在插入前修改字段值）
     IF default_class_id IS NOT NULL THEN
-    SET NEW.class_id = default_class_id;
+        SET NEW.class_id = default_class_id;
     END IF;
-    END //
-    
-    -- 触发器2：新增用户时自动创建学生记录（如果用户角色包含学生）
-    CREATE TRIGGER trg_auto_create_student_after_insert_users
+END //
+
+-- 触发器2：新增用户时自动创建学生记录（如果用户角色包含学生）
+CREATE TRIGGER trg_auto_create_student_after_insert_users
     AFTER INSERT ON users
     FOR EACH ROW
-    BEGIN
+BEGIN
     DECLARE student_role_count INT;
     
     SELECT COUNT(*) INTO student_role_count
-    FROM user_roles
+    FROM user_roles 
     WHERE user_id = NEW.user_id AND role_id = 3;
     
     IF student_role_count > 0 THEN
-    INSERT INTO students (
-    user_id,
-    department_id,
-    major_id,
-    class_id,
-    enrollment_date,
-    education_years,
-    student_no,
-    status_id,
-    created_by
-    ) VALUES (
-    NEW.user_id,
-    1,  -- 默认学院
-    1,  -- 默认专业
-    1,  -- 默认班级
-    CURDATE(),  -- 当前日期作为入学日期
-    4,  -- 默认4年学制
-    CONCAT(DATE_FORMAT(CURDATE(), '%Y'), 'CS', LPAD(NEW.user_id, 4, '0')),  -- 自动生成学号
-    1,  -- 默认在读状态
-    NEW.created_by
-    );
+        INSERT INTO students (
+            user_id, 
+            department_id, 
+            major_id, 
+            class_id, 
+            enrollment_date, 
+            education_years, 
+            student_no, 
+            status_id, 
+            created_by
+        ) VALUES (
+            NEW.user_id,
+            1,  -- 默认学院
+            1,  -- 默认专业
+            1,  -- 默认班级
+            CURDATE(),  -- 当前日期作为入学日期
+            4,  -- 默认4年学制
+            CONCAT(DATE_FORMAT(CURDATE(), '%Y'), 'CS', LPAD(NEW.user_id, 4, '0')),  -- 自动生成学号
+            1,  -- 默认在读状态
+            NEW.created_by
+        );
     END IF;
-    END //
-    
-    
-    
-    DELIMITER ;
-    
-    DELIMITER //
-    
-    CREATE PROCEDURE sp_repair_student_data_consistency()
-    BEGIN
+END //
+
+
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE PROCEDURE sp_repair_student_data_consistency()
+BEGIN
     DELETE s FROM students s
     LEFT JOIN users u ON s.user_id = u.user_id
     WHERE u.user_id IS NULL;
@@ -1039,19 +1035,19 @@ INSERT INTO course_selections (student_id, assignment_id, status) VALUES
     WHERE ur.user_id IS NULL;
     
     INSERT INTO students (
-    user_id, department_id, major_id, class_id,
-    enrollment_date, education_years, student_no, status_id, created_by
+        user_id, department_id, major_id, class_id, 
+        enrollment_date, education_years, student_no, status_id, created_by
     )
-    SELECT
-    ur.user_id, 1, 1, 1, CURDATE(), 4,
-    CONCAT(DATE_FORMAT(CURDATE(), '%Y'), 'CS', LPAD(ur.user_id, 4, '0')), 1, ur.assigned_by
+    SELECT 
+        ur.user_id, 1, 1, 1, CURDATE(), 4, 
+        CONCAT(DATE_FORMAT(CURDATE(), '%Y'), 'CS', LPAD(ur.user_id, 4, '0')), 1, ur.assigned_by
     FROM user_roles ur
     LEFT JOIN students s ON ur.user_id = s.user_id
     WHERE ur.role_id = 3 AND s.student_id IS NULL;
     
     UPDATE students s
-    INNER JOIN class_info c ON s.major_id = c.major_id
-    AND YEAR(s.enrollment_date) = c.enrollment_year
+    INNER JOIN class_info c ON s.major_id = c.major_id 
+                           AND YEAR(s.enrollment_date) = c.enrollment_year
     SET s.class_id = c.class_id
     WHERE s.class_id != c.class_id;
     
@@ -1060,40 +1056,40 @@ INSERT INTO course_selections (student_id, assignment_id, status) VALUES
     SET s.department_id = m.department_id
     WHERE s.department_id != m.department_id;
     
-    END //
-    
-    DELIMITER ;
-    
-    DELIMITER //
-    
-    CREATE EVENT IF NOT EXISTS event_check_student_data_consistency
-    ON SCHEDULE EVERY 1 DAY
-    STARTS CURRENT_TIMESTAMP
-    DO
-    BEGIN
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE EVENT IF NOT EXISTS event_check_student_data_consistency
+ON SCHEDULE EVERY 1 DAY
+STARTS CURRENT_TIMESTAMP
+DO
+BEGIN
     CALL sp_repair_student_data_consistency();
-    END //
-    
-    DELIMITER ;
-    
-    SET FOREIGN_KEY_CHECKS = 1;
-    
-    SET @max_user_id = (SELECT MAX(user_id) FROM users);
-    SET @sql_user = CONCAT('ALTER TABLE users AUTO_INCREMENT = ', IFNULL(@max_user_id + 1, 1));
-    PREPARE stmt_user FROM @sql_user;
-    EXECUTE stmt_user;
-    DEALLOCATE PREPARE stmt_user;
-    
-    SET @max_student_id = (SELECT MAX(student_id) FROM students);
-    SET @sql_student = CONCAT('ALTER TABLE students AUTO_INCREMENT = ', IFNULL(@max_student_id + 1, 1));
-    PREPARE stmt_student FROM @sql_student;
-    EXECUTE stmt_student;
-    DEALLOCATE PREPARE stmt_student;
-    
-    DELETE s1 FROM students s1
-    INNER JOIN students s2
-    ON s1.user_id = s2.user_id
+END //
+
+DELIMITER ;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+SET @max_user_id = (SELECT MAX(user_id) FROM users);
+SET @sql_user = CONCAT('ALTER TABLE users AUTO_INCREMENT = ', IFNULL(@max_user_id + 1, 1));
+PREPARE stmt_user FROM @sql_user;
+EXECUTE stmt_user;
+DEALLOCATE PREPARE stmt_user;
+
+SET @max_student_id = (SELECT MAX(student_id) FROM students);
+SET @sql_student = CONCAT('ALTER TABLE students AUTO_INCREMENT = ', IFNULL(@max_student_id + 1, 1));
+PREPARE stmt_student FROM @sql_student;
+EXECUTE stmt_student;
+DEALLOCATE PREPARE stmt_student;
+
+DELETE s1 FROM students s1
+INNER JOIN students s2 
+    ON s1.user_id = s2.user_id 
     AND s1.student_id > s2.student_id;
-    
-    INSERT INTO users (username, password_hash, phone, status, created_by)
-    VALUES ('TEST_STUDENT', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '13800000004', 'ACTIVE', 1);
+
+INSERT INTO users (username, password_hash, phone, status, created_by) 
+VALUES ('TEST_STUDENT', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '13800000004', 'ACTIVE', 1);
