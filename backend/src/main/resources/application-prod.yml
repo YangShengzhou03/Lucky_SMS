@@ -2,7 +2,7 @@
 spring:
   # 数据源配置 - 生产环境使用环境变量
   datasource:
-    url: ${DATABASE_URL:jdbc:mysql://mysql:3306/lucky_sms?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8}
+    url: ${DATABASE_URL:jdbc:mysql://mysql:3306/Lucky_SMS?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8}
     username: ${DATABASE_USERNAME:root}
     password: ${DATABASE_PASSWORD:123456}
     driver-class-name: com.mysql.cj.jdbc.Driver
