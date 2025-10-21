@@ -19,9 +19,16 @@ spec:
           image: crpi-kczczesrmgxok6ke.cn-hangzhou.personal.cr.aliyuncs.com/yangshengzhou/lucky-sms-backend:latest  # ACR 地址+仓库名+标签
           ports:
             - containerPort: 8081
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://mysql:3306/Lucky_SMS?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "root"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "123456"
           readinessProbe:
             httpGet:
-              path: /api/actuator/health  # 确保后端应用有这个健康检查端点，否则删除或修改
+              path: /actuator/health  # 修正健康检查路径
               port: 8081
             initialDelaySeconds: 180
             periodSeconds: 10
