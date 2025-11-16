@@ -1,13 +1,16 @@
 package com.yangshengzhou.lucky_sms.mapper.student;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.yangshengzhou.lucky_sms.pojo.Course;
 import com.yangshengzhou.lucky_sms.vo.student.CourseSelectionVO;
-import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-@Mapper
-public interface CourseMapper {
+/**
+ * 课程Mapper接口
+ */
+public interface CourseMapper extends BaseMapper<Course> {
     /**
      * 获取可选课程列表
      * @param userId 学生ID

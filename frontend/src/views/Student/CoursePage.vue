@@ -36,29 +36,42 @@
       <div class="course-list-panel">
         <div class="course-list modern-card">
           <div class="panel-header">
-            <h3>
-              <el-icon>
-                <Collection />
-              </el-icon>
-              可选课程
-            </h3>
-            <div class="search-filter">
-              <el-input v-model="searchQuery" placeholder="搜索课程" size="small" clearable class="modern-input">
-                <template #suffix>
-                  <el-icon>
-                    <Search />
-                  </el-icon>
-                </template>
-              </el-input>
-              <el-select v-model="filterCategory" placeholder="筛选分类" size="small" class="modern-select">
-                <el-option v-for="category in categories" :key="category.value" :label="category.label"
-                  :value="category.value" />
-              </el-select>
+              <h3>
+                <el-icon>
+                  <Collection />
+                </el-icon>
+                可选课程
+              </h3>
+              <div class="header-actions">
+                <div v-if="selectedCourseIds.length > 0" class="batch-actions">
+                  <span>已选择 {{ selectedCourseIds.length }} 门课程</span>
+                  <el-button @click="batchSelectCourses" type="primary" size="small" style="margin-left: 12px; margin-right: 6px;">
+                    批量选课
+                  </el-button>
+                  <el-button @click="batchDropCourses" type="danger" size="small">
+                    批量退课
+                  </el-button>
+                </div>
+                <div class="search-filter">
+                  <el-input v-model="searchQuery" placeholder="搜索课程" size="small" clearable class="modern-input">
+                    <template #suffix>
+                      <el-icon>
+                        <Search />
+                      </el-icon>
+                    </template>
+                  </el-input>
+                  <el-select v-model="filterCategory" placeholder="筛选分类" size="small" class="modern-select">
+                    <el-option v-for="category in categories" :key="category.value" :label="category.label"
+                      :value="category.value" />
+                  </el-select>
+                </div>
+              </div>
             </div>
-          </div>
 
           <div class="courses-container">
-            <el-card v-for="course in filteredCourses" :key="course.id" class="course-card" shadow="hover">
+            <div v-for="course in filteredCourses" :key="course.id" class="course-card-wrapper">
+              <el-checkbox v-model="selectedCourseIds" :label="course.id" @change="handleSelectionChange" class="selection-checkbox"></el-checkbox>
+              <el-card class="course-card" shadow="hover">
               <div class="course-header">
                 <h4>{{ course.name }}</h4>
                 <span class="course-code">{{ course.code }}</span>
@@ -104,7 +117,8 @@
                   退课
                 </el-button>
               </div>
-            </el-card>
+              </el-card>
+            </div>
 
             <div class="empty-course-card"></div>
             
@@ -185,7 +199,7 @@ import {
   Location,
   Search
 } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox, ElCheckbox } from 'element-plus'
 import { getAvailableCourses, getSelectedCourses, selectCourse as apiSelectCourse, dropCourse } from '@/api/student'
 
 const currentSemester = ref('2023-2024-2')
@@ -210,64 +224,13 @@ const categories = ref([
 
 const currentPage = ref(1)
 const pageSize = ref(5)
+const selectedCourseIds = ref([])
 
 // 从后端获取的课程数据
 const allCourses = ref([])
 const selectedCourses = ref([])
 
-// 加载可选课程数据
-const loadAvailableCourses = async () => {
-  try {
-    const response = await getAvailableCourses()
-    if (response.code === 200) {
-      // 转换后端数据为前端需要的格式
-      allCourses.value = response.data.map(course => ({
-        id: course.id,
-        name: course.name,
-        code: course.code,
-        teacher: course.teacher,
-        time: course.schedule && course.schedule.length > 0 ? 
-          course.schedule.map(s => `${getDayName(s.day)} ${getTimeSlotName(s.timeSlot)}`).join(', ') : 
-          "待安排",
-        location: course.location,
-        credits: course.credits,
-        capacityUsed: course.capacityUsed || 0,
-        category: (course.category || '').toLowerCase(),
-        schedule: course.schedule || []
-      }))
-    }
-  } catch (error) {
-    ElMessage.error('获取可选课程失败')
-    console.error('获取可选课程失败:', error)
-  }
-}
 
-// 加载已选课程数据
-const loadSelectedCourses = async () => {
-  try {
-    const response = await getSelectedCourses()
-    if (response.code === 200) {
-      // 转换后端数据为前端需要的格式
-      selectedCourses.value = response.data.map(course => ({
-        id: course.id,
-        name: course.name,
-        code: course.code,
-        teacher: course.teacher,
-        time: course.schedule && course.schedule.length > 0 ? 
-          course.schedule.map(s => `${getDayName(s.day)} ${getTimeSlotName(s.timeSlot)}`).join(', ') : 
-          "待安排",
-        location: course.location,
-        credits: course.credits,
-        capacityUsed: course.capacityUsed || 0,
-        category: (course.category || '').toLowerCase(),
-        schedule: course.schedule || []
-      }))
-    }
-  } catch (error) {
-    ElMessage.error('获取已选课程失败')
-    console.error('获取已选课程失败:', error)
-  }
-}
 
 // 将星期数字转换为名称
 const getDayName = (day) => {
@@ -431,6 +394,190 @@ const handleCurrentChange = (newPage) => {
   currentPage.value = newPage
 }
 
+const handleSelectionChange = () => {
+  // 确保已选课程不会出现在选课列表中
+  selectedCourseIds.value = selectedCourseIds.value.filter(id => 
+    !isCourseSelected(id)
+  )
+}
+
+// 批量选课
+const batchSelectCourses = async () => {
+  if (selectedCourseIds.value.length === 0) {
+    ElMessage.warning('请先选择要添加的课程')
+    return
+  }
+  
+  try {
+    // 检查学分限制
+    const selectedCoursesList = allCourses.value.filter(c => 
+      selectedCourseIds.value.includes(c.id)
+    )
+    
+    const totalCredits = selectedCoursesList.reduce((sum, c) => sum + c.credits, 0)
+    if (selectedCredits.value + totalCredits > maxCredits.value) {
+      ElMessage.warning(`选课将超出学分上限(${maxCredits.value}学分)，无法继续`)
+      return
+    }
+    
+    // 检查时间冲突
+    let conflictFound = false
+    let conflictCourse = ''
+    
+    for (const course of selectedCoursesList) {
+      const hasConflict = selectedCourses.value.some(selectedCourse => {
+        if (!selectedCourse.schedule || !course.schedule) return false
+        return selectedCourse.schedule.some(s =>
+          course.schedule.some(cs => s && cs && s.day === cs.day && s.timeSlot === cs.timeSlot)
+        )
+      })
+      
+      if (hasConflict) {
+        conflictFound = true
+        conflictCourse = course.name
+        break
+      }
+    }
+    
+    if (conflictFound) {
+      ElMessage.warning(`课程「${conflictCourse}」与已选课程时间冲突`)
+      return
+    }
+    
+    await ElMessageBox.confirm(
+      `确定要选择这 ${selectedCourseIds.value.length} 门课程吗？`,
+      '确认选课',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'primary'
+      }
+    )
+    
+    // 批量选课
+    let successCount = 0
+    for (const courseId of selectedCourseIds.value) {
+      try {
+        const response = await apiSelectCourse(courseId)
+        if (response.code === 200) {
+          successCount++
+        }
+      } catch (error) {
+        console.error(`选课失败 ${courseId}:`, error)
+      }
+    }
+    
+    // 重新加载数据
+    await loadAvailableCourses()
+    await loadSelectedCourses()
+    ElMessage.success(`成功选择 ${successCount} 门课程`)
+    selectedCourseIds.value = []
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('批量选课过程中发生错误')
+    }
+  }
+}
+
+// 批量退课
+const batchDropCourses = async () => {
+  if (selectedCourseIds.value.length === 0) {
+    ElMessage.warning('请先选择要退选的课程')
+    return
+  }
+  
+  try {
+    await ElMessageBox.confirm(
+      `确定要退选这 ${selectedCourseIds.value.length} 门课程吗？`,
+      '确认退课',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    // 批量退课
+    let successCount = 0
+    for (const courseId of selectedCourseIds.value) {
+      try {
+        const response = await dropCourse(courseId)
+        if (response.code === 200) {
+          successCount++
+        }
+      } catch (error) {
+        console.error(`退课失败 ${courseId}:`, error)
+      }
+    }
+    
+    // 重新加载数据
+    await loadAvailableCourses()
+    await loadSelectedCourses()
+    ElMessage.success(`成功退选 ${successCount} 门课程`)
+    selectedCourseIds.value = []
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('批量退课过程中发生错误')
+    }
+  }
+}
+
+// 重新加载数据时清除选择
+const loadAvailableCourses = async () => {
+  try {
+    const response = await getAvailableCourses()
+    if (response.code === 200) {
+      // 转换后端数据为前端需要的格式
+      allCourses.value = response.data.map(course => ({
+        id: course.id,
+        name: course.name,
+        code: course.code,
+        teacher: course.teacher,
+        time: course.schedule && course.schedule.length > 0 ? 
+          course.schedule.map(s => `${getDayName(s.day)} ${getTimeSlotName(s.timeSlot)}`).join(', ') : 
+          "待安排",
+        location: course.location,
+        credits: course.credits,
+        capacityUsed: course.capacityUsed || 0,
+        category: (course.category || '').toLowerCase(),
+        schedule: course.schedule || []
+      }))
+    }
+    // 清除选择状态
+    selectedCourseIds.value = []
+  } catch (error) {
+    ElMessage.error('获取可选课程失败')
+    console.error('获取可选课程失败:', error)
+  }
+}
+
+// 重新加载数据时清除选择
+const loadSelectedCourses = async () => {
+  try {
+    const response = await getSelectedCourses()
+    if (response.code === 200) {
+      // 转换后端数据为前端需要的格式
+      selectedCourses.value = response.data.map(course => ({
+        id: course.id,
+        name: course.name,
+        code: course.code,
+        teacher: course.teacher,
+        time: course.schedule && course.schedule.length > 0 ? 
+          course.schedule.map(s => `${getDayName(s.day)} ${getTimeSlotName(s.timeSlot)}`).join(', ') : 
+          "待安排",
+        location: course.location,
+        credits: course.credits,
+        capacityUsed: course.capacityUsed || 0,
+        category: (course.category || '').toLowerCase(),
+        schedule: course.schedule || []
+      }))
+    }
+  } catch (error) {
+    ElMessage.error('获取已选课程失败')
+    console.error('获取已选课程失败:', error)
+  }
+}
+
 onMounted(async () => {
   // 加载课程数据
   await loadAvailableCourses()
@@ -567,9 +714,31 @@ onMounted(async () => {
   }
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.batch-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background-color: #f5f7fa;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.dark .batch-actions {
+  background-color: rgba(51, 65, 85, 0.8);
+}
+
 .search-filter {
   display: flex;
   gap: 12px;
+  flex: 1;
 
   .modern-input {
     width: 200px;

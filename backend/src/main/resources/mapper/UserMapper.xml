@@ -4,44 +4,43 @@
 
 <mapper namespace="com.yangshengzhou.lucky_sms.mapper.UserMapper">
     <!-- 通过手机号返回用户 -->
-    <select id="loginByPhone" parameterType="String" resultType="com.yangshengzhou.lucky_sms.vo.user.LoginVO">
+    <select id="loginByPhone" resultType="com.yangshengzhou.lucky_sms.vo.user.LoginVO">
         SELECT
-            u.user_id,
+            u.id AS userId,
             u.username,
             u.phone,
-            r.role_name
+            r.role_name AS roleName
         FROM users u
-                 LEFT JOIN user_roles ur ON u.user_id = ur.user_id
+                 LEFT JOIN user_roles ur ON u.id = ur.user_id
                  LEFT JOIN roles r ON ur.role_id = r.role_id
         WHERE u.phone = #{phone}
           AND u.status = 'ACTIVE'
     </select>
 
-    <!-- 通过手机号注册用户 -->
-    <insert id="registerByPhone" parameterType="String">
-        INSERT INTO users (phone, username)
-        VALUES (#{phone}, 'Lucky')
+    <!-- 通过手机号注册 -->
+    <insert id="registerByPhone">
+        INSERT INTO users (phone, password, username) VALUES (#{phone}, #{password}, #{username})
     </insert>
 
     <!-- 通过手机号重设密码 -->
-    <insert id="resetPasswordByPhone" parameterType="java.util.Map">
+    <update id="resetPasswordByPhone">
         UPDATE users
-        SET password_hash = #{password}
+        SET password = #{password}
         WHERE phone = #{phone}
-    </insert>
+    </update>
 
     <!-- 通过手机号密码登录 -->
-    <select id="loginByPassword" parameterType="java.util.Map" resultType="com.yangshengzhou.lucky_sms.vo.user.LoginVO">
+    <select id="loginByPassword" resultType="com.yangshengzhou.lucky_sms.vo.user.LoginVO">
         SELECT
-            u.user_id,
+            u.id AS userId,
             u.username,
             u.phone,
-            r.role_name  -- 角色名称（TEACHER/STUDENT）
+            r.role_name AS roleName
         FROM users u
-                 LEFT JOIN user_roles ur ON u.user_id = ur.user_id
+                 LEFT JOIN user_roles ur ON u.id = ur.user_id
                  LEFT JOIN roles r ON ur.role_id = r.role_id
         WHERE u.phone = #{phone}
-          AND u.password_hash = #{password}
+          AND u.password = #{password}
           AND u.status = 'ACTIVE'
     </select>
 

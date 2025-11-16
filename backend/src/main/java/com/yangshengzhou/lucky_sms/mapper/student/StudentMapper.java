@@ -1,5 +1,6 @@
 package com.yangshengzhou.lucky_sms.mapper.student;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.yangshengzhou.lucky_sms.pojo.AcademicHistory;
 import com.yangshengzhou.lucky_sms.pojo.Announcement;
 import com.yangshengzhou.lucky_sms.pojo.BasicInfo;
@@ -7,14 +8,16 @@ import com.yangshengzhou.lucky_sms.pojo.Todos;
 import com.yangshengzhou.lucky_sms.vo.student.GradesVO;
 import com.yangshengzhou.lucky_sms.vo.student.StudentProfileVO;
 import com.yangshengzhou.lucky_sms.vo.student.StudentVO;
-import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
 
-@Mapper
-public interface StudentMapper {
+/**
+ * 学生相关的Mapper接口
+ * 继承MyBatis Plus的BaseMapper，提供通用CRUD操作
+ */
+public interface StudentMapper extends BaseMapper<StudentVO> {
     // 1. 查询学生信息
     StudentVO selectStudentById(Integer userId);
 

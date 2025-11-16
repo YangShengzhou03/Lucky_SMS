@@ -5,22 +5,28 @@
         <div class="course-list modern-card">
           <div class="panel-header">
             <h3>
-              <el-icon>
-                <Collection />
-              </el-icon>
-              我的课程
-            </h3>
-            <div class="header-actions">
-              <el-button @click="openCreateCourseDialog" type="primary" size="small" class="mr-2">
                 <el-icon>
-                  <Plus />
+                  <Collection />
                 </el-icon>
-                创建课程
-              </el-button>
-              <el-select v-model="currentSemester" placeholder="选择学期" size="small" class="modern-select">
-                <el-option v-for="item in semesters" :key="item.value" :label="item.label" :value="item.value" />
-              </el-select>
-            </div>
+                我的课程
+              </h3>
+              <div class="header-actions">
+                <div v-if="selectedCourses.length > 0" class="batch-actions">
+                  <span>已选择 {{ selectedCourses.length }} 门课程</span>
+                  <el-button @click="batchDeleteCourses" type="danger" size="small" style="margin-left: 12px">
+                    批量删除
+                  </el-button>
+                </div>
+                <el-button @click="openCreateCourseDialog" type="primary" size="small" class="mr-2">
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                  创建课程
+                </el-button>
+                <el-select v-model="currentSemester" placeholder="选择学期" size="small" class="modern-select">
+                  <el-option v-for="item in semesters" :key="item.value" :label="item.label" :value="item.value" />
+                </el-select>
+              </div>
           </div>
 
           <div class="search-filter">
@@ -38,7 +44,9 @@
           </div>
 
           <div class="courses-container">
-            <el-card v-for="course in filteredCourses" :key="course.id" class="course-card" shadow="hover">
+            <div v-for="course in filteredCourses" :key="course.id" class="course-card-wrapper">
+              <el-checkbox v-model="selectedRowKeys" :label="course.id" @change="handleSelectionChange" class="selection-checkbox"></el-checkbox>
+              <el-card class="course-card" shadow="hover">
               <div class="course-header">
                 <h4>{{ course.name }}</h4>
                 <span class="course-code">{{ course.code }}</span>
@@ -94,7 +102,8 @@
                   </el-button>
                 </el-button-group>
               </div>
-            </el-card>
+              </el-card>
+            </div>
 
             <div v-if="!filteredCourses.length && !searchQuery" class="no-courses">
               <el-empty description="暂无课程" />
@@ -173,7 +182,7 @@ import {
   Delete,
   View
 } from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElCheckbox } from 'element-plus'
 
 const currentSemester = ref('2023-2024-2')
 const semesters = ref([
@@ -193,6 +202,8 @@ const categories = ref([
 
 const currentPage = ref(1)
 const pageSize = ref(5)
+const selectedRowKeys = ref([])
+const selectedCourses = ref([])
 
 const allCourses = ref([
   {
@@ -383,6 +394,40 @@ const handleCurrentChange = (newPage) => {
   currentPage.value = newPage
 }
 
+const handleSelectionChange = () => {
+  selectedCourses.value = allCourses.value.filter(course => 
+    selectedRowKeys.value.includes(course.id)
+  )
+}
+
+const batchDeleteCourses = () => {
+  if (selectedCourses.value.length === 0) {
+    ElMessage.warning('请先选择要删除的课程')
+    return
+  }
+  
+  ElMessageBox.confirm(
+    `确定要删除选中的 ${selectedCourses.value.length} 门课程吗？`,
+    '确认删除',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  )
+  .then(() => {
+    // 删除选中的课程
+    const idsToDelete = selectedCourses.value.map(c => c.id)
+    allCourses.value = allCourses.value.filter(c => !idsToDelete.includes(c.id))
+    ElMessage.success('批量删除成功')
+    selectedRowKeys.value = []
+    selectedCourses.value = []
+  })
+  .catch(() => {
+    // 取消删除
+  })
+}
+
 // 创建课程相关方法
 const openCreateCourseDialog = () => {
   // 重置表单
@@ -495,7 +540,33 @@ const deleteCourse = (course) => {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 20px;
+}
+
+.batch-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background-color: #f5f7fa;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.dark .batch-actions {
+  background-color: rgba(51, 65, 85, 0.8);
+}
+
+.course-card-wrapper {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.selection-checkbox {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
 }
 
 .modern-card {

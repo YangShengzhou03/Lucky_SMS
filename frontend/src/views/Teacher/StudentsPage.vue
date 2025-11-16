@@ -42,7 +42,15 @@
               </el-icon>
               学生信息列表
             </h3>
-            <div class="search-filter">
+            <div class="header-actions">
+              <div v-if="selectedStudents.length > 0" class="batch-actions">
+                <span>已选择 {{ selectedStudents.length }} 名学生</span>
+                <el-button @click="batchDeleteStudents" type="danger" size="small" style="margin-left: 12px">
+                  批量删除
+                </el-button>
+              </div>
+              <div class="search-filter">
+            </div>
               <el-input v-model="searchQuery" placeholder="搜索学生姓名/学号" size="small" clearable class="modern-input">
                 <template #suffix>
                   <el-icon>
@@ -61,7 +69,8 @@
           </div>
 
           <el-table :data="filteredStudents" stripe highlight-current-row class="student-table"
-            @row-click="viewStudentDetail">
+            @row-click="viewStudentDetail" :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: handleSelectionChange }">
+            <el-table-column type="selection" width="55"></el-table-column>
             <el-table-column prop="studentId" label="学号" width="120"></el-table-column>
             <el-table-column prop="name" label="姓名" width="100"></el-table-column>
             <el-table-column label="性别" width="80">
@@ -130,7 +139,7 @@ import {
   Check,
   Warning
 } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const currentDepartment = ref('all')
 const departments = ref([
@@ -171,33 +180,8 @@ const filterGrade = ref('all')
 const filterClass = ref('all')
 const currentPage = ref(1)
 const pageSize = ref(5)
-
-const stats = computed(() => [
-  {
-    value: allStudents.value.length,
-    label: '总学生数',
-    icon: User,
-    color: '#6366f1'
-  },
-  {
-    value: allStudents.value.filter(s => s.status === 'normal').length,
-    label: '正常在校',
-    icon: Check,
-    color: '#10b981'
-  },
-  {
-    value: allStudents.value.filter(s => s.status !== 'normal' && s.status !== 'graduate').length,
-    label: '特殊状态',
-    icon: Warning,
-    color: '#f59e0b'
-  },
-  {
-    value: new Set(allStudents.value.map(s => s.major)).size,
-    label: '专业数量',
-    icon: School,
-    color: '#ef4444'
-  }
-])
+const selectedRowKeys = ref([])
+const selectedStudents = ref([])
 
 const allStudents = ref([
   {
@@ -314,6 +298,33 @@ const allStudents = ref([
   }
 ])
 
+const stats = computed(() => [
+  {
+    value: allStudents.value.length,
+    label: '总学生数',
+    icon: User,
+    color: '#6366f1'
+  },
+  {
+    value: allStudents.value.filter(s => s.status === 'normal').length,
+    label: '正常在校',
+    icon: Check,
+    color: '#10b981'
+  },
+  {
+    value: allStudents.value.filter(s => s.status !== 'normal' && s.status !== 'graduate').length,
+    label: '特殊状态',
+    icon: Warning,
+    color: '#f59e0b'
+  },
+  {
+    value: new Set(allStudents.value.map(s => s.major)).size,
+    label: '专业数量',
+    icon: School,
+    color: '#ef4444'
+  }
+])
+
 const filteredStudents = computed(() => {
   let filtered = allStudents.value
 
@@ -387,6 +398,39 @@ const deleteStudent = (studentId) => {
     allStudents.value = allStudents.value.filter(s => s.id !== studentId)
     ElMessage.success(`已删除学生: ${student.name}`)
   }
+}
+
+const handleSelectionChange = (selection) => {
+  selectedRowKeys.value = selection.map(row => row.id)
+  selectedStudents.value = selection
+}
+
+const batchDeleteStudents = () => {
+  if (selectedStudents.value.length === 0) {
+    ElMessage.warning('请先选择要删除的学生')
+    return
+  }
+  
+  ElMessageBox.confirm(
+    `确定要删除选中的 ${selectedStudents.value.length} 名学生吗？`,
+    '确认删除',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  )
+  .then(() => {
+    // 删除选中的学生
+    const idsToDelete = selectedStudents.value.map(s => s.id)
+    allStudents.value = allStudents.value.filter(s => !idsToDelete.includes(s.id))
+    ElMessage.success('批量删除成功')
+    selectedRowKeys.value = []
+    selectedStudents.value = []
+  })
+  .catch(() => {
+    // 取消删除
+  })
 }
 
 const handleSizeChange = (newSize) => {
@@ -529,6 +573,26 @@ onMounted(() => {
       color: var(--dark-text-primary);
     }
   }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.batch-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background-color: #f5f7fa;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.dark .batch-actions {
+  background-color: rgba(51, 65, 85, 0.8);
 }
 
 .search-filter {

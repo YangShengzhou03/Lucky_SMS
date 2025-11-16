@@ -40,9 +40,9 @@ logging:
     max-history: 30
 
 # MyBatis配置
-mybatis:
+mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: com.yangshengzhou.lucky_sms.entity
+  type-aliases-package: com.yangshengzhou.lucky_sms.pojo
   configuration:
     map-underscore-to-camel-case: true
     cache-enabled: true
@@ -51,6 +51,21 @@ mybatis:
     multiple-result-sets-enabled: true
     use-generated-keys: true
     default-statement-timeout: 30
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-not-delete-value: 0
+      logic-delete-value: 1
+
+# RocketMQ配置
+rocketmq:
+  name-server: localhost:9876
+  producer:
+    group: lucky-sms-producer-group
+    send-message-timeout: 300000
+    retry-times-when-send-failed: 2
+    retry-times-when-send-async-failed: 2
+    max-message-size: 4194304
 
 # JWT配置
 jwt:

@@ -3,6 +3,7 @@ package com.yangshengzhou.lucky_sms.service.student.impl;
 import com.yangshengzhou.lucky_sms.mapper.student.CourseMapper;
 import com.yangshengzhou.lucky_sms.mapper.student.CourseSelectionMapper;
 import com.yangshengzhou.lucky_sms.mapper.student.StudentMapper;
+import com.yangshengzhou.lucky_sms.service.RocketMQProducerService;
 import com.yangshengzhou.lucky_sms.service.student.CourseSelectionService;
 import com.yangshengzhou.lucky_sms.utils.RedisUtil;
 import com.yangshengzhou.lucky_sms.vo.student.CourseSelectionResultVO;
@@ -11,7 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -25,6 +28,9 @@ public class CourseSelectionServiceImpl implements CourseSelectionService {
     
     @Resource
     private StudentMapper studentMapper;
+
+    @Resource
+    private RocketMQProducerService rocketMQProducerService;
     
     @Resource
     private RedisUtil redisUtil;
@@ -117,6 +123,14 @@ public class CourseSelectionServiceImpl implements CourseSelectionService {
                 result.setSuccess(true);
                 result.setMessage("选课成功");
                 result.setCourse(course);
+                
+                // 发送选课成功消息
+                Map<String, Object> message = new HashMap<>();
+                message.put("userId", userId);
+                message.put("courseId", courseId);
+                message.put("courseName", course.getCourseName());
+                message.put("operationTime", System.currentTimeMillis());
+                rocketMQProducerService.sendCourseSelectionSuccessMessage(message);
             } else {
                 result.setSuccess(false);
                 result.setMessage("选课失败，请稍后再试");
@@ -172,6 +186,13 @@ public class CourseSelectionServiceImpl implements CourseSelectionService {
                 
                 result.setSuccess(true);
                 result.setMessage("退课成功");
+                
+                // 发送退课成功消息
+                Map<String, Object> message = new HashMap<>();
+                message.put("userId", userId);
+                message.put("courseId", courseId);
+                message.put("operationTime", System.currentTimeMillis());
+                rocketMQProducerService.sendDropCourseSuccessMessage(message);
             } else {
                 result.setSuccess(false);
                 result.setMessage("退课失败，请稍后再试");
