@@ -1,6 +1,7 @@
 package com.yangshengzhou.lucky_sms.mapper.student;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yangshengzhou.lucky_sms.pojo.CourseSelection;
 import com.yangshengzhou.lucky_sms.vo.student.CourseSelectionVO;
 import org.apache.ibatis.annotations.Param;
@@ -18,6 +19,15 @@ public interface CourseSelectionMapper extends BaseMapper<CourseSelection> {
      * @return 已选课程列表
      */
     List<CourseSelectionVO> getSelectedCourses(@Param("userId") Integer userId, @Param("semester") String semester);
+    
+    /**
+     * 分页获取已选课程列表
+     * @param page 分页参数
+     * @param userId 学生ID
+     * @param semester 学期
+     * @return 分页的已选课程列表
+     */
+    Page<CourseSelectionVO> getSelectedCoursesWithPagination(Page<CourseSelectionVO> page, @Param("userId") Integer userId, @Param("semester") String semester);
     
     /**
      * 检查是否已选某课程

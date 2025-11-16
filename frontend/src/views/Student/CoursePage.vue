@@ -134,7 +134,7 @@
           <div class="pagination">
             <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
               :current-page="currentPage" :page-sizes="[5, 10, 15]" :page-size="pageSize"
-              layout="total, sizes, prev, pager, next, jumper" :total="allCourses.length">
+              layout="total, sizes, prev, pager, next, jumper" :total="totalCourses">
             </el-pagination>
           </div>
         </div>
@@ -200,7 +200,7 @@ import {
   Search
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox, ElCheckbox } from 'element-plus'
-import { getAvailableCourses, getSelectedCourses, selectCourse as apiSelectCourse, dropCourse } from '@/api/student'
+import { getAvailableCourses, getSelectedCourses, getAvailableCoursesWithPagination, getSelectedCoursesWithPagination, selectCourse as apiSelectCourse, dropCourse } from '@/api/student'
 
 const currentSemester = ref('2023-2024-2')
 const semesters = ref([
@@ -229,6 +229,9 @@ const selectedCourseIds = ref([])
 // 从后端获取的课程数据
 const allCourses = ref([])
 const selectedCourses = ref([])
+// 总数据量
+const totalCourses = ref(0)
+const totalSelectedCourses = ref(0)
 
 
 
@@ -300,9 +303,7 @@ const filteredCourses = computed(() => {
     )
   }
 
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return filtered.slice(start, end)
+  return filtered
 })
 
 const selectedCredits = computed(() => {
@@ -388,10 +389,12 @@ const capacityColor = (capacity) => {
 
 const handleSizeChange = (newSize) => {
   pageSize.value = newSize
+  loadAvailableCourses() // 重新加载数据
 }
 
 const handleCurrentChange = (newPage) => {
   currentPage.value = newPage
+  loadAvailableCourses() // 重新加载数据
 }
 
 const handleSelectionChange = () => {
@@ -525,10 +528,15 @@ const batchDropCourses = async () => {
 // 重新加载数据时清除选择
 const loadAvailableCourses = async () => {
   try {
-    const response = await getAvailableCourses()
+    const response = await getAvailableCoursesWithPagination({
+      semester: currentSemester.value,
+      page: currentPage.value,
+      size: pageSize.value
+    })
     if (response.code === 200) {
+      const data = response.data
       // 转换后端数据为前端需要的格式
-      allCourses.value = response.data.map(course => ({
+      allCourses.value = data.records.map(course => ({
         id: course.id,
         name: course.name,
         code: course.code,
@@ -542,6 +550,8 @@ const loadAvailableCourses = async () => {
         category: (course.category || '').toLowerCase(),
         schedule: course.schedule || []
       }))
+      // 更新总数据量
+      totalCourses.value = data.total
     }
     // 清除选择状态
     selectedCourseIds.value = []
@@ -554,10 +564,15 @@ const loadAvailableCourses = async () => {
 // 重新加载数据时清除选择
 const loadSelectedCourses = async () => {
   try {
-    const response = await getSelectedCourses()
+    const response = await getSelectedCoursesWithPagination({
+      semester: currentSemester.value,
+      page: 1, // 已选课程可以默认只加载第一页
+      size: 50 // 已选课程通常不会太多，可以设置一个较大的值
+    })
     if (response.code === 200) {
+      const data = response.data
       // 转换后端数据为前端需要的格式
-      selectedCourses.value = response.data.map(course => ({
+      selectedCourses.value = data.records.map(course => ({
         id: course.id,
         name: course.name,
         code: course.code,
@@ -571,6 +586,8 @@ const loadSelectedCourses = async () => {
         category: (course.category || '').toLowerCase(),
         schedule: course.schedule || []
       }))
+      // 更新总数据量
+      totalSelectedCourses.value = data.total
     }
   } catch (error) {
     ElMessage.error('获取已选课程失败')

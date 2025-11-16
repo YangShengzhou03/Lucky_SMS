@@ -2,6 +2,7 @@ package com.yangshengzhou.lucky_sms.service.student;
 
 import com.yangshengzhou.lucky_sms.vo.student.CourseSelectionResultVO;
 import com.yangshengzhou.lucky_sms.vo.student.CourseSelectionVO;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import java.util.List;
 
@@ -21,6 +22,26 @@ public interface CourseSelectionService {
      * @return 已选课程列表
      */
     List<CourseSelectionVO> getSelectedCourses(Integer userId, String semester);
+    
+    /**
+     * 分页获取可选课程列表
+     * @param userId 学生ID
+     * @param semester 学期
+     * @param page 页码
+     * @param size 每页数量
+     * @return 分页的可选课程列表
+     */
+    Page<CourseSelectionVO> getAvailableCoursesWithPagination(Integer userId, String semester, Integer page, Integer size);
+    
+    /**
+     * 分页获取已选课程列表
+     * @param userId 学生ID
+     * @param semester 学期
+     * @param page 页码
+     * @param size 每页数量
+     * @return 分页的已选课程列表
+     */
+    Page<CourseSelectionVO> getSelectedCoursesWithPagination(Integer userId, String semester, Integer page, Integer size);
     
     /**
      * 选课

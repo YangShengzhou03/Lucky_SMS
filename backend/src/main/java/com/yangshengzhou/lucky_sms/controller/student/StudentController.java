@@ -160,6 +160,43 @@ public class StudentController {
 
         return result;
     }
+    
+    /**
+     * 分页获取可选课程列表
+     * @param semester 学期
+     * @param page 页码
+     * @param size 每页大小
+     * @return 分页的可选课程列表
+     */
+    @GetMapping("/courses/available/pagination")
+    public HashMap<String, Object> getAvailableCoursesWithPagination(
+            @RequestParam(defaultValue = "2023-2024-2") String semester,
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            HttpServletRequest request
+    ) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        try {
+            Integer userId = jwtUtil.getUidByRequest(request);
+            // 假设服务层实现了分页方法
+            Object courses = courseSelectionService.getAvailableCoursesWithPagination(userId, semester, page, size);
+
+            result.put("code", 200);
+            result.put("message", "请求成功");
+            result.put("data", courses);
+        } catch (ResponseStatusException e) {
+            result.put("code", e.getStatusCode().value());
+            result.put("message", e.getReason());
+            result.put("data", null);
+        } catch (Exception e) {
+            result.put("code", 500);
+            result.put("message", e.getMessage());
+            result.put("data", null);
+        }
+
+        return result;
+    }
 
     @GetMapping("/courses/selected")
     public HashMap<String, Object> getSelectedCourses(
@@ -171,6 +208,43 @@ public class StudentController {
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
             List<CourseSelectionVO> courses = courseSelectionService.getSelectedCourses(userId, semester);
+
+            result.put("code", 200);
+            result.put("message", "请求成功");
+            result.put("data", courses);
+        } catch (ResponseStatusException e) {
+            result.put("code", e.getStatusCode().value());
+            result.put("message", e.getReason());
+            result.put("data", null);
+        } catch (Exception e) {
+            result.put("code", 500);
+            result.put("message", e.getMessage());
+            result.put("data", null);
+        }
+
+        return result;
+    }
+    
+    /**
+     * 分页获取已选课程列表
+     * @param semester 学期
+     * @param page 页码
+     * @param size 每页大小
+     * @return 分页的已选课程列表
+     */
+    @GetMapping("/courses/selected/pagination")
+    public HashMap<String, Object> getSelectedCoursesWithPagination(
+            @RequestParam(defaultValue = "2023-2024-2") String semester,
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            HttpServletRequest request
+    ) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        try {
+            Integer userId = jwtUtil.getUidByRequest(request);
+            // 假设服务层实现了分页方法
+            Object courses = courseSelectionService.getSelectedCoursesWithPagination(userId, semester, page, size);
 
             result.put("code", 200);
             result.put("message", "请求成功");

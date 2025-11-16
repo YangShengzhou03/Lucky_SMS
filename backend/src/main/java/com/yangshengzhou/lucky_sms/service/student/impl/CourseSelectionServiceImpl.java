@@ -1,5 +1,6 @@
 package com.yangshengzhou.lucky_sms.service.student.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yangshengzhou.lucky_sms.mapper.student.CourseMapper;
 import com.yangshengzhou.lucky_sms.mapper.student.CourseSelectionMapper;
 import com.yangshengzhou.lucky_sms.mapper.student.StudentMapper;
@@ -47,6 +48,18 @@ public class CourseSelectionServiceImpl implements CourseSelectionService {
     @Override
     public List<CourseSelectionVO> getSelectedCourses(Integer userId, String semester) {
         return courseSelectionMapper.getSelectedCourses(userId, semester);
+    }
+
+    @Override
+    public Page<CourseSelectionVO> getAvailableCoursesWithPagination(Integer userId, String semester, Integer page, Integer size) {
+        Page<CourseSelectionVO> pageInfo = new Page<>(page, size);
+        return courseMapper.getAvailableCoursesWithPagination(pageInfo, userId, semester);
+    }
+
+    @Override
+    public Page<CourseSelectionVO> getSelectedCoursesWithPagination(Integer userId, String semester, Integer page, Integer size) {
+        Page<CourseSelectionVO> pageInfo = new Page<>(page, size);
+        return courseSelectionMapper.getSelectedCoursesWithPagination(pageInfo, userId, semester);
     }
 
     // 抢课的关键代码

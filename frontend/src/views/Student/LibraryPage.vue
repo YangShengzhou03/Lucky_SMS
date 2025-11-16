@@ -204,6 +204,14 @@ import {
   Reading, Clock, Check, List
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import {
+  searchBooks,
+  getBookDetail,
+  reserveBook as apiReserveBook,
+  getMyBorrows,
+  renewBook as apiRenewBook,
+  getRecommendedBooks
+} from '@/api/library'
 
 // 默认图书封面
 const defaultBookCover = 'https://picsum.photos/200/300?random=book'
@@ -224,41 +232,10 @@ const detailVisible = ref(false)
 const selectedBook = ref(null)
 
 // 热门推荐书籍
-const recommendedBooks = ref([
-  {
-    id: 101,
-    title: '深入理解计算机系统',
-    cover: 'https://picsum.photos/200/300?random=101',
-    isNew: true
-  },
-  {
-    id: 102,
-    title: '代码整洁之道',
-    cover: 'https://picsum.photos/200/300?random=102',
-    isNew: false
-  },
-  {
-    id: 103,
-    title: '设计模式',
-    cover: 'https://picsum.photos/200/300?random=103',
-    isNew: false
-  },
-  {
-    id: 104,
-    title: '算法导论',
-    cover: 'https://picsum.photos/200/300?random=104',
-    isNew: true
-  },
-  {
-    id: 105,
-    title: '计算机程序的构造和解释',
-    cover: 'https://picsum.photos/200/300?random=105',
-    isNew: false
-  }
-])
+const recommendedBooks = ref([])
 
-// 模拟搜索功能
-const performSearch = () => {
+// 执行搜索功能
+const performSearch = async () => {
   if (!searchQuery.value.trim()) {
     ElMessage.warning('请输入搜索关键词')
     return
@@ -273,163 +250,28 @@ const performSearch = () => {
     localStorage.setItem('librarySearchHistory', JSON.stringify(searchHistory.value))
   }
 
-  currentPage.value = 1
+  try {
+    const response = await searchBooks({
+      query: searchQuery.value,
+      type: selectedType.value,
+      sort: selectedSort.value,
+      location: selectedLocation.value,
+      page: currentPage.value,
+      size: pageSize.value
+    })
 
-  // 模拟API请求延迟
-  setTimeout(() => {
-    // 模拟API返回数据
-    const allResults = [
-      {
-        id: 101,
-        title: '深入理解计算机系统',
-        author: 'Randal E.Bryant',
-        publisher: '机械工业出版社',
-        year: '2016',
-        cover: 'https://picsum.photos/200/300?random=101',
-        location: '三楼自然科学区',
-        callNumber: 'TP311.5/B915',
-        available: true,
-        availableCopies: 5,
-        isbn: '9787111544937',
-        pages: '737',
-        description: '本书从程序员的视角详细阐述计算机系统的本质概念，并展示这些概念如何实实在在地影响应用程序的正确性、性能和实用性。',
-        type: 'book',
-        library: 'main'
-      },
-      {
-        id: 102,
-        title: '代码整洁之道',
-        author: 'Robert C. Martin',
-        publisher: '人民邮电出版社',
-        year: '2020',
-        cover: 'https://picsum.photos/200/300?random=102',
-        location: '二楼计算机科学区',
-        callNumber: 'TP311.5/M379',
-        available: false,
-        availableCopies: 0,
-        returnDate: '2023-07-30',
-        isbn: '9787115279460',
-        pages: '388',
-        description: '本书讲述了一系列行之有效的整洁代码操作实践，帮助读者写出高质量的代码。',
-        type: 'book',
-        library: 'main'
-      },
-      {
-        id: 103,
-        title: '设计模式：可复用面向对象软件的基础',
-        author: 'Erich Gamma等',
-        publisher: '机械工业出版社',
-        year: '2019',
-        cover: 'https://picsum.photos/200/300?random=103',
-        location: '二楼计算机科学区',
-        callNumber: 'TP311.5/G191',
-        available: true,
-        availableCopies: 2,
-        isbn: '9787111618048',
-        pages: '395',
-        description: '本书结合设计实例从面向对象的设计中精选出23个设计模式，总结了面向对象设计中最有价值的经验。',
-        type: 'book',
-        library: 'science'
-      },
-      {
-        id: 104,
-        title: '算法导论',
-        author: 'Thomas H. Cormen',
-        publisher: 'MIT Press',
-        year: '2009',
-        cover: 'https://picsum.photos/200/300?random=104',
-        location: '三楼自然科学区',
-        callNumber: 'TP311.5/C813',
-        available: true,
-        availableCopies: 3,
-        isbn: '9780262033848',
-        pages: '1292',
-        description: '本书全面论述了算法的内容，是一本经典的算法教材。',
-        type: 'book',
-        library: 'science'
-      },
-      {
-        id: 105,
-        title: '计算机程序的构造和解释',
-        author: 'Harold Abelson',
-        publisher: 'MIT Press',
-        year: '1996',
-        cover: 'https://picsum.photos/200/300?random=105',
-        location: '三楼自然科学区',
-        callNumber: 'TP311.5/A139',
-        available: true,
-        availableCopies: 1,
-        isbn: '9780262011532',
-        pages: '657',
-        description: '本书强调通过抽象来构建系统的方法，特别专注于不同抽象层次上系统的创建和使用。',
-        type: 'book',
-        library: 'main'
-      },
-      {
-        id: 106,
-        title: '人工智能：现代方法',
-        author: 'Stuart Russell',
-        publisher: 'Pearson',
-        year: '2020',
-        cover: 'https://picsum.photos/200/300?random=106',
-        location: '四楼科技分馆',
-        callNumber: 'TP18/R961',
-        available: false,
-        availableCopies: 0,
-        returnDate: '2023-08-15',
-        isbn: '9780134610993',
-        pages: '1136',
-        description: '本书全面系统地介绍了人工智能的理论和实践，阐述了人工智能领域的核心内容。',
-        type: 'book',
-        library: 'science'
-      },
-      {
-        id: 107,
-        title: '计算机网络：自顶向下方法',
-        author: 'James F. Kurose',
-        publisher: 'Pearson',
-        year: '2017',
-        cover: 'https://picsum.photos/200/300?random=107',
-        location: '二楼计算机科学区',
-        callNumber: 'TP393/K968',
-        available: true,
-        availableCopies: 4,
-        isbn: '9780133594140',
-        pages: '864',
-        description: '本书采用自顶向下的方法讲解计算机网络的原理及其协议，是经典的计算机网络教材。',
-        type: 'book',
-        library: 'main'
-      }
-    ].filter(book =>
-      book.title.includes(searchQuery.value) ||
-      book.author.includes(searchQuery.value) ||
-      (book.isbn && book.isbn.includes(searchQuery.value))
-    )
-
-    // 应用筛选条件
-    let filteredResults = [...allResults]
-    if (selectedType.value) {
-      filteredResults = filteredResults.filter(book => book.type === selectedType.value)
+    if (response.code === 200) {
+      const data = response.data
+      searchResults.value = data.records
+      totalResults.value = data.total
+      ElMessage.success(`找到 ${totalResults.value} 条结果`)
+    } else {
+      ElMessage.error(response.message || '搜索失败')
     }
-    if (selectedLocation.value) {
-      filteredResults = filteredResults.filter(book => book.library === selectedLocation.value)
-    }
-
-    // 模拟排序
-    if (selectedSort.value === 'newest') {
-      filteredResults.sort((a, b) => b.year - a.year)
-    } else if (selectedSort.value === 'popular') {
-      filteredResults.sort(() => Math.random() - 0.5) // 模拟随机排序
-    }
-
-    totalResults.value = filteredResults.length
-    searchResults.value = filteredResults.slice(
-      (currentPage.value - 1) * pageSize.value,
-      currentPage.value * pageSize.value
-    )
-
-    ElMessage.success(`找到 ${totalResults.value} 条结果`)
-  }, 800)
+  } catch (error) {
+    ElMessage.error('搜索失败，请稍后再试')
+    console.error('搜索失败:', error)
+  }
 }
 
 // 分页处理
@@ -455,15 +297,35 @@ const resetSearch = () => {
 }
 
 // 查看图书详情
-const viewBookDetail = (book) => {
-  selectedBook.value = book
-  detailVisible.value = true
+const viewBookDetail = async (book) => {
+  try {
+    const response = await getBookDetail(book.id)
+    if (response.code === 200) {
+      selectedBook.value = response.data
+      detailVisible.value = true
+    } else {
+      ElMessage.error(response.message || '获取图书详情失败')
+    }
+  } catch (error) {
+    ElMessage.error('获取图书详情失败，请稍后再试')
+    console.error('获取图书详情失败:', error)
+  }
 }
 
 // 预约图书
-const reserveBook = (book) => {
-  ElMessage.success(`已预约《${book.title}》，请到${book.location}借阅`)
-  detailVisible.value = false
+const reserveBook = async (book) => {
+  try {
+    const response = await apiReserveBook(book.id)
+    if (response.code === 200) {
+      ElMessage.success(response.message || '预约成功')
+      detailVisible.value = false
+    } else {
+      ElMessage.error(response.message || '预约失败')
+    }
+  } catch (error) {
+    ElMessage.error('预约失败，请稍后再试')
+    console.error('预约失败:', error)
+  }
 }
 
 // 从搜索历史中移除
@@ -472,19 +334,77 @@ const removeSearchHistory = (index) => {
   localStorage.setItem('librarySearchHistory', JSON.stringify(searchHistory.value))
 }
 
-// 加载搜索历史
-onMounted(() => {
-  const history = localStorage.getItem('librarySearchHistory')
-  if (history) {
-    searchHistory.value = JSON.parse(history)
+// 加载数据
+const loadData = async () => {
+  try {
+    // 加载搜索历史
+    const history = localStorage.getItem('librarySearchHistory')
+    if (history) {
+      searchHistory.value = JSON.parse(history)
+    }
+    
+    // 加载热门推荐
+    const response = await getRecommendedBooks()
+    if (response.code === 200) {
+      recommendedBooks.value = response.data
+    }
+    
+    // 加载借阅记录
+    const borrowsResponse = await getMyBorrows()
+    if (borrowsResponse.code === 200) {
+      currentBorrows.value = borrowsResponse.data
+      // 更新统计数据
+      updateStats()
+    }
+  } catch (error) {
+    console.error('加载数据失败:', error)
   }
+}
+
+// 更新统计数据
+const updateStats = () => {
+  const currentCount = currentBorrows.value.length
+  const overdueCount = currentBorrows.value.filter(book => isOverdue(book.dueDate)).length
+  const renewableCount = currentBorrows.value.filter(book => canRenew(book)).length
+  
+  stats.value = [
+    {
+      label: '当前借阅',
+      value: currentCount,
+      icon: Reading,
+      color: '#6366f1'
+    },
+    {
+      label: '逾期数量',
+      value: overdueCount,
+      icon: Clock,
+      color: '#ef4444'
+    },
+    {
+      label: '可续借',
+      value: renewableCount,
+      icon: Check,
+      color: '#10b981'
+    },
+    {
+      label: '累计借阅',
+      value: 42, // 这个值可以从API获取，暂时使用模拟数据
+      icon: List,
+      color: '#3b82f6'
+    }
+  ]
+}
+
+// 页面挂载时加载数据
+onMounted(() => {
+  loadData()
 })
 
-// 原有数据和方法
+// 初始化统计数据
 const stats = ref([
   {
     label: '当前借阅',
-    value: 3,
+    value: 0,
     icon: Reading,
     color: '#6366f1'
   },
@@ -496,47 +416,20 @@ const stats = ref([
   },
   {
     label: '可续借',
-    value: 2,
+    value: 0,
     icon: Check,
     color: '#10b981'
   },
   {
     label: '累计借阅',
-    value: 42,
+    value: 0,
     icon: List,
     color: '#3b82f6'
   }
 ])
 
-const currentBorrows = ref([
-  {
-    id: 1,
-    title: '数据结构与算法分析',
-    author: 'Mark Allen Weiss',
-    cover: 'https://picsum.photos/200/300?random=1',
-    borrowDate: '2023-06-15',
-    dueDate: '2023-07-15',
-    renewTimes: 1
-  },
-  {
-    id: 2,
-    title: '计算机网络：自顶向下方法',
-    author: 'Andrew S. Tanenbaum',
-    cover: 'https://picsum.photos/200/300?random=2',
-    borrowDate: '2023-06-20',
-    dueDate: '2023-07-20',
-    renewTimes: 0
-  },
-  {
-    id: 3,
-    title: '操作系统概念',
-    author: 'Abraham Silberschatz',
-    cover: 'https://picsum.photos/200/300?random=3',
-    borrowDate: '2023-06-25',
-    dueDate: '2023-07-25',
-    renewTimes: 0
-  }
-])
+// 当前借阅列表
+const currentBorrows = ref([])
 
 const formatDate = (dateStr) => {
   return new Date(dateStr).toLocaleDateString('zh-CN')
@@ -550,17 +443,25 @@ const canRenew = (book) => {
   return book.renewTimes < 2 && !isOverdue(book.dueDate)
 }
 
-const renewBook = (book) => {
+const renewBook = async (book) => {
   if (!canRenew(book)) return
 
-  const index = currentBorrows.value.findIndex(item => item.id === book.id)
-  if (index !== -1) {
-    const newDueDate = new Date(book.dueDate)
-    newDueDate.setDate(newDueDate.getDate() + 30)
-
-    currentBorrows.value[index].renewTimes += 1
-    currentBorrows.value[index].dueDate = newDueDate.toISOString().split('T')[0]
-    ElMessage.success(`《${book.title}》续借成功，新应还日期: ${formatDate(newDueDate)}`)
+  try {
+    const response = await apiRenewBook(book.id)
+    if (response.code === 200) {
+      // 更新本地数据
+      const index = currentBorrows.value.findIndex(item => item.id === book.id)
+      if (index !== -1) {
+        currentBorrows.value[index] = response.data
+      }
+      updateStats()
+      ElMessage.success(`《${book.title}》续借成功，新应还日期: ${formatDate(response.data.dueDate)}`)
+    } else {
+      ElMessage.error(response.message || '续借失败')
+    }
+  } catch (error) {
+    ElMessage.error('续借失败，请稍后再试')
+    console.error('续借失败:', error)
   }
 }
 </script>
