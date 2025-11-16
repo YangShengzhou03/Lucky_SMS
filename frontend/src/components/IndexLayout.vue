@@ -1027,7 +1027,26 @@ onUnmounted(() => {
   opacity: 0;
 }
 
+@media (max-width: 1024px) {
+  .hero-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+
+  .features-grid,
+  .pricing-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .hero-content {
+    padding: 30px;
+  }
+}
+
 @media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+
   .hero-title {
     font-size: clamp(1.8rem, 5vw, 2.5rem);
   }
@@ -1040,6 +1059,11 @@ onUnmounted(() => {
   .pricing-grid,
   .footer-content {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .footer-content {
+    text-align: center;
   }
 
   .premium-card-wrapper::before {
@@ -1064,6 +1088,7 @@ onUnmounted(() => {
 
   .hero-actions .el-button {
     width: 100%;
+    min-width: auto;
   }
 
   .nav-actions {
@@ -1072,6 +1097,88 @@ onUnmounted(() => {
 
   .hero-content {
     padding: 20px;
+  }
+
+  .feature-item {
+    padding: 24px 16px;
+  }
+
+  .nav-logo {
+    font-size: 1.2rem;
+  }
+
+  .logo-text {
+    font-size: 20px;
+  }
+
+  .social-links {
+    justify-content: center;
+  }
+
+  .footer-section h3::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    height: auto;
+    min-height: 500px;
+    padding: 60px 10px;
+  }
+
+  .hero-content {
+    padding: 16px;
+  }
+
+  .hero-title {
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+  }
+
+  .feature-item {
+    padding: 16px;
+  }
+
+  .feature-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+  }
+
+  .pricing-card {
+    margin-bottom: 2rem;
+  }
+
+  .pricing-header {
+    padding: 24px 16px;
+  }
+
+  .plan-title {
+    font-size: 20px;
+  }
+
+  .plan-price {
+    font-size: 28px;
+  }
+
+  .plan-features {
+    padding: 24px 16px;
+  }
+
+  .footer {
+    padding: 80px 0 24px;
+  }
+
+  .footer-content {
+    gap: 32px;
+  }
+
+  .back-to-top {
+    bottom: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
   }
 }
 </style>

@@ -922,6 +922,62 @@ onUnmounted(() => {
 
   .info-cards {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .card-header h3 {
+    font-size: 16px;
+  }
+
+  .score-card .gpa .value {
+    font-size: 32px;
+  }
+
+  .course-card .course-count .highlight {
+    font-size: 24px;
+  }
+
+  .todo-card .todo-list {
+    max-height: 200px;
+  }
+
+  .announcements .section-header h3 {
+    font-size: 18px;
+  }
+
+  .announcements .el-scrollbar {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-section h2 {
+    font-size: 20px;
+  }
+
+  .welcome-section .subtitle {
+    font-size: 14px;
+  }
+
+  .info-cards {
+    padding: 0 10px;
+  }
+
+  .card-base {
+    padding: 15px;
+  }
+
+  .todo-card .todo-item {
+    padding: 10px 0;
+  }
+
+  .announcement-item {
+    padding: 12px 0;
+  }
+
+  .announcement-item:hover {
+    padding: 12px;
+    margin: 0 -8px;
   }
 }
 </style>

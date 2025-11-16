@@ -42,7 +42,7 @@
               </el-badge>
             </div>
 
-            <button class="mobile-menu-btn action-btn" v-if="isMobile && showSidebar" @click="toggleMobileSidebar"
+            <button class="mobile-menu-btn action-btn" v-if="isMobile" @click="toggleMobileSidebar"
               aria-label="移动端菜单" title="菜单">
               <el-icon>
                 <Menu />
@@ -164,10 +164,12 @@ const route = useRoute()
 const { isDarkMode, toggleDarkMode } = provideDarkMode()
 
 const mobileNavItems = [
-  { index: '1', icon: Notebook, text: '学籍', path: '/status' },
-  { index: '2', icon: Histogram, text: '成绩', path: '/grades' },
-  { index: '3', icon: Calendar, text: '课表', path: '/schedule' },
-  { index: '4', icon: Reading, text: '图书', path: '/library' }
+  { index: '1', icon: House, text: '首页', path: '/student' },
+  { index: '2', icon: Notebook, text: '学籍', path: '/student/status' },
+  { index: '3', icon: Histogram, text: '成绩', path: '/student/grades' },
+  { index: '4', icon: Calendar, text: '课表', path: '/student/schedule' },
+  { index: '5', icon: Reading, text: '图书', path: '/student/library' },
+  { index: '6', icon: EditPen, text: '选课', path: '/student/course' }
 ]
 
 const showBackToTop = ref(false)
@@ -929,8 +931,12 @@ onUnmounted(() => {
     max-width: 400px;
   }
 
+  .sidebar {
+    width: 260px;
+  }
+  
   .main-content {
-    padding: 16px;
+    padding: 20px;
   }
 
   .router-view-container {
@@ -939,7 +945,15 @@ onUnmounted(() => {
 }
 
 @media (max-width: 768px) {
+  .main-content {
+    padding: 15px;
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding-bottom: 72px;
+  }
+
   .sidebar {
+    width: 280px;
     position: fixed;
     left: 0;
     top: 72px;
@@ -971,34 +985,51 @@ onUnmounted(() => {
     align-items: flex-start;
   }
 
-  .main-content {
-    margin-left: 0 !important;
-    width: 100% !important;
-    padding-bottom: 72px;
-  }
-
   .router-view-container {
     height: auto;
     min-height: calc(100vh - 180px);
+    padding: 15px;
+  }
+
+  .top-nav .container {
+    padding: 0 15px;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
   }
 }
 
 @media (max-width: 480px) {
   .container {
-    padding: 0 16px;
+    padding: 0 10px;
   }
 
   .logo-text {
-    font-size: 1rem;
+    font-size: 18px;
   }
 
   .main-content {
-    padding: 12px;
+    padding: 10px;
     padding-bottom: 72px;
   }
 
   .router-view-container {
-    padding: 12px;
+    padding: 10px;
+    min-height: calc(100vh - 160px);
+  }
+
+  .sidebar {
+    width: 260px;
+  }
+
+  .action-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .nav-content {
+    gap: 8px;
   }
 }
 </style>

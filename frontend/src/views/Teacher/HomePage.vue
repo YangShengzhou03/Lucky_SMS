@@ -1207,17 +1207,101 @@ onMounted(() => {
       margin-bottom: 15px;
     }
 
+    .welcome-content h2 {
+      font-size: 20px;
+    }
+
     .welcome-stats {
       margin-left: 0;
       padding-left: 0;
       border-left: none;
       width: 100%;
       justify-content: center;
+      gap: 20px;
+    }
+
+    .stat-value {
+      font-size: 20px;
     }
   }
 
   .info-cards {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .card-header h3 {
+    font-size: 16px;
+  }
+
+  .teaching-card .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .class-info .class-name {
+    font-size: 16px;
+  }
+
+  .class-info .class-meta {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .announcements-card .card-header {
+    padding: 15px 20px 12px;
+  }
+
+  .announcement-list {
+    padding: 0 15px;
+  }
+
+  .announcement-item {
+    padding: 12px 0;
+  }
+
+  .announcement-item .announcement-content .announcement-title {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .teacher-home {
+    padding: 0 10px;
+  }
+
+  .welcome-card {
+    padding: 15px;
+  }
+
+  .card-base {
+    padding: 15px;
+  }
+
+  .task-card .task-item {
+    padding: 10px 12px;
+  }
+
+  .announcements-card .el-scrollbar {
+    height: 250px;
+  }
+
+  .announcement-item:hover {
+    transform: translateX(3px);
+  }
+
+  .class-actions {
+    flex-direction: column;
+  }
+
+  .class-actions .el-button {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .class-actions .el-button:last-child {
+    margin-bottom: 0;
   }
 }
 </style>

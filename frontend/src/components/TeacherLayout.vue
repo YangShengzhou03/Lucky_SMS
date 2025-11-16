@@ -42,7 +42,7 @@
               </el-badge>
             </div>
 
-            <button class="mobile-menu-btn action-btn" v-if="isMobile && showSidebar" @click="toggleMobileSidebar"
+            <button class="mobile-menu-btn action-btn" v-if="isMobile" @click="toggleMobileSidebar"
               aria-label="移动端菜单" title="菜单">
               <el-icon>
                 <Menu />
@@ -162,7 +162,7 @@ import { useRoute, useRouter } from 'vue-router';
 import {
   Notebook, Setting, Calendar, EditPen,
   Menu, Search, Bell, Moon, Sunny, Warning, Top, House,
-  UserFilled, ChatLineRound
+  UserFilled, ChatLineRound, Histogram
 } from '@element-plus/icons-vue'
 import { provideDarkMode } from '@/composables/useDarkMode'
 
@@ -172,7 +172,7 @@ const route = useRoute()
 const mobileNavItems = [
   { index: '1', icon: House, text: '首页', path: '/teacher' },
   { index: '2', icon: Notebook, text: '课程', path: '/teacher/courses' },
-  { index: '3', icon: EditPen, text: '成绩', path: '/teacher/grades' },
+  { index: '3', icon: Histogram, text: '成绩', path: '/teacher/grades' },
   { index: '4', icon: UserFilled, text: '学生', path: '/teacher/students' },
   { index: '5', icon: ChatLineRound, text: '沟通', path: '/teacher/communication' }
 ]
@@ -935,12 +935,16 @@ onUnmounted(() => {
 }
 
 @media (max-width: 1024px) {
+  .sidebar {
+    width: 260px;
+  }
+  
   .nav-search {
     max-width: 400px;
   }
 
   .main-content {
-    padding: 16px;
+    padding: 20px;
   }
 
   .router-view-container {
@@ -949,7 +953,15 @@ onUnmounted(() => {
 }
 
 @media (max-width: 768px) {
+  .main-content {
+    padding: 15px;
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding-bottom: 72px;
+  }
+
   .sidebar {
+    width: 280px;
     position: fixed;
     left: 0;
     top: 72px;
@@ -981,34 +993,74 @@ onUnmounted(() => {
     align-items: flex-start;
   }
 
-  .main-content {
-    margin-left: 0 !important;
-    width: 100% !important;
-    padding-bottom: 72px;
-  }
-
   .router-view-container {
     height: auto;
     min-height: calc(100vh - 180px);
+  }
+
+  .header {
+    padding: 0 15px;
+  }
+
+  .user-info {
+    display: none;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  .logo-container {
+    padding: 0 15px;
+  }
+  
+  .el-header {
+    padding: 0 15px;
   }
 }
 
 @media (max-width: 480px) {
   .container {
-    padding: 0 16px;
+    padding: 0 10px;
   }
 
   .logo-text {
-    font-size: 1rem;
+    font-size: 18px;
   }
 
   .main-content {
-    padding: 12px;
+    padding: 10px;
     padding-bottom: 72px;
   }
 
+  .sidebar {
+    width: 260px;
+  }
+
+  .header {
+    padding: 0 10px;
+  }
+
+  .logo-container {
+    padding: 0 10px;
+  }
+
+  .el-header {
+    padding: 0 10px;
+  }
+
   .router-view-container {
-    padding: 12px;
+    padding: 10px;
+    min-height: calc(100vh - 160px);
+  }
+  
+  .action-btn {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .nav-content {
+    gap: 8px;
   }
 }
 </style>
