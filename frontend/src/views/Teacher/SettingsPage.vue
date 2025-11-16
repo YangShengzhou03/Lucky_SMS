@@ -464,7 +464,128 @@ const beforeAvatarUpload = (file) => {
 
       @media (max-width: 768px) {
         grid-template-columns: 1fr;
+        gap: 10px;
       }
+
+/* 响应式布局调整 */
+@media (max-width: 1024px) {
+  .personal-center-content {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .personal-center-content {
+    padding: 15px;
+    gap: 15px;
+  }
+
+  .personal-info-card {
+    padding: 20px;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .avatar-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .avatar-uploader-icon {
+    width: 80px;
+    height: 80px;
+  }
+
+  .username {
+    font-size: 1.25rem;
+  }
+
+  .info-title {
+    font-size: 0.95rem;
+  }
+
+  .info-item {
+    padding: 12px 14px;
+  }
+
+  .quick-actions-card {
+    padding: 20px;
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+  }
+
+  .action-item {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .personal-center-content {
+    padding: 10px;
+    gap: 12px;
+  }
+
+  .personal-info-card,
+  .quick-actions-card {
+    padding: 16px;
+  }
+
+  .avatar {
+    width: 70px;
+    height: 70px;
+  }
+
+  .avatar-uploader-icon {
+    width: 70px;
+    height: 70px;
+  }
+
+  .username {
+    font-size: 1.15rem;
+  }
+
+  .teacher-id {
+    font-size: 0.85rem;
+  }
+
+  .info-item {
+    padding: 10px 12px;
+  }
+
+  .item-icon {
+    font-size: 18px;
+    margin-right: 12px;
+  }
+
+  .item-value {
+    font-size: 0.95rem;
+  }
+
+  .edit-button {
+    padding: 6px 14px;
+    font-size: 0.9rem;
+    width: 100%;
+  }
+
+  .action-content {
+    .action-icon {
+      margin-right: 10px;
+      font-size: 1em;
+    }
+  }
+}
 
       .info-item {
         display: flex;
