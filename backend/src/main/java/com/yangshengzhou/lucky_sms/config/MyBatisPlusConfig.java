@@ -9,11 +9,7 @@ import org.springframework.context.annotation.Configuration;
  * 扫描所有mapper接口
  */
 @Configuration
-@MapperScan({
-    "com.yangshengzhou.lucky_sms.mapper",
-    "com.yangshengzhou.lucky_sms.mapper.student",
-    "com.yangshengzhou.lucky_sms.mapper.teacher"
-})
+@MapperScan("com.yangshengzhou.lucky_sms.mapper")
 public class MyBatisPlusConfig {
     // 基础Mapper接口可以在这里定义公共方法
 }
