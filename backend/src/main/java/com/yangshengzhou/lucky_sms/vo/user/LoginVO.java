@@ -62,4 +62,17 @@ public class LoginVO {
     public void setToken(String token) {
         this.token = token;
     }
+
+    // 兼容方法的getter
+    public Integer getId() {
+        return uid;
+    }
+
+    public String getRoleName() {
+        return role;
+    }
+
+    public String getStudentId() {
+        return uid != null ? uid.toString() : null;
+    }
 }

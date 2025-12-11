@@ -27,7 +27,10 @@ public class LuckySsmsApplication {
 
     @Bean
     public ConfigurationCustomizer configurationCustomizer() {
-        return configuration -> configuration.setUseDeprecatedExecutor(false);
+        return configuration -> {
+            // 配置MyBatis设置，移除已废弃的方法调用
+            // configuration.setUseDeprecatedExecutor(false); // 此方法在新版本中可能已移除
+        };
     }
 
 }

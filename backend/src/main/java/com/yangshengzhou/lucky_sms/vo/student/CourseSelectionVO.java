@@ -142,4 +142,12 @@ public class CourseSelectionVO {
     public void setSemester(String semester) {
         this.semester = semester;
     }
+
+    public String getCourseName() {
+        return name;
+    }
+
+    public void setCourseName(String courseName) {
+        this.name = courseName;
+    }
 }
