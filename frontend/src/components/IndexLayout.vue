@@ -84,13 +84,6 @@
                 <User />
               </el-icon>
             </div>
-            <div class="newsletter">
-              <el-input placeholder="您的邮箱地址" size="small">
-                <template #append>
-                  <el-button icon="ArrowRight" />
-                </template>
-              </el-input>
-            </div>
           </div>
         </div>
         <div class="footer-bottom">

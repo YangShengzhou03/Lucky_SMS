@@ -1,7 +1,5 @@
 <template>
   <div class="login-page">
-    <div class="particles" id="login-particles"></div>
-
     <div class="login-container">
       <div class="login-card">
         <div v-if="!showQRCode" class="qr-corner" @click="toggleQRCode" :class="{ active: showQRCode }">
@@ -16,14 +14,8 @@
             </div>
 
             <!-- 手机号登录/注册表单 -->
-            <el-form 
-              v-if="loginMode === 'phone'" 
-              ref="phoneFormRef" 
-              :model="phoneForm" 
-              :rules="phoneRules" 
-              class="login-form"
-              @keyup.enter="isResetMode ? handleReset() : handlePhoneLogin()"
-            >
+            <el-form v-if="loginMode === 'phone'" ref="phoneFormRef" :model="phoneForm" :rules="phoneRules"
+              class="login-form" @keyup.enter="isResetMode ? handleReset() : handlePhoneLogin()">
               <el-form-item prop="phone" class="form-item">
                 <el-input v-model="phoneForm.phone" placeholder="输入手机号" size="large" :prefix-icon="Phone" clearable
                   class="custom-input" maxlength="11" @blur="validatePhone" />
@@ -53,8 +45,8 @@
                 </el-link>
               </el-form-item>
 
-              <el-button type="primary" size="large" class="login-btn" @click="isResetMode ? handleReset() : handlePhoneLogin()" 
-                :loading="loginLoading">
+              <el-button type="primary" size="large" class="login-btn"
+                @click="isResetMode ? handleReset() : handlePhoneLogin()" :loading="loginLoading">
                 <span v-if="!loginLoading">{{ isResetMode ? '重置密码' : '登录/注册' }}</span>
                 <span v-else>{{ '请稍等' }}</span>
               </el-button>
@@ -64,24 +56,22 @@
                 <el-divider>其他登录方式</el-divider>
                 <div class="social-icons">
                   <el-button type="default" circle class="social-icon">
-                    <el-icon><ChatDotRound /></el-icon>
+                    <el-icon>
+                      <ChatDotRound />
+                    </el-icon>
                   </el-button>
                   <el-button type="default" circle class="social-icon">
-                    <el-icon><Iphone /></el-icon>
+                    <el-icon>
+                      <Iphone />
+                    </el-icon>
                   </el-button>
                 </div>
               </div>
             </el-form>
 
             <!-- 账号密码登录表单 -->
-            <el-form 
-              v-if="loginMode === 'account'" 
-              ref="loginFormRef" 
-              :model="loginForm" 
-              :rules="loginRules" 
-              class="login-form"
-              @keyup.enter="handleLogin"
-            >
+            <el-form v-if="loginMode === 'account'" ref="loginFormRef" :model="loginForm" :rules="loginRules"
+              class="login-form" @keyup.enter="handleLogin">
               <el-form-item prop="phone" class="form-item">
                 <el-input v-model="loginForm.phone" placeholder="输入手机号" size="large" :prefix-icon="User" clearable
                   class="custom-input" />
@@ -96,7 +86,8 @@
                 <el-link type="primary" @click="loginMode = 'phone'" :underline="false" class="register-text">
                   立即注册
                 </el-link>
-                <el-link type="primary" :underline="false" class="forgot-password" @click="isResetMode = true; loginMode = 'phone'">
+                <el-link type="primary" :underline="false" class="forgot-password"
+                  @click="isResetMode = true; loginMode = 'phone'">
                   忘记密码?
                 </el-link>
               </div>
@@ -232,7 +223,7 @@ const validatePhone = () => {
 // 发送验证码（手机号登录/注册）
 const sendCaptcha = async () => {
   if (!validatePhone()) return;
-  
+
   if (captchaCooldown.value > 0) {
     ElMessage.warning(`请等待${captchaCooldown.value}秒后重试`);
     return;
@@ -241,7 +232,7 @@ const sendCaptcha = async () => {
   try {
     // 这里应该调用发送验证码的API
     // const res = await service.post('/captcha/send', { phone: phoneForm.phone });
-    
+
     // 模拟发送验证码
     captchaCooldown.value = 60;
 
@@ -267,12 +258,12 @@ const handleLoginSuccess = (role, token) => {
   if (token) {
     localStorage.setItem('token', token);
   }
-  
+
   // 将用户角色存储到localStorage
   if (role) {
     localStorage.setItem('userRole', role);
   }
-  
+
   ElMessage.success('登录成功！');
   switch (role) {
     case 'ADMIN':
@@ -293,11 +284,11 @@ const handleLoginSuccess = (role, token) => {
 // 账号密码登录
 const handleLogin = async () => {
   if (!loginFormRef.value) return;
-  
+
   try {
     await loginFormRef.value.validate();
     loginLoading.value = true;
-    
+
     const loginData = new URLSearchParams();
     loginData.append('phone', loginForm.phone);
     loginData.append('password', loginForm.password);
@@ -323,7 +314,7 @@ const handleLogin = async () => {
 // 手机号登录
 const handlePhoneLogin = async () => {
   if (!phoneFormRef.value) return;
-  
+
   try {
     // 使用 validate 方法的回调形式来处理验证结果
     const isValid = await new Promise((resolve) => {
@@ -331,12 +322,12 @@ const handlePhoneLogin = async () => {
         resolve(valid);
       });
     });
-    
+
     if (!isValid) {
       ElMessage.error('请填写完整的表单信息');
       return;
     }
-    
+
     loginLoading.value = true;
     const loginData = new URLSearchParams();
     loginData.append('phone', phoneForm.phone);
@@ -363,21 +354,21 @@ const handlePhoneLogin = async () => {
 // 重置密码
 const handleReset = async () => {
   if (!phoneFormRef.value) return;
-  
+
   try {
     const isValid = await new Promise((resolve) => {
       phoneFormRef.value.validate((valid) => {
         resolve(valid);
       });
     });
-    
+
     if (!isValid) {
       ElMessage.error('请填写完整的表单信息');
       return;
     }
-    
+
     loginLoading.value = true;
-    
+
     const resetData = new URLSearchParams();
     resetData.append('phone', phoneForm.phone);
     resetData.append('captcha', phoneForm.captcha);
@@ -413,40 +404,6 @@ onMounted(() => {
     // 这里可以添加任何需要在登录页面加载时执行的逻辑
     // 例如，检查用户是否已经登录，如果已登录则重定向到相应页面
   }
-  
-  if (window.particlesJS) {
-    window.particlesJS('login-particles', {
-      particles: {
-        number: { value: 60, density: { enable: true, value_area: 800 } },
-        color: { value: "#3b82f6" },
-        shape: { type: "circle" },
-        opacity: { value: 0.5, random: true },
-        size: { value: 3, random: true },
-        line_linked: {
-          enable: true,
-          distance: 150,
-          color: "#3b82f6",
-          opacity: 0.3,
-          width: 1
-        },
-        move: {
-          enable: true,
-          speed: 2,
-          direction: "none",
-          random: true,
-          straight: false,
-          out_mode: "out"
-        }
-      },
-      interactivity: {
-        detect_on: "canvas",
-        events: {
-          onhover: { enable: true, mode: "grab" },
-          onclick: { enable: true, mode: "push" }
-        }
-      }
-    });
-  }
 });
 
 onUnmounted(() => {
@@ -461,44 +418,22 @@ onUnmounted(() => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  position: relative;
-  overflow: hidden;
+  background: #f8fafc;
   padding: 20px;
-}
-
-.particles {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
 }
 
 .login-container {
   width: 100%;
   max-width: 420px;
-  position: relative;
-  z-index: 1;
 }
 
 .login-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 40px;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.3);
   position: relative;
-  overflow: hidden;
   min-height: 400px;
-}
-
-.login-card:hover {
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
 }
 
 .qr-corner {
@@ -508,7 +443,6 @@ onUnmounted(() => {
   width: 36px;
   height: 36px;
   cursor: pointer;
-  transition: all 0.3s ease;
   z-index: 20;
   background-color: white;
   border-radius: 0 0 0 8px;
@@ -520,11 +454,6 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  transition: transform 0.3s ease;
-}
-
-.qr-corner:hover .qr-icon {
-  transform: scale(1.1);
 }
 
 .qr-corner.active .qr-icon {
@@ -541,10 +470,6 @@ onUnmounted(() => {
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 8px;
-  background: linear-gradient(90deg, #3b82f6, #10b981);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
 }
 
 .login-subtitle {
@@ -569,7 +494,6 @@ onUnmounted(() => {
   padding: 10px 0;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
   font-size: 14px;
   font-weight: 500;
   color: #64748b;
@@ -597,15 +521,6 @@ onUnmounted(() => {
   padding: 0 15px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   border-radius: 10px;
-  transition: all 0.3s ease;
-}
-
-.custom-input :deep(.el-input__wrapper:hover) {
-  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
-}
-
-.custom-input :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 1px #3b82f6 inset, 0 4px 8px rgba(59, 130, 246, 0.2);
 }
 
 .captcha-container {
@@ -651,22 +566,10 @@ onUnmounted(() => {
   font-size: 16px;
   font-weight: 500;
   letter-spacing: 1px;
-  background: linear-gradient(90deg, #3b82f6, #10b981);
+  background: #3b82f6;
   border: none;
-  transition: all 0.3s ease;
   margin-top: 10px;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
   color: white;
-}
-
-.login-btn:hover {
-  background: linear-gradient(90deg, #2563eb, #0d9488);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
-}
-
-.login-btn:active {
-  transform: translateY(0);
 }
 
 .register-link {
@@ -679,11 +582,6 @@ onUnmounted(() => {
 .register-text {
   font-weight: 500;
   margin-left: 4px;
-  transition: all 0.2s ease;
-}
-
-.register-text:hover {
-  transform: translateX(2px);
 }
 
 .alternative-login {
@@ -727,9 +625,8 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   background: #f8fafc;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   margin-bottom: 20px;
 }
 
@@ -760,13 +657,9 @@ onUnmounted(() => {
   color: #64748b;
 }
 
-.back-btn:hover {
-  color: #3b82f6;
-}
-
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease;
+  transition: opacity 0.2s ease;
 }
 
 .fade-enter-from,
@@ -776,7 +669,7 @@ onUnmounted(() => {
 
 /* 忘记密码对话框样式 */
 :deep(.el-dialog) {
-  border-radius: 12px;
+  border-radius: 8px;
 }
 
 :deep(.el-dialog__header) {
