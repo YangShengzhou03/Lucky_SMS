@@ -5,13 +5,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
  * 用户操作消息消费者
  */
 @Component
-@RocketMQMessageListener(topic = RocketMQConfig.USER_OPERATION_TOPIC, consumerGroup = "user-operation-consumer-group")
+@RocketMQMessageListener(
+    topic = RocketMQConfig.USER_OPERATION_TOPIC, 
+    consumerGroup = "user-operation-consumer-group",
+    enableMsgTrace = false
+)
+@ConditionalOnProperty(name = "rocketmq.consumer.user-operation.enabled", havingValue = "true", matchIfMissing = false)
 public class UserOperationConsumer implements RocketMQListener<Object> {
 
     private static final Logger log = LoggerFactory.getLogger(UserOperationConsumer.class);

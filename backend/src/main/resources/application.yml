@@ -59,13 +59,20 @@ mybatis-plus:
 
 # RocketMQ配置
 rocketmq:
-  name-server: localhost:9876
+  name-server: 127.0.0.1:9876
   producer:
     group: lucky-sms-producer-group
     send-message-timeout: 300000
     retry-times-when-send-failed: 2
     retry-times-when-send-async-failed: 2
     max-message-size: 4194304
+  consumer:
+    pull-batch-size: 10
+    enabled: false  # 默认禁用消费者，避免连接失败导致应用启动失败
+    course-selection:
+      enabled: false
+    user-operation:
+      enabled: false
 
 # JWT配置
 jwt:
