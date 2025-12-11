@@ -18,46 +18,6 @@
 
     <div v-if="isHomePage">
       <main>
-        <section id="home" class="hero">
-          <div class="particles" id="particles-js"></div>
-          <div class="hero-content">
-            <div class="hero-text">
-              <h1 class="hero-title">
-                <span class="title-line">智能学生管理系统</span>
-                <span class="hero-subtitle-accent">创新科技，引领未来</span>
-              </h1>
-              <p class="hero-subtitle">高效、便捷的教育服务解决方案</p>
-              <div class="hero-actions">
-                <el-button type="primary" size="large" @click="scrollToSection('features')">
-                  了解功能
-                </el-button>
-                <el-button type="default" size="large" @click="handleLogin">
-                  立即体验
-                </el-button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="features" class="features">
-          <div class="container">
-            <h2 class="section-title">核心功能</h2>
-            <div class="features-grid">
-              <div class="feature-item" v-for="feature in features" :key="feature.id">
-                <div class="feature-content">
-                  <div class="feature-icon">
-                    <el-icon>
-                      <component :is="feature.icon" />
-                    </el-icon>
-                  </div>
-                  <h3 class="feature-title">{{ feature.title }}</h3>
-                  <p class="feature-desc">{{ feature.description }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section id="cta" class="cta-section">
           <div class="container">
             <div class="cta-content">
@@ -159,8 +119,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import {
-  Position, MostlyCloudy, Lock, ArrowUp,
-  Location, Phone, Message, ChatDotRound,
+  ArrowUp, Location, Phone, Message, ChatDotRound,
   Opportunity, Link, User
 } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router';
@@ -170,29 +129,6 @@ const route = useRoute();
 const showBackToTop = ref(false)
 const isHomePage = computed(() => route.path === '/');
 const isLoggedIn = ref(false);
-
-const features = [
-  {
-    id: 1,
-    icon: Position,
-    title: '秒级响应',
-    description: '百万级并发处理能力，信息数据秒级送达'
-  },
-  {
-    id: 2,
-    icon: MostlyCloudy,
-    title: '云端服务',
-    description: '分布式架构设计，99.99%系统可用性'
-  },
-  {
-    id: 3,
-    icon: Lock,
-    title: '安全可靠',
-    description: '金融级安全防护，数据加密传输'
-  }
-]
-
-
 
 const scrollToSection = (sectionId) => {
   const element = document.getElementById(sectionId)
