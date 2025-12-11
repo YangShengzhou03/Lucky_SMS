@@ -200,7 +200,7 @@ import {
   Search
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox, ElCheckbox } from 'element-plus'
-import { getAvailableCourses, getSelectedCourses, getAvailableCoursesWithPagination, getSelectedCoursesWithPagination, selectCourse as apiSelectCourse, dropCourse } from '@/api/student'
+import { getAvailableCoursesWithPagination, getSelectedCoursesWithPagination, selectCourse as apiSelectCourse, dropCourse } from '@/api/student'
 
 const currentSemester = ref('2023-2024-2')
 const semesters = ref([
