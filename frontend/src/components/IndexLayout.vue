@@ -31,8 +31,8 @@
                 <el-button type="primary" size="large" @click="scrollToSection('features')">
                   了解功能
                 </el-button>
-                <el-button type="default" size="large" @click="scrollToSection('pricing')">
-                  查看价格
+                <el-button type="default" size="large" @click="handleLogin">
+                  立即体验
                 </el-button>
               </div>
             </div>
@@ -58,36 +58,20 @@
           </div>
         </section>
 
-        <section id="pricing" class="pricing">
+        <section id="cta" class="cta-section">
           <div class="container">
-            <h2 class="section-title">价格方案</h2>
-            <div class="pricing-grid">
-              <div class="pricing-card-wrapper" :class="{ 'premium-card-wrapper': plan.id === 3 }"
-                v-for="plan in pricingPlans" :key="plan.id">
-                <div class="pricing-card" :class="{ 'premium-card': plan.id === 3 }">
-                  <div class="pricing-header">
-                    <h3 class="plan-title">{{ plan.title }}</h3>
-                    <div class="plan-price">
-                      <span class="price-amount">{{ plan.price }}</span>
-                      <span class="price-period">{{ plan.period }}</span>
-                    </div>
-                  </div>
-                  <div class="plan-features">
-                    <ul>
-                      <li v-for="feature in plan.features" :key="feature">
-                        <el-icon>
-                          <Check />
-                        </el-icon>
-                        {{ feature }}
-                      </li>
-                    </ul>
-                  </div>
-                  <div class="plan-cta">
-                    <el-button :type="plan.id === 3 ? 'success' : 'primary'" size="medium">
-                      选择方案
-                    </el-button>
-                  </div>
-                </div>
+            <div class="cta-content">
+              <div class="cta-text">
+                <h2 class="cta-title">开启智能教育新时代</h2>
+                <p class="cta-subtitle">立即体验我们的智能学生管理系统，让教育管理变得更加高效便捷</p>
+              </div>
+              <div class="cta-actions">
+                <el-button type="primary" size="large" @click="handleLogin" class="cta-btn-primary">
+                  免费试用
+                </el-button>
+                <el-button type="default" size="large" @click="scrollToSection('features')" class="cta-btn-secondary">
+                  了解更多
+                </el-button>
               </div>
             </div>
           </div>
@@ -109,7 +93,7 @@
             <ul>
               <li @click="scrollToSection('home')">Lucky-SMS</li>
               <li @click="scrollToSection('features')">功能服务</li>
-              <li @click="scrollToSection('pricing')">价格方案</li>
+              <li @click="scrollToSection('cta')">立即体验</li>
             </ul>
           </div>
           <div class="footer-section">
@@ -175,7 +159,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import {
-  Position, MostlyCloudy, Lock, ArrowUp, Check,
+  Position, MostlyCloudy, Lock, ArrowUp,
   Location, Phone, Message, ChatDotRound,
   Opportunity, Link, User
 } from '@element-plus/icons-vue'
@@ -208,46 +192,7 @@ const features = [
   }
 ]
 
-const pricingPlans = [
-  {
-    id: 1,
-    title: '基础版',
-    price: '¥99',
-    period: '/月',
-    features: [
-      '十万级学生容量',
-      '基础API接口',
-      '邮件技术支持',
-      '基础数据分析'
-    ]
-  },
-  {
-    id: 2,
-    title: '企业版',
-    price: '¥299',
-    period: '/月',
-    features: [
-      '百万级学生容量',
-      '高级API接口',
-      '24/7技术支持',
-      '高级数据分析',
-      '自定义模板'
-    ]
-  },
-  {
-    id: 3,
-    title: '旗舰版',
-    price: '¥899',
-    period: '/月',
-    features: [
-      '千万级学生容量',
-      'VIP API接口',
-      '专属客户经理',
-      '高级安全保障',
-      '定制化解决方案'
-    ]
-  }
-]
+
 
 const scrollToSection = (sectionId) => {
   const element = document.getElementById(sectionId)
@@ -408,16 +353,20 @@ onUnmounted(() => {
 }
 
 .top-nav {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   padding: 16px 0;
-  box-shadow: var(--shadow-md);
-  border-bottom: 1px solid var(--gray-100);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
   position: sticky;
   top: 0;
   z-index: 9999;
   width: 100%;
   left: 0;
+  transition: all 0.3s ease;
 }
 
 .nav-content {
@@ -593,6 +542,28 @@ onUnmounted(() => {
   box-shadow: var(--shadow-lg);
 }
 
+/* 液态玻璃效果增强 */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.4s cubic-bezier(0.16, 0.77, 0.21, 0.99);
+}
+
+.glass-effect:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.15),
+    0 0 20px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
 .features {
   padding: 120px 0;
   background: var(--white);
@@ -623,10 +594,14 @@ onUnmounted(() => {
   text-align: center;
   padding: 40px 32px;
   border-radius: var(--border-radius);
-  box-shadow: var(--shadow-md);
-  background: var(--white);
-  border: 1px solid var(--gray-200);
-  transition: var(--transition);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: all 0.4s cubic-bezier(0.16, 0.77, 0.21, 0.99);
   position: relative;
   overflow: hidden;
 }
@@ -656,32 +631,44 @@ onUnmounted(() => {
 }
 
 .feature-item:hover {
-  box-shadow: var(--shadow-xl);
-  transform: translateY(-5px);
-  border-color: var(--gray-300);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.15),
+    0 0 20px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transform: translateY(-8px) rotateX(5deg);
+  border-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .feature-icon {
   font-size: 36px;
   color: var(--primary-color);
   margin-bottom: 24px;
-  width: 72px;
-  height: 72px;
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 24px;
-  background: var(--gray-100);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   border-radius: 50%;
   transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-  border: 1px solid var(--gray-200);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    0 4px 15px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .feature-item:hover .feature-icon {
-  transform: scale(1.1) rotate(5deg);
-  background: var(--primary-color);
+  transform: scale(1.15) rotate(10deg);
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
   color: var(--white);
-  border-color: transparent;
+  border-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 
+    0 8px 25px rgba(59, 130, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .feature-title {
@@ -896,6 +883,138 @@ onUnmounted(() => {
 .plan-cta .el-button:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
+}
+
+/* CTA部分样式 */
+.cta-section {
+  padding: 120px 0;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--primary-light);
+  border-bottom: 1px solid var(--primary-light);
+}
+
+.cta-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="rgba(255,255,255,0.05)" points="0,1000 1000,0 1000,1000"/></svg>');
+  background-size: cover;
+}
+
+.cta-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 60px 40px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.4s cubic-bezier(0.16, 0.77, 0.21, 0.99);
+}
+
+.cta-content:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.15),
+    0 0 20px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transform: translateY(-5px);
+}
+
+.cta-title {
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 24px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.cta-subtitle {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 48px;
+  line-height: 1.6;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.cta-actions {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.cta-btn-primary {
+  padding: 16px 40px !important;
+  font-size: 18px !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, var(--success-color) 0%, #0d9488 100%) !important;
+  border: none !important;
+  box-shadow: 
+    0 4px 15px rgba(16, 185, 129, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.cta-btn-primary:hover::before {
+  left: 100%;
+}
+
+.cta-btn-primary:hover {
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 
+    0 8px 25px rgba(16, 185, 129, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+.cta-btn-secondary {
+  padding: 16px 40px !important;
+  font-size: 18px !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: var(--white) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  box-shadow: 
+    0 4px 15px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+.cta-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
 }
 
 .footer {
