@@ -137,12 +137,7 @@
       </main>
     </div>
 
-    <el-backtop v-show="showBackToTop" class="back-to-top" :right="24" :bottom="24" :visibility-height="300"
-      :transition-duration="300">
-      <el-icon :size="20">
-        <Top />
-      </el-icon>
-    </el-backtop>
+
 
     <nav class="mobile-bottom-nav" v-if="isMobile && showSidebar">
       <button v-for="item in mobileNavItems" :key="item.index" @click="handleMobileNav(item)"
@@ -161,7 +156,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router';
 import {
   Notebook, Setting, Calendar, EditPen,
-  Menu, Search, Bell, Moon, Sunny, Warning, Top, House,
+  Menu, Search, Bell, Moon, Sunny, Warning, House,
   UserFilled, ChatLineRound, Histogram
 } from '@element-plus/icons-vue'
 import { provideDarkMode } from '@/composables/useDarkMode'
@@ -177,7 +172,6 @@ const mobileNavItems = [
   { index: '5', icon: ChatLineRound, text: '沟通', path: '/teacher/communication' }
 ]
 
-const showBackToTop = ref(false)
 const currentPageName = ref('')
 const searchQuery = ref('')
 const isSearchFocused = ref(false)
@@ -229,10 +223,6 @@ watch(route, (newRoute) => {
     clearTimeout(timer)
   }, 500)
 }, { immediate: true })
-
-const handleScroll = () => {
-  showBackToTop.value = window.scrollY > 300
-}
 
 const handleMobileNav = (item) => {
   router.push(item.path)
@@ -306,7 +296,6 @@ onMounted(() => {
   }
 
   document.addEventListener('click', closeDropdowns)
-  window.addEventListener('scroll', handleScroll)
   window.addEventListener('resize', checkScreenSize)
 
   checkScreenSize()
@@ -319,7 +308,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('click', closeDropdowns)
-  window.removeEventListener('scroll', handleScroll)
   window.removeEventListener('resize', checkScreenSize)
 })
 </script>

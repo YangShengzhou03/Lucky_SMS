@@ -172,7 +172,6 @@ const mobileNavItems = [
   { index: '6', icon: EditPen, text: '选课', path: '/student/course' }
 ]
 
-const showBackToTop = ref(false)
 const currentPageName = ref('')
 const searchQuery = ref('')
 const isSearchFocused = ref(false)
@@ -226,10 +225,6 @@ watch(route, (newRoute) => {
     clearTimeout(timer)
   }, 500)
 }, { immediate: true })
-
-const handleScroll = () => {
-  showBackToTop.value = window.scrollY > 300
-}
 
 const handleMobileNav = (item) => {
   router.push(item.path)
@@ -306,7 +301,6 @@ const checkScreenSize = () => {
 
 onMounted(() => {
   document.addEventListener('click', closeDropdowns)
-  window.addEventListener('scroll', handleScroll)
   window.addEventListener('resize', checkScreenSize)
   checkScreenSize()
   setPageLoading(true)
@@ -317,7 +311,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('click', closeDropdowns)
-  window.removeEventListener('scroll', handleScroll)
   window.removeEventListener('resize', checkScreenSize)
 })
 </script>

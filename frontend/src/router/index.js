@@ -19,18 +19,15 @@ import TeacherCommunication from '@/views/Teacher/CommunicationPage.vue';
 import TeacherSettings from '@/views/Teacher/SettingsPage.vue';
 
 const routes = [
-  // 未登录布局（首页 + 登录/注册）
   {
     path: '/',
     component: IndexLayout,
     children: [
       { path: '', name: 'Home', meta: { title: 'Lucky-SMS' } },
       { path: '/login', name: 'Login', component: LoginPage, meta: { title: '登录' } }
-      // 注册功能已整合到登录页面中，移除独立的注册页面路由
     ]
   },
 
-  // 登录后布局（学生系统）
   {
     path: '/student',
     component: StudentLayout,
@@ -45,7 +42,6 @@ const routes = [
     ]
   },
 
-  // 登录后布局（教师页面）
   {
     path: '/teacher',
     component: TeacherLayout,
@@ -60,7 +56,6 @@ const routes = [
     ]
   },
 
-  // 错误路径重定向（仅保留这一条）
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ];
 

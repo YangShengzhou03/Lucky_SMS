@@ -26,11 +26,8 @@
                 <p class="cta-subtitle">立即体验我们的智能学生管理系统，让教育管理变得更加高效便捷</p>
               </div>
               <div class="cta-actions">
-                <el-button type="primary" size="large" @click="handleLogin" class="cta-btn-primary">
-                  免费试用
-                </el-button>
-                <el-button type="default" size="large" @click="scrollToSection('features')" class="cta-btn-secondary">
-                  了解更多
+                <el-button type="default" size="large" @click="handleLogin" class="cta-btn-secondary">
+                  开始体验
                 </el-button>
               </div>
             </div>
@@ -51,9 +48,7 @@
           <div class="footer-section">
             <h3>快速链接</h3>
             <ul>
-              <li @click="scrollToSection('home')">Lucky-SMS</li>
-              <li @click="scrollToSection('features')">功能服务</li>
-              <li @click="scrollToSection('cta')">立即体验</li>
+              <li @click="handleLogin">立即体验</li>
             </ul>
           </div>
           <div class="footer-section">
@@ -64,12 +59,6 @@
                   <Location />
                 </el-icon>
                 <span>江西科技师范大学（红角洲校区）</span>
-              </li>
-              <li>
-                <el-icon>
-                  <Phone />
-                </el-icon>
-                <span>123-456-7890</span>
               </li>
               <li>
                 <el-icon>
@@ -110,51 +99,24 @@
       </div>
     </footer>
 
-    <transition name="fade">
-      <el-button v-show="showBackToTop" class="back-to-top" type="primary" :icon="ArrowUp" @click="scrollToTop" />
-    </transition>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import {
-  ArrowUp, Location, Phone, Message, ChatDotRound,
+  Location, Message, ChatDotRound,
   Opportunity, Link, User
 } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router';
 
 const router = useRouter()
 const route = useRoute();
-const showBackToTop = ref(false)
 const isHomePage = computed(() => route.path === '/');
 const isLoggedIn = ref(false);
 
-const scrollToSection = (sectionId) => {
-  const element = document.getElementById(sectionId)
-  if (element) {
-    window.scrollTo({
-      top: element.offsetTop - 80,
-      behavior: 'smooth'
-    })
-  }
-}
-
-const scrollToTop = () => {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  })
-}
-
-const handleScroll = () => {
-  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-  showBackToTop.value = scrollTop > 300
-}
-
 const handleLogin = () => {
   if (isLoggedIn.value) {
-    // 如果已登录，根据用户角色跳转到相应的主页
     const userRole = localStorage.getItem('userRole');
     switch (userRole) {
       case 'ADMIN':
@@ -167,21 +129,17 @@ const handleLogin = () => {
         router.push('/teacher');
         break;
       default:
-        // 如果没有角色信息，默认跳转到学生主页
         router.push('/student');
     }
   } else {
-    // 如果未登录，跳转到登录页
     router.push('/login');
   }
 }
 
 onMounted(() => {
-  // 检查本地存储中是否有 token
   const token = localStorage.getItem('token');
   isLoggedIn.value = !!token;
   
-  window.addEventListener('scroll', handleScroll)
   if (window.particlesJS) {
     window.particlesJS('particles-js', {
       particles: {
@@ -205,7 +163,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
   if (window.pJSDom && window.pJSDom.length > 0) {
     window.pJSDom[0].pJS.fn.vendors.destroypJS()
     window.pJSDom = []
@@ -408,11 +365,10 @@ onUnmounted(() => {
 }
 
 .hero-content:hover {
-  transform: translateY(-6px);
+  transform: translateY(-1px);
   background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15),
-    0 0 15px rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .hero-title {
@@ -478,7 +434,6 @@ onUnmounted(() => {
   box-shadow: var(--shadow-lg);
 }
 
-/* 液态玻璃效果增强 */
 .glass-effect {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(15px);
@@ -492,12 +447,11 @@ onUnmounted(() => {
 
 .glass-effect:hover {
   background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.25);
   box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.15),
-    0 0 20px rgba(255, 255, 255, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
+    0 6px 24px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-0.5px);
 }
 
 .features {
@@ -568,11 +522,10 @@ onUnmounted(() => {
 
 .feature-item:hover {
   box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.15),
-    0 0 20px rgba(255, 255, 255, 0.1),
+    0 8px 32px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  transform: translateY(-8px) rotateX(5deg);
-  border-color: rgba(255, 255, 255, 0.7);
+  transform: translateY(-4px) rotateX(2deg);
+  border-color: rgba(255, 255, 255, 0.6);
   background: rgba(255, 255, 255, 0.9);
 }
 
@@ -598,13 +551,13 @@ onUnmounted(() => {
 }
 
 .feature-item:hover .feature-icon {
-  transform: scale(1.15) rotate(10deg);
+  transform: scale(1.05) rotate(5deg);
   background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
   color: var(--white);
-  border-color: rgba(255, 255, 255, 0.7);
+  border-color: rgba(255, 255, 255, 0.6);
   box-shadow: 
-    0 8px 25px rgba(59, 130, 246, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    0 4px 15px rgba(59, 130, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .feature-title {
@@ -862,12 +815,11 @@ onUnmounted(() => {
 
 .cta-content:hover {
   background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.25);
   box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.15),
-    0 0 20px rgba(255, 255, 255, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  transform: translateY(-5px);
+    0 8px 32px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
 }
 
 .cta-title {
@@ -923,10 +875,10 @@ onUnmounted(() => {
 }
 
 .cta-btn-primary:hover {
-  transform: translateY(-3px) scale(1.05) !important;
+  transform: translateY(-1px) scale(1.02) !important;
   box-shadow: 
-    0 8px 25px rgba(16, 185, 129, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    0 4px 15px rgba(16, 185, 129, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
 }
 
 .cta-btn-secondary {
@@ -1050,36 +1002,6 @@ onUnmounted(() => {
   border-top: 1px solid var(--gray-800);
   color: var(--gray-500);
   font-size: 16px;
-}
-
-.back-to-top {
-  position: fixed;
-  bottom: 40px;
-  right: 40px;
-  z-index: 1000;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  box-shadow: var(--shadow-xl);
-  opacity: 0.9;
-  transition: var(--transition);
-  background-color: var(--primary-color) !important;
-}
-
-.back-to-top:hover {
-  opacity: 1;
-  transform: translateY(-5px);
-  background-color: var(--primary-light) !important;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 
 @media (max-width: 1024px) {
@@ -1227,13 +1149,6 @@ onUnmounted(() => {
 
   .footer-content {
     gap: 32px;
-  }
-
-  .back-to-top {
-    bottom: 20px;
-    right: 20px;
-    width: 48px;
-    height: 48px;
   }
 }
 </style>
