@@ -151,7 +151,7 @@ const semesters = ref([
   { value: '2022-2023-2', label: '2022-2023学年第二学期' }
 ])
 
-// 从后端获取成绩数据
+
 const fetchGradesData = async () => {
   loading.value = true
   try {
@@ -168,7 +168,7 @@ const fetchGradesData = async () => {
       semesterGPAList.value = data.semesterGPAList || []
       totalGrades.value = data.total || 0
       
-      // 初始化图表
+  
       if (trendChartCanvas.value) {
         initTrendChart()
       }
@@ -179,7 +179,7 @@ const fetchGradesData = async () => {
     console.error('获取成绩数据失败:', err)
     ElMessage.error('获取成绩数据失败，请稍后重试')
     
-    // 如果API请求失败，使用默认空数据
+
     allGrades.value = []
     gradeStats.value = null
     semesterGPAList.value = []
@@ -189,7 +189,7 @@ const fetchGradesData = async () => {
   }
 }
 
-// 根据学期获取成绩数据
+
 const fetchGradesDataBySemester = async (semester) => {
   loading.value = true
   try {

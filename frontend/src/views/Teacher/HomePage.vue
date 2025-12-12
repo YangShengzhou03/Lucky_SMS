@@ -389,7 +389,6 @@ const fetchData = async () => {
   error.value = null
 
   try {
-    // 使用axios获取数据
     const res = await service.get('/teacher/home')
     
     if (res.code === 200) {
@@ -402,7 +401,6 @@ const fetchData = async () => {
     error.value = '获取数据失败，请稍后重试'
     console.error('获取数据失败:', err)
     
-    // 如果API请求失败，使用模拟数据作为后备
     teacher.value = {
       name: '张明华',
       id: 'T2023001',

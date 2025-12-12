@@ -110,17 +110,17 @@ import Chart from 'chart.js/auto'
 import service from '@/utils/request'
 import { ElMessage } from 'element-plus'
 
-// DOM 引用
+
 const statusCard = ref(null)
 const creditChartCard = ref(null)
 const trendChartCard = ref(null)
 const creditDoughnutCanvas = ref(null)
 const performanceTrendCanvas = ref(null)
 
-// 从父组件或全局状态中注入暗色模式状态
+
 const isDarkMode = inject('isDarkMode', ref(false))
 
-// 学籍状态配置映射 - 定义不同学籍状态的显示样式
+
 const statusConfig = {
   ACTIVE: { label: '在读', type: 'success', color: '#10b981' },
   GRADUATED: { label: '已毕业', type: 'primary', color: '#6366f1' },
@@ -131,21 +131,20 @@ const statusConfig = {
   DROP_OUT: { label: '退学', type: 'danger', color: '#ef4444' }
 }
 
-// 响应式数据
-const status = ref('ACTIVE') // 学籍状态
-const effectiveDate = ref('2022-09-01') // 入学日期
-const graduationDate = ref('2026-06-30') // 预计毕业日期
-const credits = ref(70) // 已修学分
-const totalCredits = ref(140) // 总学分要求
-const attendanceRate = ref(99) // 出勤率
-const performanceLevel = ref('良好') // 学业等级
-const loading = ref(false) // 加载状态
-const error = ref(null) // 错误信息
-const academicHistory = ref([]) // 历史学业表现数据
-let creditChart = null // 学分进度图表实例
-let trendChart = null // 学业表现趋势图表实例
+const status = ref('ACTIVE')
+const effectiveDate = ref('2022-09-01')
+const graduationDate = ref('2026-06-30')
+const credits = ref(70)
+const totalCredits = ref(140)
+const attendanceRate = ref(99)
+const performanceLevel = ref('良好')
+const loading = ref(false)
+const error = ref(null)
+const academicHistory = ref([])
+let creditChart = null
+let trendChart = null
 
-// 获取学生状态数据
+
 const fetchStudentStatus = async () => {
   loading.value = true
   error.value = null
@@ -182,7 +181,7 @@ const fetchStudentStatus = async () => {
         attendanceRate.value = data.academicHistory[data.academicHistory.length - 1].attendanceRate || attendanceRate.value
       }
       
-      // 更新图表数据
+      
       updateChartsData()
     } else {
       throw new Error(response.message || '获取数据失败')
@@ -192,7 +191,7 @@ const fetchStudentStatus = async () => {
     console.error('获取学生状态失败:', err)
     ElMessage.warning('获取学籍状态失败，显示模拟数据')
     
-    // 使用模拟数据
+    
     useMockData()
   } finally {
     loading.value = false
@@ -201,7 +200,7 @@ const fetchStudentStatus = async () => {
 
 // 使用模拟数据
 const useMockData = () => {
-  // 精简的模拟数据，只包含必要字段
+  
   const mockData = {
     basicInfo: {
       status: "ACTIVE",
@@ -256,7 +255,7 @@ const updateChartsData = () => {
     const trendLabels = academicHistory.value.map(item => item.semester)
     const trendData = academicHistory.value.map(item => item.attendanceRate)
     
-    // 添加当前学期数据点
+    
     trendLabels.push('当前')
     trendData.push(attendanceRate.value)
     
@@ -266,19 +265,19 @@ const updateChartsData = () => {
   }
 }
 
-// 鼠标移动事件处理 - 用于创建卡片的光影效果
+
 const handleMouseMove = (e) => {
   // 直接更新CSS变量，避免响应式变量更新导致的重渲染
   document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`)
   document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`)
 }
 
-// 计算属性 - 学分完成百分比
+
 const creditProgress = computed(() => {
   return Math.round((credits.value / totalCredits.value) * 100)
 })
 
-// 计算属性 - 根据学分进度确定进度条颜色
+
 const progressColor = computed(() => {
   const progress = creditProgress.value
   if (progress < 30) return '#ef4444' // 红色：进度较低
@@ -286,7 +285,7 @@ const progressColor = computed(() => {
   return '#10b981' // 绿色：进度良好
 })
 
-// 计算属性 - 根据出勤率确定进度条颜色
+
 const attendanceColor = computed(() => {
   const rate = attendanceRate.value
   if (rate < 70) return '#ef4444' // 红色：出勤率低
@@ -294,7 +293,7 @@ const attendanceColor = computed(() => {
   return '#10b981' // 绿色：出勤率高
 })
 
-// 将学业等级转换为评分（用于星级显示）
+
 const levelToRating = (level) => {
   const levelMap = {
     '优秀': 5,
@@ -306,14 +305,14 @@ const levelToRating = (level) => {
   return levelMap[level] || 3 // 默认返回中等评分
 }
 
-// 计算属性：根据暗色模式动态调整评分颜色
+
 const ratingColors = computed(() => {
   return isDarkMode.value
     ? ['rgba(255, 255, 255, 0.3)', '#f7ba1e', '#f7ba1e', '#f7ba1e', '#10b981']
     : ['rgba(0, 0, 0, 0.2)', '#3b82f6', '#3b82f6', '#10b981', '#10b981']
 })
 
-// 日期格式化方法 - 将YYYY-MM-DD格式转换为本地日期格式
+
 const formatDate = (dateStr) => {
   if (!dateStr) return '--'
   return new Date(dateStr).toLocaleDateString('zh-CN', {
@@ -323,7 +322,7 @@ const formatDate = (dateStr) => {
   }).replace(/\//g, '-')
 }
 
-// 初始化图表
+
 const initCharts = () => {
   nextTick(() => {
     // 检查canvas元素是否存在
@@ -346,11 +345,11 @@ const initCharts = () => {
         datasets: [{
           data: [credits.value, totalCredits.value - credits.value],
           backgroundColor: [
-            '#409eff', // 已修部分颜色
-            isDarkMode.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' // 剩余部分颜色，根据暗色模式调整
+            '#409eff', 
+            isDarkMode.value ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' 
           ],
           borderWidth: 0,
-          cutout: '70%' // 环形图中心空洞大小
+          cutout: '70%' 
         }]
       },
       options: {
@@ -358,7 +357,7 @@ const initCharts = () => {
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            display: false // 不显示图例
+            display: false 
           },
           tooltip: {
             callbacks: {
@@ -386,7 +385,7 @@ const initCharts = () => {
       return
     }
     
-    // 准备趋势图数据
+    
     const trendLabels = academicHistory.value.map(item => item.semester)
     const trendData = academicHistory.value.map(item => item.attendanceRate)
     
@@ -401,17 +400,17 @@ const initCharts = () => {
         datasets: [{
           label: '学业表现',
           data: trendData,
-          borderColor: '#409eff', // 线条颜色
+          borderColor: '#409eff', 
           backgroundColor: isDarkMode.value
             ? 'rgba(64, 158, 255, 0.1)'
-            : 'rgba(64, 158, 255, 0.2)', // 填充颜色，根据暗色模式调整
-          tension: 0.4, // 线条弯曲度
-          fill: true, // 填充区域
-          pointBackgroundColor: '#fff', // 数据点背景色
-          pointBorderColor: '#409eff', // 数据点边框色
-          pointBorderWidth: 2, // 数据点边框宽度
-          pointRadius: 4, // 数据点半径
-          pointHoverRadius: 6 // 鼠标悬停时数据点半径
+            : 'rgba(64, 158, 255, 0.2)', 
+          tension: 0.4, 
+          fill: true, 
+          pointBackgroundColor: '#fff', 
+          pointBorderColor: '#409eff', 
+          pointBorderWidth: 2, 
+          pointRadius: 4, 
+          pointHoverRadius: 6 
         }]
       },
       options: {
@@ -428,12 +427,12 @@ const initCharts = () => {
             grid: {
               color: isDarkMode.value
                 ? 'rgba(255, 255, 255, 0.1)'
-                : 'rgba(0, 0, 0, 0.05)' // 网格线颜色，根据暗色模式调整
+                : 'rgba(0, 0, 0, 0.05)' 
             }
           },
           x: {
             grid: {
-              display: false // 不显示x轴网格线
+              display: false 
             }
           }
         },
@@ -456,9 +455,9 @@ const initCharts = () => {
   })
 }
 
-// 监听暗色模式变化，更新图表样式
+
 watch(isDarkMode, (newVal) => {
-  // 更新学分环形图样式
+  
   if (creditChart) {
     creditChart.data.datasets[0].backgroundColor[1] = newVal
       ? 'rgba(255, 255, 255, 0.1)'
@@ -466,7 +465,7 @@ watch(isDarkMode, (newVal) => {
     creditChart.update()
   }
 
-  // 更新学业表现趋势图样式
+  
   if (trendChart) {
     trendChart.data.datasets[0].backgroundColor = newVal
       ? 'rgba(64, 158, 255, 0.1)'
@@ -480,7 +479,7 @@ watch(isDarkMode, (newVal) => {
   }
 })
 
-// 组件挂载时初始化数据和图表
+
 onMounted(async () => {
   // 先获取学生状态数据
   await fetchStudentStatus()
@@ -490,15 +489,15 @@ onMounted(async () => {
   initCharts()
 })
 
-// 组件卸载时清理资源
+
 onUnmounted(() => {
-  if (creditChart) creditChart.destroy() // 销毁学分图表
-  if (trendChart) trendChart.destroy() // 销毁趋势图表
+  if (creditChart) creditChart.destroy() 
+  if (trendChart) trendChart.destroy() 
 })
 </script>
 
 <style scoped lang="scss">
-// 仪表盘整体样式
+
 .status-dashboard {
   min-height: 100vh;
   display: flex;
@@ -509,7 +508,7 @@ onUnmounted(() => {
   --mouse-y: 0;
 }
 
-// 主内容区域
+
 .dashboard-content {
   flex: 1;
   width: 100%;
@@ -520,7 +519,7 @@ onUnmounted(() => {
   gap: 30px;
 }
 
-// 现代化卡片样式 - 与主页保持一致的卡片设计语言
+
 .modern-card {
   position: relative;
   border-radius: 16px;
@@ -529,12 +528,12 @@ onUnmounted(() => {
   overflow: hidden;
   z-index: 1;
 
-  // 浅色模式
+  
   background: white;
   border: 1px solid rgba(0, 0, 0, 0.1);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
 
-  // 深色模式样式
+  
   .dark & {
     background: rgba(30, 41, 59, 0.8);
     backdrop-filter: blur(12px);
@@ -542,7 +541,7 @@ onUnmounted(() => {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   }
 
-  // 卡片光影效果 - 随鼠标位置变化
+  
   &::before {
     content: '';
     position: absolute;
@@ -559,7 +558,7 @@ onUnmounted(() => {
     pointer-events: none;
   }
 
-  // 卡片悬停效果
+  
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
@@ -569,7 +568,7 @@ onUnmounted(() => {
     }
   }
 
-  // 卡片头部
+  
   .card-header {
     display: flex;
     justify-content: space-between;
@@ -594,7 +593,7 @@ onUnmounted(() => {
   }
 }
 
-// 学籍状态卡片
+
 .status-card {
   .status-main {
     display: flex;
@@ -662,18 +661,18 @@ onUnmounted(() => {
       text-align: center;
       transition: all 0.3s ease;
 
-      // 深色模式
+      
       .dark & {
         background-color: rgba(255, 255, 255, 0.05);
       }
 
-      // 卡片悬停效果
+      
       &:hover {
         transform: translateY(-4px);
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
       }
 
-      // 统计值样式
+      
       .stat-value {
         font-size: 32px;
         font-weight: 700;
@@ -681,27 +680,27 @@ onUnmounted(() => {
         margin-bottom: 8px;
       }
 
-      // 统计标签样式
+      
       .stat-label {
         font-size: 15px;
         color: var(--text-secondary);
         margin-bottom: 12px;
       }
 
-      // 进度条样式
+      
       .stat-progress {
         margin-top: 12px;
       }
 
-      // 评分样式
+      
       .stat-rating {
         margin-top: 12px;
 
         .el-rate__item {
-          // 添加过渡效果
+          
           transition: transform 0.2s ease;
 
-          // 鼠标悬停时的微动画
+          
           &:hover {
             transform: scale(1.1);
           }
@@ -710,7 +709,7 @@ onUnmounted(() => {
     }
   }
 
-  // 增强评分组件的视觉效果
+  
   .stat-rating {
     margin-top: 12px;
 
@@ -726,7 +725,7 @@ onUnmounted(() => {
   }
 }
 
-// 图表卡片
+
 .chart-card {
   .chart-wrapper {
     display: flex;
@@ -778,7 +777,7 @@ onUnmounted(() => {
   }
 }
 
-// 图表容器样式
+
 .charts-container {
   display: grid;
   grid-template-columns: 1fr;
@@ -789,7 +788,7 @@ onUnmounted(() => {
   }
 }
 
-// 颜色变量 - 与主页保持一致的配色方案
+
 :root {
   --text-primary: #303133;
   --text-secondary: #606266;
@@ -800,7 +799,7 @@ onUnmounted(() => {
   --text-secondary: rgba(255, 255, 255, 0.7);
 }
 
-// 加载状态样式
+
 .loading-container {
   display: flex;
   flex-direction: column;

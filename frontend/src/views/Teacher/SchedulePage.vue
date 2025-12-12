@@ -335,7 +335,7 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const historySearch = ref('')
 
-// 教学计划数据
+
 const teachingPlans = ref([
   {
     id: 1,
@@ -597,7 +597,7 @@ const teachingPlans = ref([
   }
 ])
 
-// 计算属性
+
 const ongoingPlans = computed(() => teachingPlans.value.filter(plan => plan.status === 'ongoing'))
 const completedPlans = computed(() => teachingPlans.value.filter(plan => plan.status === 'completed'))
 const draftPlans = computed(() => teachingPlans.value.filter(plan => plan.status === 'draft'))
@@ -650,7 +650,7 @@ const avgPlanProgress = computed(() => {
   return Math.round(totalProgress / ongoingPlans.value.length)
 })
 
-// 方法
+
 const planProgressColor = (progress) => {
   if (progress >= 80) return '#67c23a'
   if (progress >= 60) return '#e6a23c'
@@ -664,7 +664,6 @@ const viewPlanDetails = (plan) => {
 
 const editPlan = (plan) => {
   ElMessage.info(`编辑教学计划: ${plan.courseName}`)
-  // 这里应该打开编辑模态框
 }
 
 const deletePlan = (plan) => {
@@ -692,17 +691,14 @@ const deletePlan = (plan) => {
 
 const createNewPlan = () => {
   ElMessage.info('创建新的教学计划')
-  // 这里应该打开创建模态框
 }
 
 const importPlan = () => {
   ElMessage.info('导入教学计划')
-  // 这里应该打开导入文件对话框
 }
 
 const exportPlan = (plan) => {
   ElMessage.info(`导出教学计划: ${plan.courseName}`)
-  // 这里应该实现导出功能
 }
 
 const handleSizeChange = (size) => {
@@ -725,7 +721,6 @@ const formatStatValue = (value) => {
 }
 
 onMounted(() => {
-  // 初始化操作
 })
 </script>
 
@@ -734,13 +729,13 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   transition: background-color 0.3s ease;
-  gap: 30px; // 保持与系列设计一致的卡片间距
+  gap: 30px;
   padding: 0 15px;
   --mouse-x: 0;
   --mouse-y: 0;
 }
 
-// 现代化卡片样式 - 完全统一设计语言
+
 .modern-card {
   position: relative;
   border-radius: 16px;
@@ -749,18 +744,18 @@ onMounted(() => {
   overflow: hidden;
   z-index: 1;
 
-  // 卡片内部相对定位
+
   .card-content {
     position: relative;
     z-index: 2;
   }
 
-  // 浅色模式
+
   background: white;
   border: 1px solid rgba(0, 0, 0, 0.1);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
 
-  // 深色模式样式
+
   .dark & {
     background: rgba(30, 41, 59, 0.8);
     backdrop-filter: blur(12px);
@@ -768,7 +763,7 @@ onMounted(() => {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   }
 
-  // 卡片光影效果 - 微紫色
+
   &::before {
     content: '';
     position: absolute;
@@ -785,7 +780,7 @@ onMounted(() => {
     pointer-events: none;
   }
 
-  // 卡片悬停效果 - 与系列设计完全一致
+
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
@@ -795,7 +790,7 @@ onMounted(() => {
     }
   }
 
-  // 卡片头部
+
   .card-header {
     display: flex;
     justify-content: space-between;

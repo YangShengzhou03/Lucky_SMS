@@ -821,14 +821,14 @@ import { debounce } from 'lodash-es'
 
 const { copy } = useClipboard()
 
-// 当前用户信息
+
 const currentUser = ref({
   id: 100,
   name: '我',
   avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
 })
 
-// 联系人列表
+
 const contacts = ref([
   { id: 1, name: '张教授', avatar: 'https://randomuser.me/api/portraits/men/32.jpg', online: true, department: '计算机学院' },
   { id: 2, name: '李老师', avatar: 'https://randomuser.me/api/portraits/women/44.jpg', online: false, lastOnline: new Date(Date.now() - 3600000), department: '数学系' },
@@ -838,7 +838,7 @@ const contacts = ref([
   { id: 6, name: '学生事务办公室', avatar: 'https://randomuser.me/api/portraits/lego/3.jpg', online: true, department: '行政部门' },
 ])
 
-// 聊天历史
+
 const chatHistory = ref([
   {
     id: 1,
@@ -955,7 +955,7 @@ const chatHistory = ref([
   }
 ])
 
-// 状态管理
+
 const searchQuery = ref('')
 const newChatSearch = ref('')
 const searchPerformed = ref(false)
@@ -977,10 +977,10 @@ const isLoadingMoreMessages = ref(false)
 const isCreatingGroup = ref(false)
 const isAddingMembers = ref(false)
 
-// 添加联系人相关状态
+
 const activeTab = ref('search')
 
-// 群组相关状态
+
 const showCreateGroupDialog = ref(false)
 const showGroupMembersDialog = ref(false)
 const showAddMembersDialog = ref(false)
@@ -997,7 +997,7 @@ const addMemberSearch = ref('')
 const filteredAddMembers = ref([...contacts.value])
 const membersToAdd = ref([])
 
-// 计算属性
+
 const filteredChats = computed(() => {
   if (!searchQuery.value.trim()) return chatHistory.value
   return chatHistory.value.filter(chat =>
@@ -1048,7 +1048,7 @@ const canCreateGroup = computed(() => {
   return groupForm.name.trim() && groupForm.members.length > 0
 })
 
-// 聊天功能方法
+
 const selectChat = (index) => {
   currentChatIndex.value = index
   if (currentChat.value?.unreadCount > 0) {
@@ -1063,7 +1063,7 @@ const loadChatMessages = async () => {
   isLoadingMessages.value = true
   
   try {
-    // 模拟加载消息的延迟
+    
     await new Promise(resolve => setTimeout(resolve, 300))
     
     nextTick(() => {
@@ -1078,7 +1078,7 @@ const loadChatMessages = async () => {
 }
 
 const handleSearchInput = debounce(() => {
-  // 搜索聊天列表
+  
 }, 300)
 
 const formatMessage = (content) => {
@@ -1167,7 +1167,7 @@ const sendMessage = async () => {
     setTimeout(() => {
       message.status = 'sent'
 
-      // 单人聊天时模拟回复
+      
       if (!currentChat.value.isGroup && currentChat.value.id === 1) {
         setTimeout(() => {
           const replies = [
@@ -1270,12 +1270,12 @@ const handleFileUpload = (event) => {
 
 const downloadFile = (url) => {
   ElMessage.success('开始下载文件: ' + getFileName(url))
-  // 实际应用中这里应该实现真实的下载逻辑
+  
 }
 
 const downloadImage = () => {
   ElMessage.success('开始下载图片')
-  // 实际应用中这里应该实现真实的下载逻辑
+  
 }
 
 const getFileName = (url) => {
@@ -1388,7 +1388,7 @@ const onSearchInput = debounce(() => {
   isSearchingContacts.value = true
   searchPerformed.value = newChatSearch.value.trim() !== ''
   
-  // 模拟搜索延迟
+  
   setTimeout(() => {
     isSearchingContacts.value = false
   }, 300)
@@ -1407,7 +1407,7 @@ const highlightMatch = (text, search) => {
   })
 }
 
-// 群组功能方法
+
 const debouncedFilterGroupMembers = debounce(() => {
   filterGroupMembers()
 }, 300)
@@ -1479,7 +1479,7 @@ const createGroup = async () => {
   isCreatingGroup.value = true
   
   try {
-    // 创建群成员列表，包含当前用户并设置为群主
+    
     const members = [
       {
         ...currentUser.value,
@@ -1489,7 +1489,7 @@ const createGroup = async () => {
       }
     ]
     
-    // 添加选中的群成员
+    
     groupForm.members.forEach(memberId => {
       const contact = contacts.value.find(c => c.id === memberId)
       if (contact) {
@@ -1501,10 +1501,10 @@ const createGroup = async () => {
       }
     })
 
-    // 生成新群ID
+    
     const newGroupId = Date.now()
     
-    // 创建新群
+    
     const newGroupChat = {
       id: newGroupId,
       name: groupForm.name,
@@ -1529,11 +1529,11 @@ const createGroup = async () => {
       ]
     }
 
-    // 添加到聊天历史
+    
     chatHistory.value.unshift(newGroupChat)
     currentChatIndex.value = 0
     
-    // 关闭对话框并重置表单
+    
     showCreateGroupDialog.value = false
     groupForm.name = ''
     groupForm.description = ''
@@ -1570,7 +1570,7 @@ const removeFromSelection = (memberId) => {
   }
 }
 
-// 群成员管理
+
 const getSenderName = (message) => {
   if (!currentChat.value?.isGroup) return ''
   
@@ -1601,23 +1601,21 @@ const isCurrentUserAdmin = () => {
 }
 
 const canManageMember = (member) => {
-  // 群主可以管理所有人
-  // 管理员不能管理群主和其他管理员
-  // 普通成员不能管理任何人
+  
   
   const currentMember = currentChat.value.members.find(m => m.id === currentUser.value.id)
   
-  // 普通成员
+  
   if (!currentMember || (currentMember.role !== 'ADMIN' && !currentMember.isAdmin)) {
     return false
   }
   
-  // 群主可以管理所有人
+  
   if (currentMember.isAdmin) {
-    return member.id !== currentUser.value.id // 不能管理自己
+    return member.id !== currentUser.value.id 
   }
   
-  // 管理员
+  
   return !member.isAdmin && member.role !== 'ADMIN' && member.id !== currentUser.value.id
 }
 
@@ -1644,7 +1642,7 @@ const removeGroupMember = (memberId) => {
     if (currentChat.value) {
       currentChat.value.members = currentChat.value.members.filter(m => m.id !== memberId)
       
-      // 添加系统消息
+      
       const member = contacts.value.find(c => c.id === memberId)
       currentChat.value.messages.push({
         id: Date.now(),
@@ -1670,7 +1668,7 @@ const toggleAdminRole = (memberId) => {
       member.role = 'MEMBER'
       ElMessage.success('已取消管理员权限')
       
-      // 添加系统消息
+      
       currentChat.value.messages.push({
         id: Date.now(),
         type: 'system',
@@ -1683,7 +1681,7 @@ const toggleAdminRole = (memberId) => {
       member.role = 'ADMIN'
       ElMessage.success('已设置为管理员')
       
-      // 添加系统消息
+      
       currentChat.value.messages.push({
         id: Date.now(),
         type: 'system',
@@ -1698,7 +1696,7 @@ const toggleAdminRole = (memberId) => {
   }
 }
 
-// 添加群成员相关
+
 const isMemberInGroup = (memberId) => {
   return currentChat.value?.members.some(m => m.id === memberId) || 
          membersToAdd.value.some(m => m.id === memberId)
@@ -1727,10 +1725,10 @@ const confirmAddMembers = async () => {
   
   try {
     if (currentChat.value) {
-      // 添加成员到群
+      
       currentChat.value.members.push(...membersToAdd.value)
       
-      // 添加系统消息
+      
       const memberNames = membersToAdd.value.map(m => m.name).join('、')
       currentChat.value.messages.push({
         id: Date.now(),
@@ -1744,7 +1742,7 @@ const confirmAddMembers = async () => {
       updateChatPreview(currentChat.value, currentChat.value.messages[currentChat.value.messages.length - 1])
       ElMessage.success(`成功添加${membersToAdd.value.length}名成员`)
       
-      // 重置状态
+      
       membersToAdd.value = []
       showAddMembersDialog.value = false
       addMemberSearch.value = ''
@@ -1757,7 +1755,7 @@ const confirmAddMembers = async () => {
   }
 }
 
-// 监听当前聊天变化
+
 watch(currentChat, (newChat) => {
   if (newChat) {
     loadChatMessages()
@@ -1831,7 +1829,7 @@ onMounted(() => {
         }
       }
 
-      // 下拉菜单样式
+      
       :deep(.el-dropdown-menu) {
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -2019,7 +2017,7 @@ onMounted(() => {
           margin: 0 4px;
         }
 
-        // 空状态下的下拉菜单样式
+        
         :deep(.el-dropdown-menu) {
           border-radius: 8px;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -2463,7 +2461,7 @@ onMounted(() => {
     }
   }
 
-  // 群组相关样式
+  
   .group-badge {
     font-size: 12px;
     background-color: rgba(59, 130, 246, 0.1);
@@ -2693,7 +2691,7 @@ onMounted(() => {
       }
     }
 
-    // 深色模式下的下拉菜单样式
+    
     :deep(.el-dropdown-menu) {
       background: var(--bg-primary);
       border-color: var(--border-color);
@@ -2816,7 +2814,7 @@ onMounted(() => {
     }
   }
 
-  // 悬停状态
+  
   &:hover {
     background-color: var(--bg-secondary);
     border-color: rgba(59, 130, 246, 0.3);
@@ -2828,7 +2826,7 @@ onMounted(() => {
     }
   }
 
-  // 激活状态
+  
   &.active {
     background-color: rgba(59, 130, 246, 0.1);
     border-color: var(--primary-color);
@@ -2839,7 +2837,7 @@ onMounted(() => {
   }
 }
 
-// 深色模式样式
+
 .dark .custom-contact-card {
   background-color: var(--bg-primary);
   border-color: var(--border-color);
@@ -2873,7 +2871,7 @@ onMounted(() => {
   }
 }
 
-// 现代化对话框样式
+
 .custom-dialog {
   :deep(.el-dialog) {
     border-radius: 12px;
@@ -2972,7 +2970,7 @@ onMounted(() => {
   }
 }
 
-// 选项卡样式
+
 .dialog-tabs {
   display: flex;
   border-bottom: 1px solid var(--border-color);
@@ -3022,7 +3020,7 @@ onMounted(() => {
   padding: 24px;
 }
 
-// 搜索区域样式
+
 .search-section {
   margin-bottom: 24px;
 
@@ -3053,7 +3051,7 @@ onMounted(() => {
   }
 }
 
-// 空状态样式
+
 .empty-state,
 .empty-result {
   display: flex;
@@ -3103,7 +3101,7 @@ onMounted(() => {
   }
 }
 
-// 加载状态样式
+
 .loading-state {
   padding: 24px;
 
@@ -3159,7 +3157,7 @@ onMounted(() => {
   }
 }
 
-// 现代化联系人卡片样式
+
 .contact-list {
   .modern-contact-card {
     display: flex;
@@ -3251,7 +3249,7 @@ onMounted(() => {
   }
 }
 
-// 二维码和联系人占位符样式
+
 .qr-section,
 .contacts-section {
   padding: 48px 24px;
@@ -3292,7 +3290,7 @@ onMounted(() => {
   }
 }
 
-// 现代化群组表单样式
+
 .modern-group-form {
   .form-section {
     padding: 24px;
@@ -3532,7 +3530,7 @@ onMounted(() => {
   }
 }
 
-// 群成员管理对话框样式
+
 .members-management-section {
   padding: 24px;
 
@@ -3718,7 +3716,7 @@ onMounted(() => {
   }
 }
 
-// 角色徽章样式
+
 .role-badge {
   font-size: 11px;
   padding: 2px 6px;
@@ -3741,7 +3739,7 @@ onMounted(() => {
   }
 }
 
-// 成员数量徽章
+
 .add-count-badge {
   font-size: 12px;
   background-color: rgba(59, 130, 246, 0.1);
@@ -3752,7 +3750,7 @@ onMounted(() => {
   margin-left: 8px;
 }
 
-// 添加群成员对话框样式
+
 .add-members-section {
   padding: 24px;
 
@@ -4035,7 +4033,7 @@ onMounted(() => {
   }
 }
 
-// 深色模式适配
+
 .dark {
   .custom-dialog {
     :deep(.el-dialog) {
@@ -4077,7 +4075,7 @@ onMounted(() => {
     }
   }
 
-  // 深色模式下的角色徽章
+  
   .role-badge {
     &.owner {
       background-color: rgba(217, 119, 6, 0.2);
@@ -4095,7 +4093,7 @@ onMounted(() => {
     }
   }
 
-  // 深色模式下的成员卡片
+  
   .modern-member-card,
   .modern-add-member-card {
     &:hover {
@@ -4108,7 +4106,7 @@ onMounted(() => {
     }
   }
 
-  // 深色模式下的选中成员标签
+  
   .selected-member-tag {
     background: rgba(59, 130, 246, 0.2);
     border-color: rgba(59, 130, 246, 0.3);
