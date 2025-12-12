@@ -8,9 +8,6 @@ import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-/**
- * 选课消息消费者
- */
 @Component
 @RocketMQMessageListener(
     topic = RocketMQConfig.COURSE_SELECTION_TOPIC, 
@@ -24,10 +21,6 @@ public class CourseSelectionConsumer implements RocketMQListener<Object> {
 
     @Override
     public void onMessage(Object message) {
-        // 处理选课相关消息
         log.info("收到选课消息: {}", message.toString());
-        
-        // 这里可以根据消息类型进行不同的处理，比如记录日志、发送通知等
-        // 实际应用中应该根据业务需求实现具体的处理逻辑
     }
 }

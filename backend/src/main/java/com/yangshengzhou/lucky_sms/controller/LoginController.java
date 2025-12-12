@@ -11,9 +11,6 @@ import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 登录控制器
- */
 @RestController
 public class LoginController {
 
@@ -26,12 +23,6 @@ public class LoginController {
     @Resource
     private RocketMQProducerService rocketMQProducerService;
 
-    /**
-     * 手机号密码登录
-     * @param phone 手机号
-     * @param password 密码
-     * @return 登录结果
-     */
     @PostMapping("/login/password")
     public HashMap<String, Object> loginByPassword(
             @RequestParam String phone,
@@ -39,8 +30,6 @@ public class LoginController {
         HashMap<String, Object> result = new HashMap<>();
 
         try {
-            // 参数已经通过@RequestParam获取
-
             if (phone == null || password == null) {
                 result.put("code", 400);
                 result.put("message", "手机号和密码不能为空");
@@ -48,7 +37,6 @@ public class LoginController {
                 return result;
             }
 
-            // 调用Mapper进行登录验证
             LoginVO loginVO = userMapper.loginByPassword(phone, password);
 
             if (loginVO == null) {
@@ -58,10 +46,8 @@ public class LoginController {
                 return result;
             }
 
-            // 生成JWT token
             String token = jwtUtil.generateToken(loginVO.getId());
 
-            // 构建返回数据
             Map<String, Object> data = new HashMap<>();
             data.put("token", token);
             data.put("userId", loginVO.getId());
@@ -69,7 +55,6 @@ public class LoginController {
             data.put("role", loginVO.getRoleName());
             data.put("studentId", loginVO.getStudentId());
 
-            // 发送登录消息到消息队列
             Map<String, Object> loginMessage = new HashMap<>();
             loginMessage.put("userId", loginVO.getId());
             loginMessage.put("username", loginVO.getUsername());
@@ -89,12 +74,6 @@ public class LoginController {
         return result;
     }
 
-    /**
-     * 手机号验证码登录
-     * @param phone 手机号
-     * @param captcha 验证码
-     * @return 登录结果
-     */
     @PostMapping("/login/phone")
     public HashMap<String, Object> loginByPhone(
             @RequestParam String phone,
@@ -111,10 +90,6 @@ public class LoginController {
                 return result;
             }
 
-            // 这里应该验证验证码是否正确，暂时简化处理
-            // TODO: 实现验证码验证逻辑
-
-            // 调用Mapper查询用户信息
             LoginVO loginVO = userMapper.loginByPhone(phone);
 
             if (loginVO == null) {
@@ -124,10 +99,8 @@ public class LoginController {
                 return result;
             }
 
-            // 生成JWT token
             String token = jwtUtil.generateToken(loginVO.getId());
 
-            // 构建返回数据
             Map<String, Object> data = new HashMap<>();
             data.put("token", token);
             data.put("userId", loginVO.getId());
@@ -135,7 +108,6 @@ public class LoginController {
             data.put("role", loginVO.getRoleName());
             data.put("studentId", loginVO.getStudentId());
 
-            // 发送登录消息到消息队列
             Map<String, Object> loginMessage = new HashMap<>();
             loginMessage.put("userId", loginVO.getId());
             loginMessage.put("username", loginVO.getUsername());
@@ -155,27 +127,17 @@ public class LoginController {
         return result;
     }
 
-    /**
-     * 发送验证码
-     * @param phone 手机号
-     * @return 发送结果
-     */
     @PostMapping("/captcha/send")
     public HashMap<String, Object> sendCode(@RequestParam String phone) {
         HashMap<String, Object> result = new HashMap<>();
 
         try {
-            // phone参数已经通过@RequestParam获取
-
             if (phone == null) {
                 result.put("code", 400);
                 result.put("message", "手机号不能为空");
                 result.put("data", null);
                 return result;
             }
-
-            // TODO: 实现发送验证码的逻辑
-            // 这里应该调用短信发送服务发送验证码
 
             result.put("code", 200);
             result.put("message", "验证码已发送（测试环境：123456）");
@@ -189,13 +151,6 @@ public class LoginController {
         return result;
     }
 
-    /**
-     * 重置密码
-     * @param phone 手机号
-     * @param captcha 验证码
-     * @param newPassword 新密码
-     * @return 重置结果
-     */
     @PostMapping("/resetPassword")
     public HashMap<String, Object> resetPassword(
             @RequestParam String phone,
@@ -204,8 +159,6 @@ public class LoginController {
         HashMap<String, Object> result = new HashMap<>();
 
         try {
-            // 参数已经通过@RequestParam获取
-
             if (phone == null || newPassword == null || captcha == null) {
                 result.put("code", 400);
                 result.put("message", "手机号、新密码和验证码不能为空");
@@ -213,9 +166,6 @@ public class LoginController {
                 return result;
             }
 
-            // TODO: 验证验证码
-
-            // 重置密码
             int affectedRows = userMapper.resetPasswordByPhone(phone, newPassword);
 
             if (affectedRows > 0) {
@@ -236,17 +186,11 @@ public class LoginController {
         return result;
     }
 
-    /**
-     * 获取当前用户信息
-     * @param request HTTP请求
-     * @return 用户信息
-     */
     @GetMapping("/getUserInfo")
     public HashMap<String, Object> getUserInfo(HttpServletRequest request) {
         HashMap<String, Object> result = new HashMap<>();
 
         try {
-            // 从JWT token中获取用户ID
             Integer userId = jwtUtil.getUidByRequest(request);
             if (userId == null) {
                 result.put("code", 401);
@@ -255,13 +199,11 @@ public class LoginController {
                 return result;
             }
 
-            // 这里可以根据用户ID查询详细的用户信息
-            // 构建返回数据
             Map<String, Object> userInfo = new HashMap<>();
             userInfo.put("userId", userId);
             userInfo.put("username", "用户" + userId);
-            userInfo.put("role", "student"); // 暂时固定角色
-            userInfo.put("date", userInfo); // 为了兼容前端的data字段
+            userInfo.put("role", "student");
+            userInfo.put("date", userInfo);
 
             result.put("code", 200);
             result.put("message", "获取用户信息成功");
@@ -275,17 +217,11 @@ public class LoginController {
         return result;
     }
 
-    /**
-     * 退出登录
-     * @return 退出结果
-     */
     @PostMapping("/logout")
     public HashMap<String, Object> logout() {
         HashMap<String, Object> result = new HashMap<>();
 
         try {
-            // 由于使用JWT，服务端不需要做特殊处理
-            // 客户端删除token即可
             result.put("code", 200);
             result.put("message", "退出登录成功");
             result.put("data", null);

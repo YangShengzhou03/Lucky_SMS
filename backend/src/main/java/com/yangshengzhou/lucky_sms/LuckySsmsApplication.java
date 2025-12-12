@@ -19,7 +19,6 @@ public class LuckySsmsApplication {
         SpringApplication.run(LuckySsmsApplication.class, args);
     }
 
-    // 配置MyBatis Plus分页插件
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
@@ -30,8 +29,6 @@ public class LuckySsmsApplication {
     @Bean
     public ConfigurationCustomizer configurationCustomizer() {
         return configuration -> {
-            // 配置MyBatis设置，移除已废弃的方法调用
-            // configuration.setUseDeprecatedExecutor(false); // 此方法在新版本中可能已移除
         };
     }
 

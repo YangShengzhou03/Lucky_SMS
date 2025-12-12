@@ -15,9 +15,6 @@ public class ResetPasswordController {
     @Resource
     private UserService userService;
 
-    /**
-     *重设密码
-     */
     @PostMapping("/resetPassword")
     public Map<String,Object> resetPassword(
             @RequestParam String phone,

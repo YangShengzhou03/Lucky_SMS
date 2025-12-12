@@ -41,10 +41,6 @@ public class StudentController {
     @Resource
     private ProfileService profileService;
 
-    /**
-     * 用来拿到学生端首页数据
-     * @return request响应
-     */
     @GetMapping("/home")
     public HashMap<String, Object> studentHomeResult(
             HttpServletRequest request) {
@@ -59,20 +55,16 @@ public class StudentController {
             result.put("data", homeVO);
         } catch (ResponseStatusException e) {
             result.put("code", e.getStatusCode().value());
-            result.put("message", e.getReason());  // 使用 getReason() 获取自定义消息
+            result.put("message", e.getReason());
             result.put("data", null);
-        } catch (Exception e) {  // 捕获其他所有异常
-            result.put("code", 500);  // 通用错误码
-            result.put("message", e.getMessage());  // 其他异常的消息
+        } catch (Exception e) {
+            result.put("code", 500);
+            result.put("message", e.getMessage());
             result.put("data", null);
         }
         return result;
     }
 
-    /**
-     * 用来拿到学生端学籍数据
-     * @return request响应
-     */
     @GetMapping("/status")
     public HashMap<String, Object> studentStatusResult(
             HttpServletRequest request
@@ -99,10 +91,6 @@ public class StudentController {
         return result;
     }
 
-    /**
-     * 用来拿到学生端成绩数据
-     * @return request响应
-     */
     @GetMapping("/grades")
     public HashMap<String, Object> studentGradesResult(
             HttpServletRequest request
@@ -129,16 +117,11 @@ public class StudentController {
         return result;
     }
 
-    /**
-     * 用来拿到选课功能的可选课程数据
-     * @return request响应
-     */
     @GetMapping("/courses/available")
     public HashMap<String, Object> getAvailableCourses(
             @RequestParam(defaultValue = "2023-2024-2") String semester,
             HttpServletRequest request
     ) {
-        // 返回所有可选的课程
         HashMap<String, Object> result = new HashMap<>();
 
         try {
@@ -161,13 +144,6 @@ public class StudentController {
         return result;
     }
     
-    /**
-     * 分页获取可选课程列表
-     * @param semester 学期
-     * @param page 页码
-     * @param size 每页大小
-     * @return 分页的可选课程列表
-     */
     @GetMapping("/courses/available/pagination")
     public HashMap<String, Object> getAvailableCoursesWithPagination(
             @RequestParam(defaultValue = "2023-2024-2") String semester,
@@ -179,7 +155,6 @@ public class StudentController {
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
-            // 假设服务层实现了分页方法
             Object courses = courseSelectionService.getAvailableCoursesWithPagination(userId, semester, page, size);
 
             result.put("code", 200);
@@ -225,13 +200,6 @@ public class StudentController {
         return result;
     }
     
-    /**
-     * 分页获取已选课程列表
-     * @param semester 学期
-     * @param page 页码
-     * @param size 每页大小
-     * @return 分页的已选课程列表
-     */
     @GetMapping("/courses/selected/pagination")
     public HashMap<String, Object> getSelectedCoursesWithPagination(
             @RequestParam(defaultValue = "2023-2024-2") String semester,
@@ -243,7 +211,6 @@ public class StudentController {
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
-            // 假设服务层实现了分页方法
             Object courses = courseSelectionService.getSelectedCoursesWithPagination(userId, semester, page, size);
 
             result.put("code", 200);
@@ -262,11 +229,6 @@ public class StudentController {
         return result;
     }
 
-    /**
-     * 用户点击了选课按钮
-     * @param courseId 传入被选择课程的id
-     * @return request响应
-     */
     @PostMapping("/courses/select")
     public HashMap<String, Object> selectCourse(
             @RequestParam Integer courseId,
@@ -276,11 +238,17 @@ public class StudentController {
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
-            CourseSelectionResultVO selectionResult = courseSelectionService.selectCourse(userId, courseId);
+            boolean success = courseSelectionService.selectCourse(userId, courseId);
 
-            result.put("code", selectionResult.getSuccess() ? 200 : 400);
-            result.put("message", selectionResult.getMessage());
-            result.put("data", selectionResult.getCourse());
+            if (success) {
+                result.put("code", 200);
+                result.put("message", "选课成功");
+                result.put("data", null);
+            } else {
+                result.put("code", 400);
+                result.put("message", "选课失败");
+                result.put("data", null);
+            }
         } catch (ResponseStatusException e) {
             result.put("code", e.getStatusCode().value());
             result.put("message", e.getReason());
@@ -294,10 +262,6 @@ public class StudentController {
         return result;
     }
 
-    /**
-     * 用来退课
-     * @return request响应
-     */
     @PostMapping("/courses/drop")
     public HashMap<String, Object> dropCourse(
             @RequestParam Integer courseId,
@@ -307,11 +271,17 @@ public class StudentController {
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
-            CourseSelectionResultVO dropResult = courseSelectionService.dropCourse(userId, courseId);
+            boolean success = courseSelectionService.dropCourse(userId, courseId);
 
-            result.put("code", dropResult.getSuccess() ? 200 : 400);
-            result.put("message", dropResult.getMessage());
-            result.put("data", dropResult.getCourse());
+            if (success) {
+                result.put("code", 200);
+                result.put("message", "退课成功");
+                result.put("data", null);
+            } else {
+                result.put("code", 400);
+                result.put("message", "退课失败");
+                result.put("data", null);
+            }
         } catch (ResponseStatusException e) {
             result.put("code", e.getStatusCode().value());
             result.put("message", e.getReason());

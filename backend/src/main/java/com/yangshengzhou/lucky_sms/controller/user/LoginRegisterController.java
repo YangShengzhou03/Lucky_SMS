@@ -18,18 +18,13 @@ public class LoginRegisterController {
     @Resource
     private UserService userService;
 
-    /**
-     * 验证码登录
-     */
     @PostMapping("/phone")
     public Map<String, Object> loginByPhone(
             @RequestParam String phone,
             @RequestParam String captcha) {
         LoginVO loginVO = new LoginVO();
-        // 封装登录返回响应
         Map<String, Object> loginResult = new HashMap<>();
         try {
-            // TODO 对验证码进行校验
             if (captcha==null || !captcha.equals("123456")) {
                 throw new RuntimeException("无效验证码");
             }
@@ -45,9 +40,6 @@ public class LoginRegisterController {
         return loginResult;
     }
 
-    /**
-     * 密码登录
-     */
     @PostMapping("/password")
     public Map<String, Object> loginByPassword(
             @RequestParam String phone,
@@ -58,11 +50,11 @@ public class LoginRegisterController {
         try {
             loginResult.put("code", 200);
             loginResult.put("message", "登录成功");
-            loginResult.put("date", loginVO);
+            loginResult.put("data", loginVO);
         } catch (Exception e) {
             loginResult.put("code", 500);
             loginResult.put("message", e.getMessage());
-            loginResult.put("date", loginVO);
+            loginResult.put("data", loginVO);
         }
         return loginResult;
     }

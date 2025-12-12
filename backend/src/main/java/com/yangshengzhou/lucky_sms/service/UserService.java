@@ -19,7 +19,6 @@ public class UserService {
         LoginVO loginVO = userMapper.loginByPhone(phone);
 
         if (loginVO == null) {
-            // 用户不存在，需要注册
             int rowNum = userMapper.registerByPhone(phone);
             if (rowNum == 0) {
                 throw new RuntimeException("注册失败");
@@ -27,11 +26,9 @@ public class UserService {
         }
         loginVO = userMapper.loginByPhone(phone);
 
-        // 生成令牌
         String token = jwtUtil.generateToken(loginVO.getUid());
         loginVO.setToken(token);
 
-        // 手机号脱敏（直接操作VO中的phone字段）
         loginVO.setPhone(desensitizePhone(loginVO.getPhone()));
 
         return loginVO;
@@ -46,21 +43,17 @@ public class UserService {
         LoginVO loginVO = userMapper.loginByPassword(phone, password);
 
         if (loginVO == null) {
-            // 用户不存在，需要注册
             throw new RuntimeException("用户名或密码错误");
         }
 
-        // 令牌
         String token = jwtUtil.generateToken(loginVO.getUid());
         loginVO.setToken(token);
 
-        // 手机号脱敏
         loginVO.setPhone(desensitizePhone(loginVO.getPhone()));
 
         return loginVO;
     }
 
-    // 手机号脱敏方法
     private String desensitizePhone(String phone) {
         if (phone == null || phone.length() != 11) {
             return phone;

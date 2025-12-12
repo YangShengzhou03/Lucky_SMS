@@ -6,18 +6,11 @@ import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-/**
- * RocketMQ消费者配置类
- * 添加条件配置，当RocketMQ可用时才启动消费者
- */
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "rocketmq.consumer.enabled", havingValue = "true", matchIfMissing = false)
 public class RocketMQConsumerConfig {
 
-    /**
-     * 课程选择消费者
-     */
     @Component
     @RocketMQMessageListener(
         topic = RocketMQConfig.COURSE_SELECTION_TOPIC, 
@@ -32,9 +25,6 @@ public class RocketMQConsumerConfig {
         }
     }
 
-    /**
-     * 用户操作消费者
-     */
     @Component
     @RocketMQMessageListener(
         topic = RocketMQConfig.USER_OPERATION_TOPIC, 

@@ -10,10 +10,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    /**
-     * 处理ResponseStatusException（包括401未授权）
-     */
-    @ExceptionHandler(ResponseStatusException.class)
+        @ExceptionHandler(ResponseStatusException.class)
     public Map<String, Object> handleResponseStatusException(ResponseStatusException e) {
         Map<String, Object> result = new HashMap<>();
         result.put("code", e.getStatusCode().value());
@@ -22,9 +19,6 @@ public class GlobalExceptionHandler {
         return result;
     }
 
-    /**
-     * 处理所有异常
-     */
     @ExceptionHandler(Exception.class)
     public Map<String, Object> handleException(Exception e) {
         Map<String, Object> result = new HashMap<>();
@@ -34,9 +28,6 @@ public class GlobalExceptionHandler {
         return result;
     }
 
-    /**
-     * 处理业务异常
-     */
     @ExceptionHandler(RuntimeException.class)
     public Map<String, Object> handleRuntimeException(RuntimeException e) {
         Map<String, Object> result = new HashMap<>();
@@ -46,9 +37,6 @@ public class GlobalExceptionHandler {
         return result;
     }
 
-    /**
-     * 处理参数校验异常
-     */
     @ExceptionHandler(IllegalArgumentException.class)
     public Map<String, Object> handleIllegalArgumentException(IllegalArgumentException e) {
         Map<String, Object> result = new HashMap<>();

@@ -15,11 +15,9 @@ public class RedisConfig {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        // 设置key的序列化器
         template.setKeySerializer(new StringRedisSerializer());
         template.setHashKeySerializer(new StringRedisSerializer());
 
-        // 设置value的序列化器
         GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer();
         template.setValueSerializer(serializer);
         template.setHashValueSerializer(serializer);
