@@ -379,17 +379,11 @@ public class StudentController {
         return result;
     }
 
-    /**
-     * 获取学生个人信息
-     * @param request HTTP请求
-     * @return 学生个人信息
-     */
     @GetMapping("/settings")
     public HashMap<String, Object> getStudentProfile(HttpServletRequest request) {
         HashMap<String, Object> response = new HashMap<>();
         
         try {
-            // 从JWT token中获取用户ID
             Integer userId = jwtUtil.getUidByRequest(request);
             if (userId == null) {
                 response.put("code", 401);
@@ -397,7 +391,6 @@ public class StudentController {
                 return response;
             }
             
-            // 调用ProfileService获取学生个人信息
             StudentProfileVO profile = profileService.getStudentProfile(userId);
             
             response.put("code", 200);
@@ -413,12 +406,6 @@ public class StudentController {
         return response;
     }
     
-    /**
-     * 更新学生个人信息
-     * @param requestVO 更新请求数据
-     * @param request HTTP请求
-     * @return 更新结果
-     */
     @PostMapping("/setting/info")
     public HashMap<String, Object> updateStudentProfile(
             @RequestBody UpdateStudentProfileRequestVO requestVO,
@@ -426,7 +413,6 @@ public class StudentController {
         HashMap<String, Object> response = new HashMap<>();
         
         try {
-            // 从JWT token中获取用户ID
             Integer userId = jwtUtil.getUidByRequest(request);
             if (userId == null) {
                 response.put("code", 401);
@@ -434,7 +420,6 @@ public class StudentController {
                 return response;
             }
 
-            // 调用ProfileService更新学生个人信息
             boolean success = profileService.updateStudentProfile(userId, requestVO);
             
             if (success) {

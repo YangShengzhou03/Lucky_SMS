@@ -2,12 +2,7 @@ package com.yangshengzhou.lucky_sms.vo.student;
 
 import java.util.Date;
 
-/**
- * 学生个人信息VO类
- * 包含用户表和学生表的完整个人信息
- */
 public class StudentProfileVO {
-    // 用户表字段
     private String username;
     private String email;
     private String phone;
@@ -15,7 +10,6 @@ public class StudentProfileVO {
     private Date birthDate;
     private String avatarUrl;
     
-    // 学生表字段
     private String studentNo;
     private String departmentName;
     private String majorName;
@@ -26,16 +20,12 @@ public class StudentProfileVO {
     private String emergencyContact;
     private String emergencyPhone;
     
-    // 地址信息
     private String province;
     private String city;
     private String district;
     private String detailedAddress;
     
-    // 构造方法
     public StudentProfileVO() {}
-    
-    // Getter和Setter方法
     public String getUsername() {
         return username;
     }

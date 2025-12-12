@@ -3,9 +3,7 @@ package com.yangshengzhou.lucky_sms.pojo;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-/**
- * 课程实体类
- */
+
 @TableName("courses")
 public class Course {
 

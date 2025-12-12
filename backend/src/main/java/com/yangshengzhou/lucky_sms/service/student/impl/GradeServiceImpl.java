@@ -16,9 +16,7 @@ public class GradeServiceImpl implements GradeService {
     private StudentMapper studentMapper;
 
     public GradesVO getGradesData(Integer userId) {
-        // 调用Mapper从数据库查询成绩数据
         GradesVO gradesVO = studentMapper.getGradesData(userId);
-        // 如果查询结果为null，返回一个初始化的GradesVO对象
         if (gradesVO == null) {
             gradesVO = new GradesVO();
         }
@@ -26,9 +24,7 @@ public class GradeServiceImpl implements GradeService {
     }
 
     public GradesVO getGradesDataBySemester(Integer userId, String semester) {
-        // 调用Mapper从数据库查询指定学期的成绩数据
         GradesVO gradesVO = studentMapper.getGradesDataBySemester(userId, semester);
-        // 如果查询结果为null，返回一个初始化的GradesVO对象
         if (gradesVO == null) {
             gradesVO = new GradesVO();
         }
@@ -36,14 +32,12 @@ public class GradeServiceImpl implements GradeService {
     }
 
     public GradesVO getGradesDataWithPagination(Integer userId, Integer page, Integer size) {
-        // 调用Mapper从数据库查询分页成绩数据
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
         params.put("page", page);
         params.put("size", size);
         params.put("offset", (page - 1) * size);
         GradesVO gradesVO = studentMapper.getGradesDataWithPagination(params);
-        // 如果查询结果为null，返回一个初始化的GradesVO对象
         if (gradesVO == null) {
             gradesVO = new GradesVO();
             gradesVO.setPage(page);
@@ -54,7 +48,6 @@ public class GradeServiceImpl implements GradeService {
     }
     
     public GradesVO getGradesDataBySemesterWithPagination(Integer userId, String semester, Integer page, Integer size) {
-        // 调用Mapper从数据库查询指定学期的分页成绩数据
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
         params.put("semester", semester);
@@ -62,7 +55,6 @@ public class GradeServiceImpl implements GradeService {
         params.put("size", size);
         params.put("offset", (page - 1) * size);
         GradesVO gradesVO = studentMapper.getGradesDataBySemesterWithPagination(params);
-        // 如果查询结果为null，返回一个初始化的GradesVO对象
         if (gradesVO == null) {
             gradesVO = new GradesVO();
             gradesVO.setPage(page);

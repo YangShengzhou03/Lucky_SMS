@@ -36,9 +36,9 @@ public class CourseSelectionServiceImpl implements CourseSelectionService {
     @Resource
     private RedisUtil redisUtil;
 
-    private static final String COURSE_SELECTION_LOCK_PREFIX = "course_selection_lock:"; // Redis锁的key前缀（防并发）
-    private static final String COURSE_CAPACITY_PREFIX = "course_capacity:"; // 课程容量在Redis中的key前缀
-    private static final int LOCK_EXPIRE_TIME = 10; // Redis锁的过期时间（10秒，防止锁一直占着）
+    private static final String COURSE_SELECTION_LOCK_PREFIX = "course_selection_lock:";
+    private static final String COURSE_CAPACITY_PREFIX = "course_capacity:";
+    private static final int LOCK_EXPIRE_TIME = 10;
     
     @Override
     public List<CourseSelectionVO> getAvailableCourses(Integer userId, String semester) {
@@ -62,18 +62,15 @@ public class CourseSelectionServiceImpl implements CourseSelectionService {
         return courseSelectionMapper.getSelectedCoursesWithPagination(pageInfo, userId, semester);
     }
 
-    // 抢课的关键代码
     @Override
     @Transactional
     public CourseSelectionResultVO selectCourse(Integer userId, Integer courseId) {
         CourseSelectionResultVO result = new CourseSelectionResultVO();
         
-        // 定义Redis锁
         String lockKey = COURSE_SELECTION_LOCK_PREFIX + courseId;
         boolean locked = false;
         
         try {
-            // 尝试获取锁
             locked = redisUtil.getLock(lockKey, "1", LOCK_EXPIRE_TIME, TimeUnit.SECONDS);
             
             if (!locked) {
@@ -82,7 +79,6 @@ public class CourseSelectionServiceImpl implements CourseSelectionService {
                 return result;
             }
             
-            // 检查课程是否已选
             boolean alreadySelected = courseSelectionMapper.checkCourseSelected(userId, courseId);
             if (alreadySelected) {
                 result.setSuccess(false);
@@ -90,7 +86,6 @@ public class CourseSelectionServiceImpl implements CourseSelectionService {
                 return result;
             }
             
-            // 检查课程容量，三目运算，先redis再mysql
             String capacityKey = COURSE_CAPACITY_PREFIX + courseId;
             Integer currentStudents = redisUtil.get(capacityKey) != null ? 
                 Integer.parseInt(redisUtil.get(capacityKey).toString()) : 
@@ -104,40 +99,17 @@ public class CourseSelectionServiceImpl implements CourseSelectionService {
                 return result;
             }
             
-            // TODO 检查时间冲突
-//            boolean hasTimeConflict = courseSelectionMapper.checkTimeConflict(userId, courseId);
-//            if (hasTimeConflict) {
-//                result.setSuccess(false);
-//                result.setMessage("所选课程与已选课程时间冲突");
-//                return result;
-//            }
-            
-            // TODO 检查学分上限
-//            Integer totalCredits = courseSelectionMapper.getTotalCredits(userId);
-//            Integer courseCredits = courseMapper.getCourseCredits(courseId);
-//            Integer maxCredits = studentMapper.getMaxCredits(userId);
-//
-//            if (totalCredits + courseCredits > maxCredits) {
-//                result.setSuccess(false);
-//                result.setMessage("已达到学分上限，无法选择更多课程");
-//                return result;
-//            }
-            
-            // 执行选课
             boolean selectionSuccess = courseSelectionMapper.addCourseSelection(userId, courseId);
             
             if (selectionSuccess) {
-                // 更新Redis中的课程容量
                 redisUtil.increment(capacityKey, 1);
                 
-                // 获取课程信息
                 CourseSelectionVO course = courseMapper.getCourseById(courseId);
                 
                 result.setSuccess(true);
                 result.setMessage("选课成功");
                 result.setCourse(course);
                 
-                // 发送选课成功消息
                 Map<String, Object> message = new HashMap<>();
                 message.put("userId", userId);
                 message.put("courseId", courseId);
@@ -153,7 +125,6 @@ public class CourseSelectionServiceImpl implements CourseSelectionService {
             result.setSuccess(false);
             result.setMessage("系统错误：" + e.getMessage());
         } finally {
-            // 释放锁
             if (locked) {
                 redisUtil.releaseLock(lockKey, "1");
             }
@@ -167,12 +138,10 @@ public class CourseSelectionServiceImpl implements CourseSelectionService {
     public CourseSelectionResultVO dropCourse(Integer userId, Integer courseId) {
         CourseSelectionResultVO result = new CourseSelectionResultVO();
         
-        // 获取Redis锁，防止并发问题
         String lockKey = COURSE_SELECTION_LOCK_PREFIX + courseId;
         boolean locked = false;
         
         try {
-            // 尝试获取锁
             locked = redisUtil.getLock(lockKey, "1", LOCK_EXPIRE_TIME, TimeUnit.SECONDS);
             
             if (!locked) {
@@ -181,7 +150,6 @@ public class CourseSelectionServiceImpl implements CourseSelectionService {
                 return result;
             }
             
-            // 检查是否已选该课程
             boolean alreadySelected = courseSelectionMapper.checkCourseSelected(userId, courseId);
             if (!alreadySelected) {
                 result.setSuccess(false);
@@ -189,18 +157,15 @@ public class CourseSelectionServiceImpl implements CourseSelectionService {
                 return result;
             }
             
-            // 执行退课
             boolean dropSuccess = courseSelectionMapper.removeCourseSelection(userId, courseId);
             
             if (dropSuccess) {
-                // 更新Redis中的课程容量
                 String capacityKey = COURSE_CAPACITY_PREFIX + courseId;
                 redisUtil.decrement(capacityKey, 1);
                 
                 result.setSuccess(true);
                 result.setMessage("退课成功");
                 
-                // 发送退课成功消息
                 Map<String, Object> message = new HashMap<>();
                 message.put("userId", userId);
                 message.put("courseId", courseId);
@@ -215,7 +180,6 @@ public class CourseSelectionServiceImpl implements CourseSelectionService {
             result.setSuccess(false);
             result.setMessage("系统错误：" + e.getMessage());
         } finally {
-            // 释放锁
             if (locked) {
                 redisUtil.releaseLock(lockKey, "1");
             }

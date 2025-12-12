@@ -12,7 +12,6 @@ public class GradesVO {
     private Integer size;
 
     public GradesVO() {
-        // 默认构造函数，初始化集合属性
         this.courseGrades = new ArrayList<>();
         this.semesterGPAList = new ArrayList<>();
     }

@@ -9,9 +9,6 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.text.SimpleDateFormat;
 
-/**
- * 学生图书管理控制器
- */
 @RestController
 @RequestMapping("/student/library")
 public class LibraryController {
@@ -19,17 +16,6 @@ public class LibraryController {
     @Resource
     private JwtUtil jwtUtil;
 
-    /**
-     * 搜索图书
-     * @param query 搜索关键词
-     * @param type 图书类型
-     * @param sort 排序方式
-     * @param location 馆藏位置
-     * @param page 页码
-     * @param size 每页大小
-     * @param request HTTP请求
-     * @return 搜索结果
-     */
     @GetMapping("/search")
     public HashMap<String, Object> searchBooks(
             @RequestParam(required = false) String query,
@@ -45,12 +31,9 @@ public class LibraryController {
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
             
-            // 模拟数据，实际应从数据库查询
             List<Map<String, Object>> books = new ArrayList<>();
             
-            // 模拟搜索结果
             if (query != null && !query.isEmpty()) {
-                // 这里可以根据关键词过滤图书
                 books.add(createBookData(101, "深入理解计算机系统", "Randal E.Bryant", true, 5));
                 books.add(createBookData(102, "代码整洁之道", "Robert C. Martin", false, 0));
                 books.add(createBookData(103, "设计模式：可复用面向对象软件的基础", "Erich Gamma等", true, 2));
@@ -58,12 +41,10 @@ public class LibraryController {
                 books.add(createBookData(105, "计算机程序的构造和解释", "Harold Abelson", true, 1));
             }
             
-            // 计算分页
             int start = (page - 1) * size;
             int end = Math.min(start + size, books.size());
             List<Map<String, Object>> pageBooks = books.subList(start, end);
             
-            // 构建分页响应
             Map<String, Object> pageData = new HashMap<>();
             pageData.put("records", pageBooks);
             pageData.put("total", books.size());
@@ -87,12 +68,6 @@ public class LibraryController {
         return result;
     }
 
-    /**
-     * 获取图书详情
-     * @param bookId 图书ID
-     * @param request HTTP请求
-     * @return 图书详情
-     */
     @GetMapping("/detail/{bookId}")
     public HashMap<String, Object> getBookDetail(
             @PathVariable Integer bookId,
@@ -103,7 +78,6 @@ public class LibraryController {
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
             
-            // 模拟图书详情数据
             Map<String, Object> book = createBookData(bookId, "图书标题", "作者", true, 3);
             book.put("publisher", "出版社名称");
             book.put("year", "2023");
@@ -130,12 +104,6 @@ public class LibraryController {
         return result;
     }
 
-    /**
-     * 预约图书
-     * @param bookId 图书ID
-     * @param request HTTP请求
-     * @return 预约结果
-     */
     @PostMapping("/reserve")
     public HashMap<String, Object> reserveBook(
             @RequestParam Integer bookId,
@@ -146,7 +114,6 @@ public class LibraryController {
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
             
-            // 模拟预约操作
             result.put("code", 200);
             result.put("message", "预约成功，请在3天内到图书馆借阅");
             result.put("data", null);
@@ -163,11 +130,6 @@ public class LibraryController {
         return result;
     }
 
-    /**
-     * 获取我的借阅记录
-     * @param request HTTP请求
-     * @return 借阅记录
-     */
     @GetMapping("/borrows")
     public HashMap<String, Object> getMyBorrows(
             HttpServletRequest request
@@ -177,7 +139,6 @@ public class LibraryController {
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
             
-            // 模拟借阅记录数据
             List<Map<String, Object>> borrows = new ArrayList<>();
             borrows.add(createBorrowData(1, "深入理解计算机系统", "2023-06-15", "2023-07-15", 0));
             borrows.add(createBorrowData(2, "代码整洁之道", "2023-06-20", "2023-07-20", 1));
@@ -215,7 +176,6 @@ public class LibraryController {
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
             
-            // 模拟续借操作
             result.put("code", 200);
             result.put("message", "续借成功，新的应还日期为30天后");
             result.put("data", null);
@@ -246,7 +206,6 @@ public class LibraryController {
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
             
-            // 模拟热门推荐数据
             List<Map<String, Object>> recommended = new ArrayList<>();
             recommended.add(createRecommendedBook(101, "深入理解计算机系统", true));
             recommended.add(createRecommendedBook(102, "代码整洁之道", false));
@@ -270,7 +229,6 @@ public class LibraryController {
         return result;
     }
 
-    // 辅助方法：创建图书数据
     private Map<String, Object> createBookData(int id, String title, String author, boolean available, int availableCopies) {
         Map<String, Object> book = new HashMap<>();
         book.put("id", id);
@@ -288,7 +246,6 @@ public class LibraryController {
         return book;
     }
 
-    // 辅助方法：创建借阅记录数据
     private Map<String, Object> createBorrowData(int id, String title, String borrowDate, String dueDate, int renewTimes) {
         Map<String, Object> borrow = new HashMap<>();
         borrow.put("id", id);
@@ -300,7 +257,6 @@ public class LibraryController {
         return borrow;
     }
 
-    // 辅助方法：创建推荐图书数据
     private Map<String, Object> createRecommendedBook(int id, String title, boolean isNew) {
         Map<String, Object> book = new HashMap<>();
         book.put("id", id);

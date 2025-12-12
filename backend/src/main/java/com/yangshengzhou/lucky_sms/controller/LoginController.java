@@ -81,8 +81,6 @@ public class LoginController {
         HashMap<String, Object> result = new HashMap<>();
 
         try {
-            // 参数已经通过@RequestParam获取
-
             if (phone == null || captcha == null) {
                 result.put("code", 400);
                 result.put("message", "手机号和验证码不能为空");

@@ -16,11 +16,8 @@ public class StatusServiceImpl implements StatusService {
     public StatusVO getStatusDate(Integer userId) {
         StatusVO statusVO = new StatusVO();
         BasicInfo basicInfo = studentMapper.selectBasicInfoById(userId);
-        // TODO 实际的历史成绩
-//        List<AcademicHistory> academicHistories = studentMapper.selectAcademicHistoryList(userId);
 
         statusVO.setBasicInfo(basicInfo);
-//        statusVO.setAcademicHistory(academicHistories);
 
         return statusVO;
     }

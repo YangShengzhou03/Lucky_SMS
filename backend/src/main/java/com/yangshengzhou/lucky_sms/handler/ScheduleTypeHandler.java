@@ -17,7 +17,6 @@ public class ScheduleTypeHandler extends BaseTypeHandler<List<CourseSelectionVO.
 
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, List<CourseSelectionVO.ScheduleVO> parameter, JdbcType jdbcType) throws SQLException {
-        // 这里不需要实现，因为只需要从数据库读取数据
     }
 
     @Override
@@ -42,17 +41,14 @@ public class ScheduleTypeHandler extends BaseTypeHandler<List<CourseSelectionVO.
             return scheduleList;
         }
         
-        // 解析schedule字符串，格式如："周一 8:00-9:40"
         String[] parts = scheduleStr.split(" ");
         if (parts.length >= 2) {
             CourseSelectionVO.ScheduleVO scheduleVO = new CourseSelectionVO.ScheduleVO();
             
-            // 解析星期几
             String dayStr = parts[0];
             int day = parseDay(dayStr);
             scheduleVO.setDay(day);
             
-            // 解析时间段
             String timeSlot = parts[1];
             int timeSlotNum = parseTimeSlot(timeSlot);
             scheduleVO.setTimeSlot(timeSlotNum);
@@ -71,7 +67,7 @@ public class ScheduleTypeHandler extends BaseTypeHandler<List<CourseSelectionVO.
         if (dayStr.contains("周五")) return 5;
         if (dayStr.contains("周六")) return 6;
         if (dayStr.contains("周日")) return 7;
-        return 1; // 默认周一
+        return 1;
     }
     
     private int parseTimeSlot(String timeSlot) {
@@ -80,6 +76,6 @@ public class ScheduleTypeHandler extends BaseTypeHandler<List<CourseSelectionVO.
         if (timeSlot.contains("14:00-15:40")) return 3;
         if (timeSlot.contains("16:00-17:40")) return 4;
         if (timeSlot.contains("19:00-20:40")) return 5;
-        return 1; // 默认第一节
+        return 1;
     }
 }
