@@ -51,7 +51,7 @@ public class ClassInfo extends BaseEntity {
     @TableField("status_id")
     private Integer statusId;
     
-    // 关联查询字段
+
     @TableField(exist = false)
     private Major major;
     

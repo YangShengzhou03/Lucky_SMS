@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.yangshengzhou.lucky_sms.mapper.student.CourseSelectionMapper">
+<mapper namespace="com.yangshengzhou.lucky_sms.mapper.student.StudentCourseSelectionMapper">
 
     <resultMap id="CourseSelectionResultMap" type="com.yangshengzhou.lucky_sms.vo.student.CourseSelectionVO">
         <id property="id" column="id"/>
@@ -29,7 +29,7 @@
             ta.classroom as location,
             c.credit as credits,
             ROUND((ta.current_students / ta.max_students) * 100) as capacityUsed,
-            c.course_type as category,
+            ct.type_name as category,
             ta.schedule,
             ta.max_students,
             ta.current_students,
@@ -40,6 +40,8 @@
         JOIN 
             courses c ON ta.course_id = c.course_id
         JOIN 
+            course_types ct ON c.course_type_id = ct.course_type_id
+        JOIN 
             teachers t ON ta.teacher_id = t.teacher_id
         JOIN 
             users u ON t.user_id = u.user_id
@@ -48,7 +50,44 @@
         WHERE 
             cs.student_id = #{userId}
             AND s.semester_name = #{semester}
-            AND cs.status = 'selected'
+            AND cs.status_id = 8
+        ORDER BY 
+            c.course_name
+    </select>
+
+    <!-- 分页获取已选课程列表 -->
+    <select id="getSelectedCoursesWithPagination" resultMap="CourseSelectionResultMap">
+        SELECT
+            ta.assignment_id as id,
+            c.course_name as name,
+            c.course_code as code,
+            u.username as teacher,
+            ta.schedule as time,
+            ta.classroom as location,
+            c.credit as credits,
+            ROUND((ta.current_students / ta.max_students) * 100) as capacityUsed,
+            ct.type_name as category,
+            ta.schedule,
+            ta.max_students,
+            ta.current_students,
+            s.semester_name as semester
+        FROM 
+            course_selections cs
+        JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
+        JOIN 
+            courses c ON ta.course_id = c.course_id
+        JOIN 
+            course_types ct ON c.course_type_id = ct.course_type_id
+        JOIN 
+            teachers t ON ta.teacher_id = t.teacher_id
+        JOIN 
+            users u ON t.user_id = u.user_id
+        JOIN 
+            semesters s ON ta.semester_id = s.semester_id
+        WHERE 
+            cs.student_id = #{userId}
+            AND s.semester_name = #{semester}
+            AND cs.status_id = 8
         ORDER BY 
             c.course_name
     </select>
@@ -58,9 +97,9 @@
         SELECT COUNT(*) > 0
         FROM course_selections cs
         INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
-        WHERE cs.student_id = #{studentId}
-        AND ta.assignment_id = #{assignmentId}
-        AND cs.status = 'SELECTED'
+        WHERE cs.student_id = #{userId}
+        AND ta.assignment_id = #{courseId}
+        AND cs.status_id = 8
     </select>
 
     <!-- 检查时间冲突 - 简化逻辑 -->
@@ -69,8 +108,8 @@
         FROM course_selections cs
         INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
         INNER JOIN courses c ON ta.course_id = c.course_id
-        WHERE cs.student_id = #{studentId}
-        AND cs.status = 'SELECTED'
+        WHERE cs.student_id = #{userId}
+        AND cs.status_id = 8
         AND ta.semester_id = #{semesterId}
         AND c.course_day = #{courseDay}
         AND c.course_time = #{courseTime}
@@ -83,7 +122,7 @@
         INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
         INNER JOIN courses c ON ta.course_id = c.course_id
         WHERE cs.student_id = #{studentId}
-        AND cs.status = 'SELECTED'
+        AND cs.status_id = 8
         AND ta.semester_id = #{semesterId}
         AND c.classroom = #{classroom}
         AND c.course_day = #{courseDay}
@@ -97,13 +136,13 @@
         JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
         JOIN courses c ON ta.course_id = c.course_id
         WHERE cs.student_id = #{userId}
-          AND cs.status = 'selected'
+          AND cs.status_id = 8
     </select>
 
     <!-- 添加选课记录 -->
     <insert id="addCourseSelection">
-        INSERT INTO course_selections (student_id, assignment_id, status, selection_time)
-        VALUES ((SELECT student_id FROM students WHERE user_id = #{userId}), #{courseId}, 'selected', NOW())
+        INSERT INTO course_selections (student_id, assignment_id, status_id, selection_time)
+        VALUES ((SELECT student_id FROM students WHERE user_id = #{userId}), #{courseId}, 8, NOW())
     </insert>
 
     <!-- 删除选课记录 -->
@@ -111,7 +150,7 @@
         DELETE FROM course_selections
         WHERE student_id = #{userId}
           AND assignment_id = #{courseId}
-          AND status = 'selected'
+          AND status_id = 8
     </delete>
 
 </mapper>

@@ -13,7 +13,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 import java.util.Map;
 
-public interface StudentMapper extends BaseMapper<StudentVO> {
+public interface StudentViewMapper extends BaseMapper<StudentVO> {
     StudentVO selectStudentById(Integer userId);
 
     List<Todos> selectTodosList(Integer userId);
@@ -42,5 +42,4 @@ public interface StudentMapper extends BaseMapper<StudentVO> {
                            @Param("birthDate") String birthDate,
                            @Param("emergencyContact") String emergencyContact,
                            @Param("emergencyPhone") String emergencyPhone);
-}
 }

@@ -53,7 +53,7 @@ public class CourseSelection extends BaseEntity {
     @TableField("evaluation_score")
     private BigDecimal evaluationScore;
     
-    // 关联查询字段
+
     @TableField(exist = false)
     private Student student;
     

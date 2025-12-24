@@ -2,8 +2,10 @@ package com.yangshengzhou.lucky_sms.service.student;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yangshengzhou.lucky_sms.pojo.CourseSelection;
-import com.yangshengzhou.lucky_sms.vo.course.CourseSelectionVO;
+import com.yangshengzhou.lucky_sms.vo.student.CourseSelectionVO;
 import com.yangshengzhou.lucky_sms.vo.student.CourseSelectionResultVO;
+import com.yangshengzhou.lucky_sms.vo.student.CourseSelectionStatisticsVO;
+import com.yangshengzhou.lucky_sms.vo.student.TimeConflictVO;
 
 import java.time.LocalDateTime;
 import java.util.List;

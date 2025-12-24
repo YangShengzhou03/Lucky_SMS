@@ -46,15 +46,20 @@ public class LoginRegisterController {
             @RequestParam String password
     ){
         HashMap<String, Object> loginResult = new HashMap<>();
-        LoginVO loginVO = userService.loginByPassword(phone, password);
         try {
+            LoginVO loginVO = userService.loginByPassword(phone, password);
+            // Debug logging
+            System.out.println("LoginVO: " + loginVO);
+            System.out.println("Role: " + loginVO.getRole());
+            System.out.println("Username: " + loginVO.getUsername());
+            
             loginResult.put("code", 200);
             loginResult.put("message", "登录成功");
             loginResult.put("data", loginVO);
         } catch (Exception e) {
             loginResult.put("code", 500);
             loginResult.put("message", e.getMessage());
-            loginResult.put("data", loginVO);
+            loginResult.put("data", null);
         }
         return loginResult;
     }

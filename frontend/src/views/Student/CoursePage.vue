@@ -202,10 +202,10 @@ import {
 import { ElMessage, ElMessageBox, ElCheckbox } from 'element-plus'
 import { getAvailableCoursesWithPagination, getSelectedCoursesWithPagination, selectCourse as apiSelectCourse, dropCourse } from '@/api/student'
 
-const currentSemester = ref('2023-2024-2')
+const currentSemester = ref(1)
 const semesters = ref([
-  { value: '2023-2024-2', label: '2023-2024学年第二学期' },
-  { value: '2023-2024-1', label: '2023-2024学年第一学期' }
+  { value: 1, label: '2023-2024学年第二学期' },
+  { value: 2, label: '2023-2024学年第一学期' }
 ])
 
 const hoveredStat = ref(null)
@@ -529,7 +529,7 @@ const batchDropCourses = async () => {
 const loadAvailableCourses = async () => {
   try {
     const response = await getAvailableCoursesWithPagination({
-      semester: currentSemester.value,
+      semesterId: currentSemester.value,
       page: currentPage.value,
       size: pageSize.value
     })
@@ -565,7 +565,7 @@ const loadAvailableCourses = async () => {
 const loadSelectedCourses = async () => {
   try {
     const response = await getSelectedCoursesWithPagination({
-      semester: currentSemester.value,
+      semesterId: currentSemester.value,
       page: 1, // 已选课程可以默认只加载第一页
       size: 50 // 已选课程通常不会太多，可以设置一个较大的值
     })

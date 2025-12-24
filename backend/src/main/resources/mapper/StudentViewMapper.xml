@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.yangshengzhou.lucky_sms.mapper.student.StudentMapper">
+<mapper namespace="com.yangshengzhou.lucky_sms.mapper.student.StudentViewMapper">
     <!-- 1. 定义显式映射规则：column 对应 SQL 列名，property 对应 StudentVO 属性名 -->
     <resultMap id="StudentVOMap" type="com.yangshengzhou.lucky_sms.vo.student.StudentVO">
         <result column="username" property="username"/>
@@ -53,7 +53,7 @@
                 SELECT COUNT(*)
                 FROM course_selections cs
                          INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
-                WHERE cs.student_id = s.student_id AND cs.`STATUS` = 'SELECTED'
+                WHERE cs.student_id = s.student_id AND cs.status_id = 1
             ) AS course_count
         FROM
             users u
@@ -121,14 +121,14 @@
     <!-- 选择出BasicInfo数据 -->
     <select id="selectBasicInfoById" parameterType="Integer" resultMap="BasicInfoMap">
         SELECT
-            status_name,
+            st.status_name,
             3.7 AS gpa,
             127 AS total_credits,
             enrollment_date,
             DATE_ADD(enrollment_date, INTERVAL students.education_years YEAR) AS expectedGraduationDate,
             78 AS attendanceRate
-        FROM students
-                 INNER JOIN student_statuses ON students.status_id = student_statuses.status_id
+        FROM students st
+        INNER JOIN status_types st ON students.status_id = st.status_id
         WHERE user_id = #{userId}
     </select>
 
@@ -191,10 +191,10 @@
             cg.grade_id AS id,
             c.course_name AS courseName,
             c.course_code AS courseCode,
-            CASE c.course_type 
+            CASE ct.type_code 
                 WHEN 'COMPULSORY' THEN '必修课'
                 WHEN 'ELECTIVE' THEN '选修课'
-                ELSE c.course_type
+                ELSE ct.type_name
             END AS courseType,
             c.credit AS credits,
             COALESCE(cg.final_grade, 0) AS score,
@@ -206,11 +206,12 @@
             INNER JOIN course_selections cs ON st.student_id = cs.student_id
             INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
             INNER JOIN courses c ON ta.course_id = c.course_id
+            INNER JOIN course_types ct ON c.course_type_id = ct.course_type_id
             INNER JOIN semesters s ON ta.semester_id = s.semester_id
             LEFT JOIN course_grades cg ON st.student_id = cg.student_id AND ta.assignment_id = cg.assignment_id
         WHERE 
             u.user_id = #{userId}
-            AND cs.status = 'COMPLETED'
+            AND cs.status_id = 1
         ORDER BY s.academic_year DESC, s.semester_name DESC, c.course_name
     </select>
 
@@ -251,7 +252,7 @@
             INNER JOIN semesters s ON ta.semester_id = s.semester_id
         WHERE 
             u.user_id = #{userId}
-            AND cs.status = 'COMPLETED'
+            AND cs.status_id = 1
         GROUP BY s.semester_id, s.academic_year, s.semester_name
         ORDER BY s.academic_year DESC, s.semester_name DESC
     </select>
@@ -262,10 +263,10 @@
             cg.grade_id,
             c.course_name,
             c.course_code,
-            CASE c.course_type 
+            CASE ct.type_code 
                 WHEN 'COMPULSORY' THEN '必修课'
                 WHEN 'ELECTIVE' THEN '选修课'
-                ELSE c.course_type
+                ELSE ct.type_name
             END AS course_type,
             c.credit,
             COALESCE(cg.final_grade, 0) AS final_grade,
@@ -320,13 +321,14 @@
             INNER JOIN course_selections cs ON st.student_id = cs.student_id
             INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
             INNER JOIN courses c ON ta.course_id = c.course_id
+            INNER JOIN course_types ct ON c.course_type_id = ct.course_type_id
             INNER JOIN semesters s ON ta.semester_id = s.semester_id
             LEFT JOIN course_grades cg ON st.student_id = cg.student_id AND ta.assignment_id = cg.assignment_id
         WHERE 
             u.user_id = #{userId}
-            AND cs.status = 'COMPLETED'
+            AND cs.status_id = 1
             AND CONCAT(s.academic_year, '-', s.semester_name) = #{semester}
-        GROUP BY cg.grade_id, c.course_id, c.course_name, c.course_code, c.course_type, c.credit, 
+        GROUP BY cg.grade_id, c.course_id, c.course_name, c.course_code, ct.type_name, c.credit, 
                  s.semester_id, s.academic_year, s.semester_name, st.student_id, st.gpa, st.class_rank, st.total_credits
     </select>
 
@@ -336,11 +338,7 @@
             u.username,
             u.email,
             u.phone,
-            CASE u.gender
-                WHEN 'M' THEN '男'
-                WHEN 'F' THEN '女'
-                ELSE '其他'
-            END AS gender,
+            g.gender_name AS gender,
             u.birth_date,
             u.avatar_url,
             s.student_no,
@@ -362,7 +360,8 @@
             INNER JOIN departments d ON s.department_id = d.department_id
             INNER JOIN majors m ON s.major_id = m.major_id
             INNER JOIN class_info ci ON s.class_id = ci.class_id
-            INNER JOIN student_statuses ss ON s.status_id = ss.status_id
+            LEFT JOIN genders g ON u.gender_id = g.gender_id
+            INNER JOIN status_types ss ON s.status_id = ss.status_id
             LEFT JOIN user_addresses ua ON u.user_id = ua.user_id
         WHERE
             u.user_id = #{userId}
@@ -374,10 +373,10 @@
             cg.grade_id,
             c.course_name,
             c.course_code,
-            CASE c.course_type 
+            CASE ct.type_code 
                 WHEN 'COMPULSORY' THEN '必修课'
                 WHEN 'ELECTIVE' THEN '选修课'
-                ELSE c.course_type
+                ELSE ct.type_name
             END AS course_type,
             c.credit,
             COALESCE(cg.final_grade, 0) AS final_grade,
@@ -432,12 +431,13 @@
             INNER JOIN course_selections cs ON st.student_id = cs.student_id
             INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
             INNER JOIN courses c ON ta.course_id = c.course_id
+            INNER JOIN course_types ct ON c.course_type_id = ct.course_type_id
             INNER JOIN semesters s ON ta.semester_id = s.semester_id
             LEFT JOIN course_grades cg ON st.student_id = cg.student_id AND ta.assignment_id = cg.assignment_id
         WHERE 
             u.user_id = #{userId}
-            AND cs.status = 'COMPLETED'
-        GROUP BY cg.grade_id, c.course_id, c.course_name, c.course_code, c.course_type, c.credit, 
+            AND cs.status_id = 1
+        GROUP BY cg.grade_id, c.course_id, c.course_name, c.course_code, ct.type_name, c.credit, 
                  s.semester_id, s.academic_year, s.semester_name, st.student_id, st.gpa, st.class_rank, st.total_credits
         LIMIT #{offset}, #{size}
     </select>
@@ -448,10 +448,10 @@
             cg.grade_id,
             c.course_name,
             c.course_code,
-            CASE c.course_type 
+            CASE ct.type_code 
                 WHEN 'COMPULSORY' THEN '必修课'
                 WHEN 'ELECTIVE' THEN '选修课'
-                ELSE c.course_type
+                ELSE ct.type_name
             END AS course_type,
             c.credit,
             COALESCE(cg.final_grade, 0) AS final_grade,
@@ -506,13 +506,14 @@
             INNER JOIN course_selections cs ON st.student_id = cs.student_id
             INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
             INNER JOIN courses c ON ta.course_id = c.course_id
+            INNER JOIN course_types ct ON c.course_type_id = ct.course_type_id
             INNER JOIN semesters s ON ta.semester_id = s.semester_id
             LEFT JOIN course_grades cg ON st.student_id = cg.student_id AND ta.assignment_id = cg.assignment_id
         WHERE 
             u.user_id = #{userId}
-            AND cs.status = 'COMPLETED'
+            AND cs.status_id = 1
             AND CONCAT(s.academic_year, '-', s.semester_name) = #{semester}
-        GROUP BY cg.grade_id, c.course_id, c.course_name, c.course_code, c.course_type, c.credit, 
+        GROUP BY cg.grade_id, c.course_id, c.course_name, c.course_code, ct.type_name, c.credit, 
                  s.semester_id, s.academic_year, s.semester_name, st.student_id, st.gpa, st.class_rank, st.total_credits
         LIMIT #{offset}, #{size}
     </select>
@@ -532,10 +533,10 @@
             u.username = #{username},
             u.email = #{email},
             u.phone = #{phone},
-            u.gender = CASE 
-                WHEN #{gender} = '男' THEN 'M'
-                WHEN #{gender} = '女' THEN 'F'
-                ELSE #{gender}
+            u.gender_id = CASE 
+                WHEN #{gender} = '男' THEN 1
+                WHEN #{gender} = '女' THEN 2
+                ELSE 3
             END,
             u.birth_date = #{birthDate},
             s.emergency_contact = #{emergencyContact},

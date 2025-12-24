@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * 课程Mapper接口
  */
-public interface CourseMapper extends BaseMapper<Course> {
+public interface StudentCourseMapper extends BaseMapper<Course> {
     /**
      * 获取可选课程列表
      * @param userId 学生ID

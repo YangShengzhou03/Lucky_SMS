@@ -1,6 +1,6 @@
 package com.yangshengzhou.lucky_sms.service.student.impl;
 
-import com.yangshengzhou.lucky_sms.mapper.student.StudentMapper;
+import com.yangshengzhou.lucky_sms.mapper.student.StudentViewMapper;
 import com.yangshengzhou.lucky_sms.service.student.GradeService;
 import com.yangshengzhou.lucky_sms.vo.student.GradesVO;
 import org.springframework.stereotype.Service;
@@ -13,10 +13,10 @@ import java.util.Map;
 public class GradeServiceImpl implements GradeService {
 
     @Resource
-    private StudentMapper studentMapper;
+    private StudentViewMapper studentViewMapper;
 
     public GradesVO getGradesData(Integer userId) {
-        GradesVO gradesVO = studentMapper.getGradesData(userId);
+        GradesVO gradesVO = studentViewMapper.getGradesData(userId);
         if (gradesVO == null) {
             gradesVO = new GradesVO();
         }
@@ -24,7 +24,7 @@ public class GradeServiceImpl implements GradeService {
     }
 
     public GradesVO getGradesDataBySemester(Integer userId, String semester) {
-        GradesVO gradesVO = studentMapper.getGradesDataBySemester(userId, semester);
+        GradesVO gradesVO = studentViewMapper.getGradesDataBySemester(userId, semester);
         if (gradesVO == null) {
             gradesVO = new GradesVO();
         }
@@ -37,7 +37,7 @@ public class GradeServiceImpl implements GradeService {
         params.put("page", page);
         params.put("size", size);
         params.put("offset", (page - 1) * size);
-        GradesVO gradesVO = studentMapper.getGradesDataWithPagination(params);
+        GradesVO gradesVO = studentViewMapper.getGradesDataWithPagination(params);
         if (gradesVO == null) {
             gradesVO = new GradesVO();
             gradesVO.setPage(page);
@@ -54,7 +54,7 @@ public class GradeServiceImpl implements GradeService {
         params.put("page", page);
         params.put("size", size);
         params.put("offset", (page - 1) * size);
-        GradesVO gradesVO = studentMapper.getGradesDataBySemesterWithPagination(params);
+        GradesVO gradesVO = studentViewMapper.getGradesDataBySemesterWithPagination(params);
         if (gradesVO == null) {
             gradesVO = new GradesVO();
             gradesVO.setPage(page);

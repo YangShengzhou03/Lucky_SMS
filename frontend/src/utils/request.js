@@ -3,7 +3,7 @@ import router from '@/router';
 import { ElMessage } from 'element-plus';
 
 const service = axios.create({
-  baseURL: process.env.VUE_APP_BASE_API || 'http://localhost:8080/',
+  baseURL: process.env.VUE_APP_BASE_API || 'http://localhost:8081/api/',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json;charset=utf-8'

@@ -1,5 +1,7 @@
 package com.yangshengzhou.lucky_sms.vo.student;
 
+import com.yangshengzhou.lucky_sms.vo.student.CourseSelectionVO;
+
 public class CourseSelectionResultVO {
     private Boolean success;
     private String message;

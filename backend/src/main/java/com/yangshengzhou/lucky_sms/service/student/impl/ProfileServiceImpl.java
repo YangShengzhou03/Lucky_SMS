@@ -1,6 +1,6 @@
 package com.yangshengzhou.lucky_sms.service.student.impl;
 
-import com.yangshengzhou.lucky_sms.mapper.student.StudentMapper;
+import com.yangshengzhou.lucky_sms.mapper.student.StudentViewMapper;
 import com.yangshengzhou.lucky_sms.service.student.ProfileService;
 import com.yangshengzhou.lucky_sms.vo.student.StudentProfileVO;
 import com.yangshengzhou.lucky_sms.vo.student.UpdateStudentProfileRequestVO;
@@ -12,11 +12,11 @@ import jakarta.annotation.Resource;
 public class ProfileServiceImpl implements ProfileService {
     
     @Resource
-    private StudentMapper studentMapper;
+    private StudentViewMapper studentViewMapper;
     
     @Override
     public StudentProfileVO getStudentProfile(Integer userId) {
-        return studentMapper.selectStudentProfileById(userId);
+        return studentViewMapper.selectStudentProfileById(userId);
     }
     
     @Override
@@ -28,12 +28,15 @@ public class ProfileServiceImpl implements ProfileService {
                 birthDate = sdf.format(requestVO.getBirthDate());
             }
             
-            int result = studentMapper.updateStudentProfile(
+
+            String gender = requestVO.getGender();
+            
+            int result = studentViewMapper.updateStudentProfile(
                 userId,
                 requestVO.getUsername(),
                 requestVO.getEmail(),
                 requestVO.getPhone(),
-                requestVO.getGender(),
+                gender,
                 birthDate,
                 requestVO.getEmergencyContact(),
                 requestVO.getEmergencyPhone()

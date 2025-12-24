@@ -1,13 +1,14 @@
 package com.yangshengzhou.lucky_sms.controller.student;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yangshengzhou.lucky_sms.service.student.CourseSelectionService;
 import com.yangshengzhou.lucky_sms.service.student.ProfileService;
 import com.yangshengzhou.lucky_sms.service.student.impl.GradeServiceImpl;
 import com.yangshengzhou.lucky_sms.service.student.impl.HomeServiceImpl;
 import com.yangshengzhou.lucky_sms.service.student.impl.StatusServiceImpl;
 import com.yangshengzhou.lucky_sms.utils.JwtUtil;
-import com.yangshengzhou.lucky_sms.vo.student.CourseSelectionResultVO;
 import com.yangshengzhou.lucky_sms.vo.student.CourseSelectionVO;
+import com.yangshengzhou.lucky_sms.vo.student.CourseSelectionResultVO;
 import com.yangshengzhou.lucky_sms.vo.student.GradesVO;
 import com.yangshengzhou.lucky_sms.vo.student.HomeVO;
 import com.yangshengzhou.lucky_sms.vo.student.StatusVO;
@@ -119,14 +120,14 @@ public class StudentController {
 
     @GetMapping("/courses/available")
     public HashMap<String, Object> getAvailableCourses(
-            @RequestParam(defaultValue = "2023-2024-2") String semester,
+            @RequestParam(defaultValue = "1") Integer semesterId,
             HttpServletRequest request
     ) {
         HashMap<String, Object> result = new HashMap<>();
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
-            List<CourseSelectionVO> courses = courseSelectionService.getAvailableCourses(userId, semester);
+            List<CourseSelectionVO> courses = courseSelectionService.getAvailableCourses(userId, semesterId);
 
             result.put("code", 200);
             result.put("message", "请求成功");
@@ -146,7 +147,7 @@ public class StudentController {
     
     @GetMapping("/courses/available/pagination")
     public HashMap<String, Object> getAvailableCoursesWithPagination(
-            @RequestParam(defaultValue = "2023-2024-2") String semester,
+            @RequestParam(defaultValue = "1") Integer semesterId,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             HttpServletRequest request
@@ -155,10 +156,10 @@ public class StudentController {
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
-            Object courses = courseSelectionService.getAvailableCoursesWithPagination(userId, semester, page, size);
+            Page<CourseSelectionVO> courses = courseSelectionService.getAvailableCoursesWithPagination(userId, semesterId, page, size);
 
             result.put("code", 200);
-            result.put("message", "请求成功");
+            result.put("message", "获取课程列表成功");
             result.put("data", courses);
         } catch (ResponseStatusException e) {
             result.put("code", e.getStatusCode().value());
@@ -175,14 +176,14 @@ public class StudentController {
 
     @GetMapping("/courses/selected")
     public HashMap<String, Object> getSelectedCourses(
-            @RequestParam(defaultValue = "2023-2024-2") String semester,
+            @RequestParam(defaultValue = "1") Integer semesterId,
             HttpServletRequest request
     ) {
         HashMap<String, Object> result = new HashMap<>();
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
-            List<CourseSelectionVO> courses = courseSelectionService.getSelectedCourses(userId, semester);
+            List<CourseSelectionVO> courses = courseSelectionService.getSelectedCourses(userId, semesterId);
 
             result.put("code", 200);
             result.put("message", "请求成功");
@@ -202,7 +203,7 @@ public class StudentController {
     
     @GetMapping("/courses/selected/pagination")
     public HashMap<String, Object> getSelectedCoursesWithPagination(
-            @RequestParam(defaultValue = "2023-2024-2") String semester,
+            @RequestParam(defaultValue = "1") Integer semesterId,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             HttpServletRequest request
@@ -211,7 +212,7 @@ public class StudentController {
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
-            Object courses = courseSelectionService.getSelectedCoursesWithPagination(userId, semester, page, size);
+            Page<CourseSelectionVO> courses = courseSelectionService.getSelectedCoursesWithPagination(userId, semesterId, page, size);
 
             result.put("code", 200);
             result.put("message", "请求成功");
@@ -231,24 +232,19 @@ public class StudentController {
 
     @PostMapping("/courses/select")
     public HashMap<String, Object> selectCourse(
-            @RequestParam Integer courseId,
+            @RequestParam Integer assignmentId,
+            @RequestParam(defaultValue = "1") Integer selectionTypeId,
             HttpServletRequest request
     ) {
         HashMap<String, Object> result = new HashMap<>();
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
-            boolean success = courseSelectionService.selectCourse(userId, courseId);
+            CourseSelectionResultVO selectionResult = courseSelectionService.selectCourse(userId, assignmentId, selectionTypeId);
 
-            if (success) {
-                result.put("code", 200);
-                result.put("message", "选课成功");
-                result.put("data", null);
-            } else {
-                result.put("code", 400);
-                result.put("message", "选课失败");
-                result.put("data", null);
-            }
+            result.put("code", 200);
+            result.put("message", "选课成功");
+            result.put("data", selectionResult);
         } catch (ResponseStatusException e) {
             result.put("code", e.getStatusCode().value());
             result.put("message", e.getReason());
@@ -264,24 +260,19 @@ public class StudentController {
 
     @PostMapping("/courses/drop")
     public HashMap<String, Object> dropCourse(
-            @RequestParam Integer courseId,
+            @RequestParam Integer selectionId,
+            @RequestParam(defaultValue = "个人原因") String dropReason,
             HttpServletRequest request
     ) {
         HashMap<String, Object> result = new HashMap<>();
 
         try {
             Integer userId = jwtUtil.getUidByRequest(request);
-            boolean success = courseSelectionService.dropCourse(userId, courseId);
+            CourseSelectionResultVO dropResult = courseSelectionService.dropCourse(userId, selectionId, dropReason);
 
-            if (success) {
-                result.put("code", 200);
-                result.put("message", "退课成功");
-                result.put("data", null);
-            } else {
-                result.put("code", 400);
-                result.put("message", "退课失败");
-                result.put("data", null);
-            }
+            result.put("code", 200);
+            result.put("message", "退课成功");
+            result.put("data", dropResult);
         } catch (ResponseStatusException e) {
             result.put("code", e.getStatusCode().value());
             result.put("message", e.getReason());

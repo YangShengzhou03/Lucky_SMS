@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.yangshengzhou.lucky_sms.mapper.student.CourseMapper">
+<mapper namespace="com.yangshengzhou.lucky_sms.mapper.student.StudentCourseMapper">
 
     <resultMap id="CourseSelectionResultMap" type="com.yangshengzhou.lucky_sms.vo.student.CourseSelectionVO">
         <id property="id" column="id"/>
@@ -28,7 +28,7 @@
             ta.classroom as location,
             c.credit as credits,
             ROUND((ta.current_students / ta.max_students) * 100) as capacityUsed,
-            c.course_type as category,
+            ct.type_name as category,
             ta.schedule,
             ta.max_students,
             ta.current_students,
@@ -37,6 +37,8 @@
         teaching_assignments ta
         JOIN
         courses c ON ta.course_id = c.course_id
+        JOIN
+        course_types ct ON c.course_type_id = ct.course_type_id
         JOIN
         teachers t ON ta.teacher_id = t.teacher_id
         JOIN
@@ -66,7 +68,7 @@
             ta.classroom as location,
             c.credit as credits,
             ROUND((ta.current_students / ta.max_students) * 100) as capacityUsed,
-            c.course_type as category,
+            ct.type_name as category,
             ta.schedule,
             ta.max_students,
             ta.current_students,
@@ -75,6 +77,8 @@
         teaching_assignments ta
         JOIN
         courses c ON ta.course_id = c.course_id
+        JOIN
+        course_types ct ON c.course_type_id = ct.course_type_id
         JOIN
         teachers t ON ta.teacher_id = t.teacher_id
         JOIN

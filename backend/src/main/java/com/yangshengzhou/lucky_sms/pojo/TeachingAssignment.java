@@ -50,7 +50,7 @@ public class TeachingAssignment extends BaseEntity {
     private String description;
     private String requirements;
     
-    // 关联查询字段
+
     @TableField(exist = false)
     private Course course;
     

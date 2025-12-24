@@ -53,10 +53,10 @@
   "message": "登录成功",
   "data": {
     "token": "string",
-    "userId": "string",
+    "uid": "number",
     "username": "string",
-    "role": "string",  // ADMIN, STUDENT, TEACHER
-    "studentId": "string"
+    "phone": "string",
+    "role": "string"  // ADMIN, STUDENT, TEACHER
   }
 }
 ```
@@ -98,10 +98,10 @@
   "message": "登录成功",
   "data": {
     "token": "string",
-    "userId": "string",
+    "uid": "number",
     "username": "string",
-    "role": "string",  // ADMIN, STUDENT, TEACHER
-    "studentId": "string"
+    "phone": "string",
+    "role": "string"  // ADMIN, STUDENT, TEACHER
   }
 }
 ```
@@ -343,7 +343,20 @@
 
 **响应示例**: 同2.2学生成绩查询响应格式
 
-### 2.2.2 按学期查询成绩（分页）
+### 2.2.3 学生成绩查询（分页）
+
+**接口地址**: `GET /student/grades/pagination`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| page | number | 否 | 页码，默认1 |
+| size | number | 否 | 每页数量，默认10 |
+
+**响应示例**: 同2.2学生成绩查询响应格式
+
+### 2.2.4 按学期查询成绩（分页）
 
 **接口地址**: `GET /student/grades/{semester}/pagination`
 
@@ -463,7 +476,7 @@
 
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| semester | string | 否 | 学期，默认 "2023-2024-2" |
+| semesterId | number | 否 | 学期ID，默认 1 |
 
 **响应示例**:
 
@@ -496,7 +509,7 @@
 
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| semester | string | 否 | 学期，默认 "2023-2024-2" |
+| semesterId | number | 否 | 学期ID，默认 1 |
 | page | number | 否 | 页码，默认1 |
 | size | number | 否 | 每页数量，默认10 |
 
@@ -510,7 +523,7 @@
 
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| semester | string | 否 | 学期，默认 "2023-2024-2" |
+| semesterId | number | 否 | 学期ID，默认 1 |
 
 **响应示例**:
 
@@ -540,7 +553,7 @@
 
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| semester | string | 否 | 学期，默认 "2023-2024-2" |
+| semesterId | number | 否 | 学期ID，默认 1 |
 | page | number | 否 | 页码，默认1 |
 | size | number | 否 | 每页数量，默认10 |
 
@@ -554,7 +567,8 @@
 
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| courseId | number | 是 | 课程ID |
+| assignmentId | number | 是 | 教学任务ID |
+| selectionTypeId | number | 否 | 选课类型ID，默认 1 |
 
 **响应示例**:
 
@@ -562,7 +576,11 @@
 {
   "code": 200,
   "message": "选课成功",
-  "data": null
+  "data": {
+    "selectionId": number,
+    "status": "string",
+    "message": "string"
+  }
 }
 ```
 
@@ -572,11 +590,10 @@
 
 **请求参数**:
 
-```json
-{
-  "courseId": number  // 课程ID
-}
-```
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| selectionId | number | 是 | 选课记录ID |
+| dropReason | string | 否 | 退课原因，默认 "个人原因" |
 
 **响应示例**:
 
@@ -584,11 +601,60 @@
 {
   "code": 200,
   "message": "退课成功",
+  "data": {
+    "selectionId": number,
+    "status": "string",
+    "message": "string"
+  }
+}
+```
+
+### 2.9 获取学生个人信息
+
+**接口地址**: `GET /student/settings`
+
+**请求参数**: 无
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "message": "获取个人信息成功",
+  "data": {
+    "studentId": "string",
+    "username": "string",
+    "realName": "string",
+    "phone": "string",
+    "email": "string",
+    "address": "string",
+    "avatar": "string",
+    "gender": "string",
+    "birthday": "string",
+    "className": "string",
+    "major": "string",
+    "department": "string"
+  }
+}
+```
+
+**错误响应**:
+
+```json
+{
+  "code": 401,
+  "message": "用户未登录",
   "data": null
 }
 ```
 
-### 2.9 更新个人信息
+```json
+{
+  "code": 500,
+  "message": "获取个人信息失败",
+  "data": null
+}
+```
 
 **接口地址**: `POST /student/setting/info`
 
@@ -986,17 +1052,53 @@
     {
       "studentId": "string",
       "studentName": "string",
-      "attendance": number,
-      "midterm": number,
-      "final": number,
-      "total": number,
+      "attendance": "number",
+      "midterm": "number",
+      "final": "number",
+      "total": "number",
       "letterGrade": "string"
     }
   ]
 }
 ```
 
-### 3.6 查询教师课表
+### 3.6 录入学生成绩
+
+**接口地址**: `POST /teacher/grades`
+
+**请求参数**:
+
+```json
+{
+  "studentId": "string",      // 学生ID
+  "courseId": "number",       // 课程ID
+  "usualScore": "number",     // 平时成绩
+  "examScore": "number",      // 考试成绩
+  "totalScore": "number",     // 总成绩
+  "semester": "string"        // 学期
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "message": "请求成功",
+  "data": null
+}
+```
+
+**错误响应**:
+
+```json
+{
+  "code": 400,
+  "message": "参数错误",
+  "data": null
+}
+
+### 3.7 查询教师课表
 
 **接口地址**: `GET /teacher/schedule`
 
@@ -1039,7 +1141,7 @@
 }
 ```
 
-### 3.7 查询教师公告
+### 3.8 查询教师公告
 
 **接口地址**: `GET /teacher/announcements`
 
@@ -1076,7 +1178,7 @@
 }
 ```
 
-### 3.8 查询教师任务
+### 3.9 查询教师任务
 
 **接口地址**: `GET /teacher/tasks`
 
@@ -1112,7 +1214,7 @@
 }
 ```
 
-### 3.9 更新任务状态
+### 3.10 更新任务状态
 
 **接口地址**: `PUT /teacher/task/{taskId}`
 
@@ -1143,7 +1245,7 @@
 }
 ```
 
-### 3.10 查询教师个人信息
+### 3.11 查询教师个人信息
 
 **接口地址**: `GET /teacher/profile`
 
@@ -1173,7 +1275,7 @@
 }
 ```
 
-### 3.11 更新教师个人信息
+### 3.12 更新教师个人信息
 
 **接口地址**: `PUT /teacher/profile`
 
@@ -1230,7 +1332,7 @@
 }
 ```
 
-### 3.12 查询教师消息
+### 3.13 查询教师消息
 
 **接口地址**: `GET /teacher/messages`
 
@@ -1265,7 +1367,7 @@
 }
 ```
 
-### 3.13 发送消息
+### 3.15 发送消息
 
 **接口地址**: `POST /teacher/messages`
 
@@ -1296,7 +1398,137 @@
 }
 ```
 
-### 3.14 标记消息已读
+### 3.16 标记消息已读
+
+**接口地址**: `GET /teacher/profile`
+
+**请求参数**: 无
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "message": "请求成功",
+  "data": {
+    "id": "string",
+    "teacherId": "string",
+    "name": "string",
+    "gender": "string",
+    "birthDate": "string",
+    "title": "string",
+    "department": "string",
+    "email": "string",
+    "phone": "string",
+    "education": "string",
+    "hireDate": "string"
+  }
+}
+```
+
+### 3.16 更新教师个人信息
+
+**接口地址**: `POST /teacher/profile`
+
+**请求参数**:
+
+```json
+{
+  "phone": "string",      // 手机号
+  "email": "string",      // 邮箱
+  "office": "string",     // 办公室
+  "title": "string"       // 职称
+}
+```
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "message": "请求成功",
+  "data": null
+}
+```
+
+**错误响应**:
+
+```json
+{
+  "code": 400,
+  "message": "参数错误",
+  "data": null
+}
+```
+
+### 3.17 查询教师学生列表
+
+**接口地址**: `GET /teacher/students`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| page | number | 否 | 页码，默认1 |
+| size | number | 否 | 每页数量，默认10 |
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "message": "请求成功",
+  "data": {
+    "records": [
+      {
+        "id": "number",
+        "studentId": "string",
+        "name": "string",
+        "major": "string",
+        "className": "string",
+        "contact": "string"
+      }
+    ],
+    "total": "number",
+    "size": "number",
+    "current": "number",
+    "pages": "number"
+  }
+}
+```
+
+### 3.18 查询教师消息列表
+
+**接口地址**: `GET /teacher/message`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| page | number | 否 | 页码，默认1 |
+| size | number | 否 | 每页数量，默认10 |
+
+**响应示例**:
+
+```json
+{
+  "code": 200,
+  "message": "请求成功",
+  "data": {
+    "messages": [
+      {
+        "id": "number",
+        "title": "string",
+        "content": "string",
+        "date": "string",
+        "isRead": "boolean"
+      }
+    ],
+    "total": "number",
+    "unreadCount": "number"
+  }
+}
+```
 
 **接口地址**: `POST /teacher/messages/{messageId}/read`
 

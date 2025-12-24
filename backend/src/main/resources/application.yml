@@ -56,6 +56,9 @@ mybatis-plus:
       logic-delete-field: deleted
       logic-not-delete-value: 0
       logic-delete-value: 1
+      db-type: mysql
+    enable-sql-runner: true
+    banner: false
 
 # RocketMQ配置
 rocketmq:

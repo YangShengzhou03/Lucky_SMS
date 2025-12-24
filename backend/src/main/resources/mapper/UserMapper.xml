@@ -6,20 +6,20 @@
     <!-- 通过手机号返回用户 -->
     <select id="loginByPhone" resultType="com.yangshengzhou.lucky_sms.vo.user.LoginVO">
         SELECT
-            u.id AS userId,
+            u.user_id AS uid,
             u.username,
             u.phone,
-            r.role_name AS roleName
+            ut.type_code AS role
         FROM users u
-                 LEFT JOIN user_roles ur ON u.id = ur.user_id
-                 LEFT JOIN roles r ON ur.role_id = r.role_id
+        LEFT JOIN user_types ut ON u.user_type_id = ut.user_type_id
         WHERE u.phone = #{phone}
-          AND u.status = 'ACTIVE'
+          AND u.status_id = 1
     </select>
 
     <!-- 通过手机号注册 -->
     <insert id="registerByPhone">
-        INSERT INTO users (phone, password, username) VALUES (#{phone}, #{password}, #{username})
+        INSERT INTO users (phone, username, password, user_type_id, status_id) 
+        VALUES (#{phone}, CONCAT('user_', #{phone}), '123456', 3, 1)
     </insert>
 
     <!-- 通过手机号重设密码 -->
@@ -32,16 +32,15 @@
     <!-- 通过手机号密码登录 -->
     <select id="loginByPassword" resultType="com.yangshengzhou.lucky_sms.vo.user.LoginVO">
         SELECT
-            u.id AS userId,
+            u.user_id AS uid,
             u.username,
             u.phone,
-            r.role_name AS roleName
+            ut.type_code AS role
         FROM users u
-                 LEFT JOIN user_roles ur ON u.id = ur.user_id
-                 LEFT JOIN roles r ON ur.role_id = r.role_id
+        LEFT JOIN user_types ut ON u.user_type_id = ut.user_type_id
         WHERE u.phone = #{phone}
           AND u.password = #{password}
-          AND u.status = 'ACTIVE'
+          AND u.status_id = 1
     </select>
 
 </mapper>

@@ -7,9 +7,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * 课程选择视图对象
- */
 @Data
 public class CourseSelectionVO {
     
@@ -34,36 +31,30 @@ public class CourseSelectionVO {
     private BigDecimal attendanceRate;
     private BigDecimal evaluationScore;
     
-    // 课程信息
     private Integer courseId;
     private String courseCode;
     private String courseName;
     private BigDecimal credit;
     private String courseDescription;
     
-    // 教师信息
     private Integer teacherId;
     private String teacherNo;
     private String teacherName;
     private String teacherPhone;
     private String teacherEmail;
     
-    // 学期信息
     private Integer semesterId;
     private String semesterName;
     private String academicYear;
     
-    // 教学安排信息
     private String classTime;
     private String classroom;
     private Integer maxStudents;
     private Integer currentStudents;
     
-    // 成绩信息
     private String gradeLevel;
     private BigDecimal gpaGrade;
     
-    // 时间信息
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
     

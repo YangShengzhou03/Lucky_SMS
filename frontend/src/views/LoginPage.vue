@@ -13,7 +13,6 @@
               <p class="login-subtitle">{{ isResetMode ? '重置您的密码' : 'Lucky SMS学生管理系统' }}</p>
             </div>
 
-            <!-- 手机号登录/注册表单 -->
             <el-form v-if="loginMode === 'phone'" ref="phoneFormRef" :model="phoneForm" :rules="phoneRules"
               class="login-form" @keyup.enter="isResetMode ? handleReset() : handlePhoneLogin()">
               <el-form-item prop="phone" class="form-item">
@@ -32,13 +31,11 @@
                 </div>
               </el-form-item>
 
-              <!-- 重置密码显示密码输入框 -->
               <el-form-item prop="password" class="form-item" v-if="isResetMode">
                 <el-input v-model="phoneForm.newPassword" placeholder="设置新密码" size="large" :prefix-icon="Lock" clearable
                   show-password class="custom-input" />
               </el-form-item>
 
-              <!-- 登录时账密登录选项 -->
               <el-form-item class="form-item" v-if="!isResetMode">
                 <el-link type="primary" @click="loginMode = 'account'" :underline="false" class="alternative-link">
                   使用账号密码登录
@@ -51,7 +48,6 @@
                 <span v-else>{{ '请稍等' }}</span>
               </el-button>
 
-              <!-- 手机号登录模式下显示账号密码登录入口 -->
               <div class="alternative-login" v-if="!isResetMode">
                 <el-divider>其他登录方式</el-divider>
                 <div class="social-icons">
@@ -69,7 +65,6 @@
               </div>
             </el-form>
 
-            <!-- 账号密码登录表单 -->
             <el-form v-if="loginMode === 'account'" ref="loginFormRef" :model="loginForm" :rules="loginRules"
               class="login-form" @keyup.enter="handleLogin">
               <el-form-item prop="phone" class="form-item">
@@ -202,12 +197,10 @@ const phoneRules = reactive({
 const loginFormRef = ref(null);
 const phoneFormRef = ref(null);
 
-// 切换二维码登录
 const toggleQRCode = () => {
   showQRCode.value = !showQRCode.value;
 };
 
-// 验证手机号格式
 const validatePhone = () => {
   if (!phoneForm.phone) {
     ElMessage.warning('请输入手机号');
@@ -220,7 +213,6 @@ const validatePhone = () => {
   return true;
 };
 
-// 发送验证码（手机号登录/注册）
 const sendCaptcha = async () => {
   if (!validatePhone()) return;
 
@@ -230,11 +222,7 @@ const sendCaptcha = async () => {
   }
 
   try {
-    // 这里应该调用发送验证码的API
-    // const res = await service.post('/captcha/send', { phone: phoneForm.phone });
-
-    // 模拟发送验证码
-    captchaCooldown.value = 60;
+      captchaCooldown.value = 60;
 
     phoneForm.captcha = '123456';
 
@@ -252,14 +240,11 @@ const sendCaptcha = async () => {
   }
 };
 
-// 处理登录成功后的路由跳转
 const handleLoginSuccess = (role, token) => {
-  // 将token存储到localStorage
   if (token) {
     localStorage.setItem('token', token);
   }
 
-  // 将用户角色存储到localStorage
   if (role) {
     localStorage.setItem('userRole', role);
   }
@@ -267,7 +252,7 @@ const handleLoginSuccess = (role, token) => {
   ElMessage.success('登录成功！');
   switch (role) {
     case 'ADMIN':
-      router.push('/admin');
+      router.push('/student'); // 管理员暂时重定向到学生页面，后续可添加管理员页面
       break;
     case 'STUDENT':
       router.push('/student');
@@ -275,13 +260,18 @@ const handleLoginSuccess = (role, token) => {
     case 'TEACHER':
       router.push('/teacher');
       break;
+    case 'COUNSELOR': // 辅导员
+      router.push('/teacher'); // 辅导员使用教师页面
+      break;
+    case 'DEAN': // 院长/系主任
+      router.push('/teacher'); // 院系领导使用教师页面
+      break;
     default:
       ElMessage.error('登录失败: 角色未定义');
       break;
   }
 };
 
-// 账号密码登录
 const handleLogin = async () => {
   if (!loginFormRef.value) return;
 
@@ -300,7 +290,7 @@ const handleLogin = async () => {
     });
 
     if (res.code === 200) {
-      handleLoginSuccess(res.date?.role, res.date?.token);
+      handleLoginSuccess(res.data?.role, res.data?.token);
     } else {
       ElMessage.error('登录失败: ' + (res.message || '用户名或密码错误'));
     }
@@ -570,6 +560,20 @@ onUnmounted(() => {
   border: none;
   margin-top: 10px;
   color: white;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.login-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+}
+
+.login-btn:active {
+  background: #1d4ed8;
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
 }
 
 .register-link {

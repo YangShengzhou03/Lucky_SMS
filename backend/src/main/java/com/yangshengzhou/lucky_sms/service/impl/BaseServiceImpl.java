@@ -7,11 +7,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 import java.util.List;
 
-/**
- * 基础服务实现类
- * @param <M> Mapper类型
- * @param <T> 实体类型
- */
 public abstract class BaseServiceImpl<M extends BaseMapper<T>, T> extends ServiceImpl<M, T> implements BaseService<T> {
     
     @Override
@@ -22,7 +17,6 @@ public abstract class BaseServiceImpl<M extends BaseMapper<T>, T> extends Servic
     
     @Override
     public Page<T> findPageWithQuery(int page, int size, Object query) {
-        // 子类实现具体的查询逻辑
         return findPage(page, size);
     }
     
@@ -39,7 +33,6 @@ public abstract class BaseServiceImpl<M extends BaseMapper<T>, T> extends Servic
         if (ids == null || ids.isEmpty() || status == null) {
             return false;
         }
-        // 子类实现具体的状态更新逻辑
         return true;
     }
 }

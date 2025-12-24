@@ -23,8 +23,12 @@ public class UserService {
             if (rowNum == 0) {
                 throw new RuntimeException("注册失败");
             }
+            // Try to get the user again after registration
+            loginVO = userMapper.loginByPhone(phone);
+            if (loginVO == null) {
+                throw new RuntimeException("用户注册成功但查询失败");
+            }
         }
-        loginVO = userMapper.loginByPhone(phone);
 
         String token = jwtUtil.generateToken(loginVO.getUid());
         loginVO.setToken(token);
@@ -43,8 +47,13 @@ public class UserService {
         LoginVO loginVO = userMapper.loginByPassword(phone, password);
 
         if (loginVO == null) {
+            System.out.println("Login failed: user not found or wrong password for phone: " + phone);
             throw new RuntimeException("用户名或密码错误");
         }
+
+        System.out.println("Login successful for phone: " + phone);
+        System.out.println("User role: " + loginVO.getRole());
+        System.out.println("User ID: " + loginVO.getUid());
 
         String token = jwtUtil.generateToken(loginVO.getUid());
         loginVO.setToken(token);

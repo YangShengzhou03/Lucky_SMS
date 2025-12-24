@@ -1,6 +1,6 @@
 package com.yangshengzhou.lucky_sms.service.student.impl;
 
-import com.yangshengzhou.lucky_sms.mapper.student.StudentMapper;
+import com.yangshengzhou.lucky_sms.mapper.student.StudentViewMapper;
 import com.yangshengzhou.lucky_sms.pojo.Announcement;
 import com.yangshengzhou.lucky_sms.service.student.HomeService;
 import com.yangshengzhou.lucky_sms.vo.student.HomeVO;
@@ -14,15 +14,15 @@ import java.util.List;
 @Service
 public class HomeServiceImpl implements HomeService {
     @Resource
-    private StudentMapper studentMapper;
+    private StudentViewMapper studentViewMapper;
 
     public HomeVO getHomeDate(Integer userid) {
 
         HomeVO homeVO = new HomeVO();
 
-        StudentVO studentVO = studentMapper.selectStudentById(userid);
-        List<Announcement> announcement = studentMapper.selectAnnouncementList();
-        List<Todos> todos = studentMapper.selectTodosList(userid);
+        StudentVO studentVO = studentViewMapper.selectStudentById(userid);
+        List<Announcement> announcement = studentViewMapper.selectAnnouncementList();
+        List<Todos> todos = studentViewMapper.selectTodosList(userid);
 
         if (studentVO == null) {
             throw new RuntimeException("获取用户数据失败");
