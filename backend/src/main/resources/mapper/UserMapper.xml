@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yangshengzhou.lucky_sms.mapper.UserMapper">
+    <!-- 通过手机号返回用户 -->
+    <select id="loginByPhone" resultType="com.yangshengzhou.lucky_sms.vo.user.LoginVO">
+        SELECT
+            u.id AS userId,
+            u.username,
+            u.phone,
+            r.role_name AS roleName
+        FROM users u
+                 LEFT JOIN user_roles ur ON u.id = ur.user_id
+                 LEFT JOIN roles r ON ur.role_id = r.role_id
+        WHERE u.phone = #{phone}
+          AND u.status = 'ACTIVE'
+    </select>
+
+    <!-- 通过手机号注册 -->
+    <insert id="registerByPhone">
+        INSERT INTO users (phone, password, username) VALUES (#{phone}, #{password}, #{username})
+    </insert>
+
+    <!-- 通过手机号重设密码 -->
+    <update id="resetPasswordByPhone">
+        UPDATE users
+        SET password = #{password}
+        WHERE phone = #{phone}
+    </update>
+
+    <!-- 通过手机号密码登录 -->
+    <select id="loginByPassword" resultType="com.yangshengzhou.lucky_sms.vo.user.LoginVO">
+        SELECT
+            u.id AS userId,
+            u.username,
+            u.phone,
+            r.role_name AS roleName
+        FROM users u
+                 LEFT JOIN user_roles ur ON u.id = ur.user_id
+                 LEFT JOIN roles r ON ur.role_id = r.role_id
+        WHERE u.phone = #{phone}
+          AND u.password = #{password}
+          AND u.status = 'ACTIVE'
+    </select>
+
+</mapper>

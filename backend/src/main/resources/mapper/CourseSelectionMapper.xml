@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yangshengzhou.lucky_sms.mapper.student.CourseSelectionMapper">
+
+    <resultMap id="CourseSelectionResultMap" type="com.yangshengzhou.lucky_sms.vo.student.CourseSelectionVO">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="code" column="code"/>
+        <result property="teacher" column="teacher"/>
+        <result property="time" column="time"/>
+        <result property="location" column="location"/>
+        <result property="credits" column="credits"/>
+        <result property="capacityUsed" column="capacityUsed"/>
+        <result property="category" column="category"/>
+        <result property="schedule" column="schedule" typeHandler="com.yangshengzhou.lucky_sms.handler.ScheduleTypeHandler"/>
+        <result property="maxStudents" column="maxStudents"/>
+        <result property="currentStudents" column="currentStudents"/>
+        <result property="semester" column="semester"/>
+    </resultMap>
+
+    <!-- 获取已选课程列表 -->
+    <select id="getSelectedCourses" resultMap="CourseSelectionResultMap">
+        SELECT
+            ta.assignment_id as id,
+            c.course_name as name,
+            c.course_code as code,
+            u.username as teacher,
+            ta.schedule as time,
+            ta.classroom as location,
+            c.credit as credits,
+            ROUND((ta.current_students / ta.max_students) * 100) as capacityUsed,
+            c.course_type as category,
+            ta.schedule,
+            ta.max_students,
+            ta.current_students,
+            s.semester_name as semester
+        FROM 
+            course_selections cs
+        JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
+        JOIN 
+            courses c ON ta.course_id = c.course_id
+        JOIN 
+            teachers t ON ta.teacher_id = t.teacher_id
+        JOIN 
+            users u ON t.user_id = u.user_id
+        JOIN 
+            semesters s ON ta.semester_id = s.semester_id
+        WHERE 
+            cs.student_id = #{userId}
+            AND s.semester_name = #{semester}
+            AND cs.status = 'selected'
+        ORDER BY 
+            c.course_name
+    </select>
+
+    <!-- 检查课程是否已选 -->
+    <select id="checkCourseSelected" parameterType="map" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM course_selections cs
+        INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
+        WHERE cs.student_id = #{studentId}
+        AND ta.assignment_id = #{assignmentId}
+        AND cs.status = 'SELECTED'
+    </select>
+
+    <!-- 检查时间冲突 - 简化逻辑 -->
+    <select id="checkTimeConflict" parameterType="map" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM course_selections cs
+        INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
+        INNER JOIN courses c ON ta.course_id = c.course_id
+        WHERE cs.student_id = #{studentId}
+        AND cs.status = 'SELECTED'
+        AND ta.semester_id = #{semesterId}
+        AND c.course_day = #{courseDay}
+        AND c.course_time = #{courseTime}
+    </select>
+
+    <!-- 检查教室冲突 -->
+    <select id="checkClassroomConflict" parameterType="map" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM course_selections cs
+        INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
+        INNER JOIN courses c ON ta.course_id = c.course_id
+        WHERE cs.student_id = #{studentId}
+        AND cs.status = 'SELECTED'
+        AND ta.semester_id = #{semesterId}
+        AND c.classroom = #{classroom}
+        AND c.course_day = #{courseDay}
+        AND c.course_time = #{courseTime}
+    </select>
+
+    <!-- 获取已选课程总学分 -->
+    <select id="getTotalCredits" resultType="java.lang.Integer">
+        SELECT SUM(c.credit)
+        FROM course_selections cs
+        JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
+        JOIN courses c ON ta.course_id = c.course_id
+        WHERE cs.student_id = #{userId}
+          AND cs.status = 'selected'
+    </select>
+
+    <!-- 添加选课记录 -->
+    <insert id="addCourseSelection">
+        INSERT INTO course_selections (student_id, assignment_id, status, selection_time)
+        VALUES ((SELECT student_id FROM students WHERE user_id = #{userId}), #{courseId}, 'selected', NOW())
+    </insert>
+
+    <!-- 删除选课记录 -->
+    <delete id="removeCourseSelection">
+        DELETE FROM course_selections
+        WHERE student_id = #{userId}
+          AND assignment_id = #{courseId}
+          AND status = 'selected'
+    </delete>
+
+</mapper>

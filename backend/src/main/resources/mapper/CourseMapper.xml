@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yangshengzhou.lucky_sms.mapper.student.CourseMapper">
+
+    <resultMap id="CourseSelectionResultMap" type="com.yangshengzhou.lucky_sms.vo.student.CourseSelectionVO">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="code" column="code"/>
+        <result property="teacher" column="teacher"/>
+        <result property="time" column="time"/>
+        <result property="location" column="location"/>
+        <result property="credits" column="credits"/>
+        <result property="capacityUsed" column="capacityUsed"/>
+        <result property="category" column="category"/>
+        <result property="schedule" column="schedule" typeHandler="com.yangshengzhou.lucky_sms.handler.ScheduleTypeHandler"/>
+        <result property="maxStudents" column="maxStudents"/>
+        <result property="currentStudents" column="currentStudents"/>
+        <result property="semester" column="semester"/>
+    </resultMap>
+
+    <select id="getAvailableCourses" resultMap="CourseSelectionResultMap">
+        SELECT
+            ta.assignment_id as id,
+            c.course_name as name,
+            c.course_code as code,
+            u.username as teacher,
+            ta.schedule as time,
+            ta.classroom as location,
+            c.credit as credits,
+            ROUND((ta.current_students / ta.max_students) * 100) as capacityUsed,
+            c.course_type as category,
+            ta.schedule,
+            ta.max_students,
+            ta.current_students,
+            s.semester_name as semester
+        FROM
+        teaching_assignments ta
+        JOIN
+        courses c ON ta.course_id = c.course_id
+        JOIN
+        teachers t ON ta.teacher_id = t.teacher_id
+        JOIN
+        users u ON t.user_id = u.user_id
+        JOIN
+        semesters s ON ta.semester_id = s.semester_id
+        WHERE
+        s.semester_name = #{semester}
+        AND ta.current_students &lt; ta.max_students  <!-- 这里的 < 转义为 &lt; -->
+        AND ta.assignment_id NOT IN (
+        SELECT assignment_id
+        FROM course_selections
+        WHERE student_id = #{userId}
+        )
+        ORDER BY
+        c.course_name
+    </select>
+
+    <!-- 根据课程ID获取课程信息 -->
+    <select id="getCourseById" resultMap="CourseSelectionResultMap">
+        SELECT
+            ta.assignment_id as id,
+            c.course_name as name,
+            c.course_code as code,
+            u.username as teacher,
+            ta.schedule as time,
+            ta.classroom as location,
+            c.credit as credits,
+            ROUND((ta.current_students / ta.max_students) * 100) as capacityUsed,
+            c.course_type as category,
+            ta.schedule,
+            ta.max_students,
+            ta.current_students,
+            s.semester_name as semester
+        FROM
+        teaching_assignments ta
+        JOIN
+        courses c ON ta.course_id = c.course_id
+        JOIN
+        teachers t ON ta.teacher_id = t.teacher_id
+        JOIN
+        users u ON t.user_id = u.user_id
+        JOIN
+        semesters s ON ta.semester_id = s.semester_id
+        WHERE
+        ta.assignment_id = #{assignmentId}
+    </select>
+
+    <!-- 获取课程最大容量 -->
+    <select id="getMaxStudents" resultType="java.lang.Integer">
+        SELECT max_students
+        FROM teaching_assignments
+        WHERE assignment_id = #{courseId}
+    </select>
+
+    <!-- 获取课程当前已选人数 -->
+    <select id="getCurrentStudents" resultType="java.lang.Integer">
+        SELECT current_students
+        FROM teaching_assignments
+        WHERE assignment_id = #{courseId}
+    </select>
+
+    <!-- 获取课程学分 -->
+<select id="getCourseCredits" resultType="java.lang.Integer">
+    SELECT c.credit
+    FROM teaching_assignments ta
+    JOIN courses c ON ta.course_id = c.course_id
+    WHERE ta.assignment_id = #{courseId}
+</select>
+
+</mapper>

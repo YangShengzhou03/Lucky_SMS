@@ -1,0 +1,87 @@
+# 开发环境配置
+spring:
+  # 数据源配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/lucky_sms?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-test-query: SELECT 1
+
+  # Redis配置
+  redis:
+    host: localhost
+    port: 6379
+    password: ""
+    database: 0
+    timeout: 3000
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 2
+        max-wait: -1
+
+  # 开发工具配置
+  devtools:
+    restart:
+      enabled: true
+      additional-exclude: static/**,templates/**
+    livereload:
+      enabled: true
+
+  # 热部署配置
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    servlet:
+      content-type: text/html
+
+# 日志配置 - 开发环境更详细
+logging:
+  level:
+    root: INFO
+    com.yangshengzhou.lucky_sms: DEBUG
+    org.springframework.web: DEBUG
+    org.mybatis: DEBUG
+    org.apache.ibatis: DEBUG
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx"
+  file:
+    name: logs/lucky-sms-dev.log
+
+# 开发环境特殊配置
+app:
+  debug: true
+  show-sql: true
+  cors:
+    allowed-origins: "http://localhost:8080,http://127.0.0.1:8080,http://localhost:3000"
+
+  # 邮件配置（开发环境使用测试邮箱）
+  mail:
+    enabled: false
+    host: smtp.gmail.com
+    port: 587
+    username: test@example.com
+    password: test
+
+  # 短信配置（开发环境使用模拟服务）
+  sms:
+    provider: mock
+    sign-name: 幸运学工
+
+  # 文件存储配置
+  storage:
+    type: local
+    local:
+      path: ./uploads
+      url-prefix: /uploads

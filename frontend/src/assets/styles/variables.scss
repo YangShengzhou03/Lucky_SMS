@@ -1,0 +1,57 @@
+// 颜色变量
+$primary-color: #409eff; // 主色调
+$success-color: #67c23a; // 成功色
+$warning-color: #e6a23c; // 警告色
+$danger-color: #f56c6c; // 危险色
+$info-color: #909399; // 信息色
+
+// 深浅色系
+$light-color: #ffffff;
+$dark-color: #1f2937;
+
+// 背景色
+$bg-primary: $primary-color;
+$bg-secondary: #f5f7fa;
+$bg-dark: #141414;
+
+// 文本颜色
+$text-primary: #303133;
+$text-secondary: #606266;
+$text-tertiary: #909399;
+$text-quaternary: #c0c4cc;
+
+// 边框颜色
+$border-color-base: #dcdfe6;
+$border-color-light: #e4e7ed;
+$border-color-lighter: #ebeef5;
+$border-color-extra-light: #f2f6fc;
+
+// 字体相关
+$font-family: 'Inter', system-ui, -apple-system, sans-serif;
+$font-size-base: 14px;
+$font-size-large: 16px;
+$font-size-small: 12px;
+
+// 边框相关
+$border-radius-base: 4px;
+$border-radius-medium: 6px;
+$border-radius-large: 8px;
+
+// 阴影相关
+$box-shadow-base: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+$box-shadow-light: 0 2px 4px rgba(0, 0, 0, 0.08);
+$box-shadow-dark: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+// 间距相关
+$spacing-unit: 8px;
+$spacing-xxs: $spacing-unit * 0.5; // 4px
+$spacing-xs: $spacing-unit; // 8px
+$spacing-sm: $spacing-unit * 1.5; // 12px
+$spacing-md: $spacing-unit * 2; // 16px
+$spacing-lg: $spacing-unit * 3; // 24px
+$spacing-xl: $spacing-unit * 4; // 32px
+$spacing-xxl: $spacing-unit * 6; // 48px
+
+// 动画相关
+$transition-duration: 0.3s;
+$transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
