@@ -624,15 +624,13 @@ onMounted(() => {
   padding: 0 15px;
   max-width: 100%;
   margin: 0 auto;
-  --mouse-x: 0;
-  --mouse-y: 0;
 }
 
 .card-base {
   position: relative;
-  border-radius: 16px;
-  padding: 25px;
-  transition: all 0.3s ease;
+  border-radius: 8px;
+  padding: 20px;
+  transition: all 0.15s ease;
   overflow: hidden;
   z-index: 1;
   background: white;
@@ -644,33 +642,12 @@ onMounted(() => {
     border-color: rgba(74, 85, 104, 0.4);
   }
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y),
-        rgba(99, 102, 241, 0.08) 0%,
-        transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: -1;
-    pointer-events: none;
-  }
-
   &:hover {
-    transform: translateY(-4px);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
     border-color: rgba(199, 210, 254, 0.8);
 
     .dark & {
       border-color: rgba(99, 102, 241, 0.5);
-    }
-
-    &::before {
-      opacity: 1;
     }
   }
 
@@ -701,46 +678,13 @@ onMounted(() => {
     @extend .card-base;
     display: flex;
     align-items: center;
-    background: linear-gradient(135deg, #f6f7f9 0%, #f0f4ff 50%, #ffffff 100%);
-    padding: 30px;
+    background: white;
+    padding: 20px;
     position: relative;
     overflow: hidden;
 
     .dark & {
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    }
-
-    &::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 50%;
-      height: 100%;
-      background: linear-gradient(to right,
-          transparent 0%,
-          rgba(255, 255, 255, 0.3) 50%,
-          transparent 100%);
-      transform: skewX(-25deg);
-      animation: shine 6s infinite;
-      z-index: 1;
-    }
-
-    .dark &::after {
-      background: linear-gradient(to right,
-          transparent 0%,
-          rgba(99, 102, 241, 0.3) 50%,
-          transparent 100%);
-    }
-
-    @keyframes shine {
-      0% {
-        left: -100%;
-      }
-
-      100% {
-        left: 150%;
-      }
+      background: #1e293b;
     }
 
     .avatar-container {
@@ -854,7 +798,6 @@ onMounted(() => {
 
       &:hover {
         background-color: #f1f5f9;
-        transform: translateY(-2px);
 
         .dark & {
           background-color: rgba(30, 41, 59, 0.8);
@@ -951,7 +894,7 @@ onMounted(() => {
   }
 
   .no-class {
-    padding: 30px 0;
+    padding: 20px 0;
   }
 }
 

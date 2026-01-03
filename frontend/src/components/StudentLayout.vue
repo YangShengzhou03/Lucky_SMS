@@ -85,17 +85,11 @@
           </el-menu-item>
           <el-menu-item index="5">
             <el-icon>
-              <Reading />
-            </el-icon>
-            <template #title>图书借阅</template>
-          </el-menu-item>
-          <el-menu-item index="6">
-            <el-icon>
               <EditPen />
             </el-icon>
             <template #title>选课系统</template>
           </el-menu-item>
-          <el-menu-item index="7">
+          <el-menu-item index="6">
             <el-icon>
               <Setting />
             </el-icon>
@@ -153,7 +147,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router';
 import {
-  Notebook, Histogram, Setting, Calendar, Reading, EditPen,
+  Notebook, Histogram, Setting, Calendar, EditPen,
   Menu, Search, Bell, Moon, Sunny, Warning, House
 } from '@element-plus/icons-vue'
 import { provideDarkMode } from '@/composables/useDarkMode'
@@ -168,8 +162,7 @@ const mobileNavItems = [
   { index: '2', icon: Notebook, text: '学籍', path: '/student/status' },
   { index: '3', icon: Histogram, text: '成绩', path: '/student/grades' },
   { index: '4', icon: Calendar, text: '课表', path: '/student/schedule' },
-  { index: '5', icon: Reading, text: '图书', path: '/student/library' },
-  { index: '6', icon: EditPen, text: '选课', path: '/student/course' }
+  { index: '5', icon: EditPen, text: '选课', path: '/student/course' }
 ]
 
 const currentPageName = ref('')
@@ -200,9 +193,8 @@ const activeMenuIndex = computed(() => {
     '/student/status': '2',
     '/student/grades': '3',
     '/student/schedule': '4',
-    '/student/library': '5',
-    '/student/course': '6',
-    '/student/settings': '7'
+    '/student/course': '5',
+    '/student/settings': '6'
   }
   return routeMap[route.path] || '1'
 })
@@ -215,7 +207,6 @@ watch(route, (newRoute) => {
       '/student/status': '学籍信息',
       '/student/grades': '成绩查询',
       '/student/schedule': '课表查询',
-      '/student/library': '图书借阅',
       '/student/course': '选课系统',
       '/student/settings': '系统设置',
       '/login': '登录'
@@ -241,9 +232,8 @@ const handleMenuSelect = (index) => {
     '2': '/student/status',
     '3': '/student/grades',
     '4': '/student/schedule',
-    '5': '/student/library',
-    '6': '/student/course',
-    '7': '/student/settings'
+    '5': '/student/course',
+    '6': '/student/settings'
   }
   if (routeMap[index]) {
     router.push(routeMap[index])
@@ -345,8 +335,8 @@ onUnmounted(() => {
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   --border-radius: 8px;
   --border-radius-lg: 16px;
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: all 0.15s ease;
+  --transition-fast: all 0.1s ease;
 }
 
 .dark-mode {
@@ -465,7 +455,7 @@ onUnmounted(() => {
 }
 
 .search-input {
-  border-radius: 20px;
+  border-radius: 8px;
   border: 1px solid var(--gray-300);
   transition: all 0.3s ease;
   background-color: var(--gray-50);
@@ -743,7 +733,7 @@ onUnmounted(() => {
   background: var(--white);
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-sm);
-  padding: 24px;
+  padding: 16px;
   transition: var(--transition);
 }
 

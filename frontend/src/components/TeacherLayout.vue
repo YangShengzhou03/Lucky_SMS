@@ -83,19 +83,7 @@
             </el-icon>
             <template #title>学生管理</template>
           </el-menu-item>
-          <el-menu-item index="5">
-            <el-icon>
-              <Calendar />
-            </el-icon>
-            <template #title>教学计划</template>
-          </el-menu-item>
           <el-menu-item index="6">
-            <el-icon>
-              <ChatLineRound />
-            </el-icon>
-            <template #title>师生交流</template>
-          </el-menu-item>
-          <el-menu-item index="7">
             <el-icon>
               <Setting />
             </el-icon>
@@ -157,7 +145,7 @@ import { useRoute, useRouter } from 'vue-router';
 import {
   Notebook, Setting, Calendar, EditPen,
   Menu, Search, Bell, Moon, Sunny, Warning, House,
-  UserFilled, ChatLineRound, Histogram
+  UserFilled, Histogram
 } from '@element-plus/icons-vue'
 import { provideDarkMode } from '@/composables/useDarkMode'
 
@@ -169,7 +157,7 @@ const mobileNavItems = [
   { index: '2', icon: Notebook, text: '课程', path: '/teacher/courses' },
   { index: '3', icon: Histogram, text: '成绩', path: '/teacher/grades' },
   { index: '4', icon: UserFilled, text: '学生', path: '/teacher/students' },
-  { index: '5', icon: ChatLineRound, text: '沟通', path: '/teacher/communication' }
+  { index: '5', icon: Calendar, text: '计划', path: '/teacher/schedule' }
 ]
 
 const currentPageName = ref('')
@@ -200,7 +188,6 @@ const activeMenuIndex = computed(() => {
     '/teacher/grades': '3',
     '/teacher/students': '4',
     '/teacher/schedule': '5',
-    '/teacher/communication': '6',
     '/teacher/settings': '7'
   }
   return routeMap[route.path] || '1'
@@ -214,8 +201,6 @@ watch(route, (newRoute) => {
       '/teacher/courses': '课程管理',
       '/teacher/grades': '成绩管理',
       '/teacher/students': '学生管理',
-      '/teacher/schedule': '个人课表',
-      '/teacher/communication': '师生沟通',
       '/teacher/settings': '系统设置'
     }
     currentPageName.value = pageTitles[newRoute.path] || '教师中心'
@@ -239,9 +224,7 @@ const handleMenuSelect = (index) => {
     '2': '/teacher/courses',
     '3': '/teacher/grades',
     '4': '/teacher/students',
-    '5': '/teacher/schedule',
-    '6': '/teacher/communication',
-    '7': '/teacher/settings'
+    '6': '/teacher/settings'
   }
   if (routeMap[index]) {
     router.push(routeMap[index])
@@ -344,8 +327,8 @@ onUnmounted(() => {
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   --border-radius: 8px;
   --border-radius-lg: 16px;
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: all 0.15s ease;
+  --transition-fast: all 0.1s ease;
 }
 
 .dark-mode {
@@ -468,7 +451,7 @@ onUnmounted(() => {
 }
 
 .search-input {
-  border-radius: 20px;
+  border-radius: 8px;
   border: 1px solid var(--gray-300);
   transition: all 0.3s ease;
   background-color: var(--gray-50);
@@ -746,7 +729,7 @@ onUnmounted(() => {
   background: var(--white);
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-sm);
-  padding: 24px;
+  padding: 16px;
   transition: var(--transition);
 }
 

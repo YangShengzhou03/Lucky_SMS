@@ -438,33 +438,29 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   transition: background-color 0.3s ease;
-  gap: 30px; // 保持与系列设计一致的卡片间距
+  gap: 30px;
   padding: 0 15px;
   --mouse-x: 0;
   --mouse-y: 0;
 }
 
-// 现代化卡片样式 - 完全统一设计语言
 .modern-card {
   position: relative;
-  border-radius: 16px;
-  padding: 30px;
+  border-radius: 8px;
+  padding: 20px;
   transition: all 0.3s ease;
   overflow: hidden;
   z-index: 1;
 
-  // 卡片内部相对定位
   .card-content {
     position: relative;
     z-index: 2;
   }
 
-  // 浅色模式
   background: white;
   border: 1px solid rgba(0, 0, 0, 0.1);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
 
-  // 深色模式样式
   .dark & {
     background: rgba(30, 41, 59, 0.8);
     backdrop-filter: blur(12px);
@@ -472,34 +468,10 @@ onMounted(() => {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   }
 
-  // 卡片光影效果 - 微紫色
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y),
-        rgba(99, 102, 241, 0.08) 0%,
-        transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: -1;
-    pointer-events: none;
-  }
-
-  // 卡片悬停效果 - 与系列设计完全一致
   &:hover {
-    transform: translateY(-4px);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-
-    &::before {
-      opacity: 1;
-    }
   }
 
-  // 卡片头部
   .card-header {
     display: flex;
     justify-content: space-between;
@@ -648,7 +620,7 @@ onMounted(() => {
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(8px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.15s ease;
     position: relative;
     overflow: hidden;
     border: 1px solid rgba(226, 232, 240, 0.6);

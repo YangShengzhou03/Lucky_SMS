@@ -186,12 +186,6 @@ const userProfile = reactive({
 // 卡片悬停状态
 const isHoveringPanel = ref(false)
 
-// 鼠标位置跟踪
-const handleMouseMove = (e) => {
-  document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`)
-  document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`)
-}
-
 // 格式化日期显示
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('zh-CN')
@@ -267,8 +261,6 @@ const beforeAvatarUpload = (file) => {
 
 .personal-center-page {
   background: var(--bg-color);
-  --mouse-x: 0;
-  --mouse-y: 0;
   min-height: 100vh;
 }
 
@@ -287,8 +279,8 @@ const beforeAvatarUpload = (file) => {
 
 .modern-card {
   position: relative;
-  border-radius: 16px;
-  padding: 30px;
+  border-radius: 8px;
+  padding: 20px;
   transition: all 0.3s ease;
   overflow: hidden;
   z-index: 1;
@@ -304,34 +296,12 @@ const beforeAvatarUpload = (file) => {
 
   .dark & {
     background: rgba(30, 41, 59, 0.8);
-    backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   }
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y),
-        rgba(99, 102, 241, 0.08) 0%,
-        transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: -1;
-    pointer-events: none;
-  }
-
   &:hover {
-    transform: translateY(-4px);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-
-    &::before {
-      opacity: 1;
-    }
   }
 
   .card-header {
@@ -389,15 +359,7 @@ const beforeAvatarUpload = (file) => {
   .edit-button {
     padding: 8px 16px;
     font-weight: 500;
-    transition: all 0.2s ease;
-
-    &:hover {
-      transform: translateY(-1px);
-    }
-
-    .el-icon {
-      margin-right: 6px;
-    }
+    transition: all 0.1s ease;
   }
 }
 
@@ -598,7 +560,6 @@ const beforeAvatarUpload = (file) => {
 
         &:hover {
           background: var(--hover-bg);
-          transform: translateY(-2px);
         }
 
         .item-icon {
@@ -660,7 +621,6 @@ const beforeAvatarUpload = (file) => {
 
     &:hover {
       background: var(--hover-bg);
-      transform: translateY(-2px);
 
       .action-content {
         color: var(--accent-color);

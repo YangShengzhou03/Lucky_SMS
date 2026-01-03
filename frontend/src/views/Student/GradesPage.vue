@@ -205,9 +205,7 @@ const fetchGradesDataBySemester = async (semester) => {
       gradeStats.value = data.gradeStats || null
       semesterGPAList.value = data.semesterGPAList || []
       totalGrades.value = data.total || 0
-      // 学期GPA列表保持不变，因为我们需要所有学期的数据来绘制趋势图
-      
-      // 初始化图表
+
       if (trendChartCanvas.value) {
         initTrendChart()
       }
@@ -217,8 +215,7 @@ const fetchGradesDataBySemester = async (semester) => {
   } catch (err) {
     console.error('获取成绩数据失败:', err)
     ElMessage.error('获取成绩数据失败，请稍后重试')
-    
-    // 如果API请求失败，使用默认空数据
+
     allGrades.value = []
     gradeStats.value = null
     totalGrades.value = 0
@@ -233,15 +230,13 @@ let trendChart = null
 const currentPage = ref(1)
 const pageSize = ref(10)
 
-// 过滤后的成绩数据（根据当前选择的学期）
 const filteredGrades = computed(() => {
   return allGrades.value
 })
 
-// 处理学期选择变化
 const handleSemesterChange = (semester) => {
   currentSemester.value = semester
-  currentPage.value = 1 // 重置到第一页
+  currentPage.value = 1
   if (semester === '全部') {
     fetchGradesData()
   } else {
@@ -312,14 +307,12 @@ const initTrendChart = () => {
   
   const ctx = trendChartCanvas.value.getContext('2d')
 
-  // 销毁旧图表
   if (trendChart && trendChart.value) {
     trendChart.value.destroy()
   }
 
-  // 根据图表类型设置数据
   let chartLabel, chartData, chartColor, chartMin, chartMax, chartStep
-  
+
   if (chartType.value === 'gpa') {
     chartLabel = '绩点趋势'
     chartData = semesterGPAList.value.map(item => item.gpa)
@@ -343,11 +336,10 @@ const initTrendChart = () => {
     chartStep = 10
   }
 
-  // 创建新图表
   if (!trendChart) {
     trendChart = {}
   }
-  
+
   trendChart.value = new Chart(ctx, {
     type: 'line',
     data: {
@@ -425,11 +417,9 @@ const viewDetails = (row) => {
   ElMessage.info(`查看课程详情: ${row.courseName}`)
 }
 
-// 处理每页条数变化
 const handleSizeChange = (size) => {
   pageSize.value = size
-  currentPage.value = 1 // 重置到第一页
-  // 重新获取数据
+  currentPage.value = 1
   if (currentSemester.value !== '全部') {
     fetchGradesDataBySemester(currentSemester.value)
   } else {
@@ -437,10 +427,8 @@ const handleSizeChange = (size) => {
   }
 }
 
-// 处理页码变化
 const handleCurrentChange = (page) => {
   currentPage.value = page
-  // 重新获取数据
   if (currentSemester.value !== '全部') {
     fetchGradesDataBySemester(currentSemester.value)
   } else {
@@ -448,10 +436,8 @@ const handleCurrentChange = (page) => {
   }
 }
 
-// 处理搜索
 const handleSearch = () => {
-  currentPage.value = 1 // 重置到第一页
-  // 重新获取数据
+  currentPage.value = 1
   if (currentSemester.value !== '全部') {
     fetchGradesDataBySemester(currentSemester.value)
   } else {
@@ -459,10 +445,8 @@ const handleSearch = () => {
   }
 }
 
-// 处理过滤条件变化
 const handleFilterChange = () => {
-  currentPage.value = 1 // 重置到第一页
-  // 重新获取数据
+  currentPage.value = 1
   if (currentSemester.value !== '全部') {
     fetchGradesDataBySemester(currentSemester.value)
   } else {
@@ -475,10 +459,8 @@ const handleMouseMove = (e) => {
   document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`)
 }
 
-// 组件挂载时获取成绩数据
 onMounted(() => {
   fetchGradesData().then(() => {
-    // 初始化图表
     if (trendChartCanvas.value) {
       initTrendChart()
     }
@@ -505,9 +487,9 @@ onUnmounted(() => {
 
 .modern-card {
   position: relative;
-  border-radius: 16px;
-  padding: 30px;
-  transition: all 0.3s ease;
+  border-radius: 8px;
+  padding: 20px;
+  transition: all 0.15s ease;
   overflow: hidden;
   z-index: 1;
   background: white;
@@ -521,29 +503,8 @@ onUnmounted(() => {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   }
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y),
-        rgba(99, 102, 241, 0.08) 0%,
-        transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: -1;
-    pointer-events: none;
-  }
-
   &:hover {
-    transform: translateY(-4px);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-
-    &::before {
-      opacity: 1;
-    }
   }
 
   .card-header {
@@ -575,8 +536,8 @@ onUnmounted(() => {
 
   .stats-card {
     position: relative;
-    border-radius: 16px;
-    padding: 24px;
+    border-radius: 8px;
+    padding: 16px;
     transition: all 0.3s ease;
     overflow: hidden;
     z-index: 1;

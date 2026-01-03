@@ -709,13 +709,6 @@ const handleCurrentChange = (page) => {
   currentPage.value = page
 }
 
-const handleMouseMove = (e) => {
-  const x = e.clientX / window.innerWidth * 100
-  const y = e.clientY / window.innerHeight * 100
-  document.documentElement.style.setProperty('--mouse-x', `${x}px`)
-  document.documentElement.style.setProperty('--mouse-y', `${y}px`)
-}
-
 const formatStatValue = (value) => {
   return typeof value === 'number' && !Number.isInteger(value) ? value.toFixed(1) : value
 }
@@ -731,15 +724,12 @@ onMounted(() => {
   transition: background-color 0.3s ease;
   gap: 30px;
   padding: 0 15px;
-  --mouse-x: 0;
-  --mouse-y: 0;
 }
-
 
 .modern-card {
   position: relative;
-  border-radius: 16px;
-  padding: 30px;
+  border-radius: 8px;
+  padding: 20px;
   transition: all 0.3s ease;
   overflow: hidden;
   z-index: 1;
@@ -758,36 +748,13 @@ onMounted(() => {
 
   .dark & {
     background: rgba(30, 41, 59, 0.8);
-    backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   }
 
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y),
-        rgba(99, 102, 241, 0.08) 0%,
-        transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: -1;
-    pointer-events: none;
-  }
-
-
   &:hover {
-    transform: translateY(-4px);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-
-    &::before {
-      opacity: 1;
-    }
   }
 
 
@@ -884,7 +851,7 @@ onMounted(() => {
     padding: 0 12px;
     height: 36px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    transition: all 0.2s ease;
+    transition: all 0.1s ease;
 
     &:hover {
       border-color: #c7d2fe;

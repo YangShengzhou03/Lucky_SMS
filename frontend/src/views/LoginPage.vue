@@ -99,7 +99,7 @@
           <div class="qr-content" v-if="showQRCode">
             <div class="qr-card">
               <div class="qr-code-container">
-                <img src="@/assets/images/login-qr-code.svg" alt="扫码登录" class="qr-image">
+                <img src="@/assets/images/login-qr-code.png" alt="扫码登录" class="qr-image">
               </div>
 
               <div class="qr-text-container">
@@ -122,22 +122,20 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import { ElMessage } from 'element-plus';
-import service from '@/utils/request';
+import { ref, reactive, computed, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import service from '@/utils/request'
 import {
   User, Lock, ArrowLeft, Phone, Key
-} from '@element-plus/icons-vue';
+} from '@element-plus/icons-vue'
 
 const router = useRouter();
-const route = useRoute();
 const showQRCode = ref(false);
 const loginLoading = ref(false);
-const loginMode = ref('phone'); // 'phone' 或 'account'
-const isResetMode = ref(false); // 是否处于注册模式
+const loginMode = ref('phone');
+const isResetMode = ref(false);
 
-// 验证码倒计时
 const captchaCooldown = ref(0);
 let captchaTimer = null;
 
@@ -145,7 +143,6 @@ const captchaBtnText = computed(() =>
   captchaCooldown.value > 0 ? `${captchaCooldown.value}秒后重试` : '获取验证码'
 );
 
-// 账号密码登录表单
 const loginForm = reactive({
   phone: '',
   password: '',
@@ -161,7 +158,6 @@ const loginRules = reactive({
   ]
 });
 
-// 手机号登录/注册表单
 const phoneForm = reactive({
   phone: '',
   captcha: '',
@@ -193,7 +189,6 @@ const phoneRules = reactive({
   ]
 });
 
-// 表单引用
 const loginFormRef = ref(null);
 const phoneFormRef = ref(null);
 
@@ -301,12 +296,10 @@ const handleLogin = async () => {
   }
 };
 
-// 手机号登录
 const handlePhoneLogin = async () => {
   if (!phoneFormRef.value) return;
 
   try {
-    // 使用 validate 方法的回调形式来处理验证结果
     const isValid = await new Promise((resolve) => {
       phoneFormRef.value.validate((valid) => {
         resolve(valid);
@@ -341,7 +334,6 @@ const handlePhoneLogin = async () => {
   }
 };
 
-// 重置密码
 const handleReset = async () => {
   if (!phoneFormRef.value) return;
 
@@ -387,14 +379,6 @@ const handleReset = async () => {
     loginLoading.value = false;
   }
 };
-
-onMounted(() => {
-  // 确保在页面刷新时，如果当前路径是/login，则显示登录页面
-  if (route.path === '/login') {
-    // 这里可以添加任何需要在登录页面加载时执行的逻辑
-    // 例如，检查用户是否已经登录，如果已登录则重定向到相应页面
-  }
-});
 
 onUnmounted(() => {
   if (captchaTimer) clearInterval(captchaTimer);
@@ -572,7 +556,6 @@ onUnmounted(() => {
 
 .login-btn:active {
   background: #1d4ed8;
-  transform: translateY(0);
   box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
 }
 

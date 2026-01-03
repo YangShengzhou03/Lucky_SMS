@@ -1,0 +1,97 @@
+# 生产环境配置
+spring:
+  # 数据源配置 - 生产环境使用环境变量
+  datasource:
+    url: ${DATABASE_URL:jdbc:mysql://mysql:3306/Lucky_SMS?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8}
+    username: ${DATABASE_USERNAME:root}
+    password: ${DATABASE_PASSWORD:123456}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 50
+      minimum-idle: 10
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
+      leak-detection-threshold: 60000
+  
+  # 生产环境禁用开发工具
+  devtools:
+    restart:
+      enabled: false
+    livereload:
+      enabled: false
+  
+  # 模板缓存开启
+  thymeleaf:
+    cache: true
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    servlet:
+      content-type: text/html
+
+# 生产环境日志配置
+logging:
+  level:
+    root: WARN
+    com.yangshengzhou.lucky_sms: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%15.15t] %-40.40logger{39} : %m%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%15.15t] %-40.40logger{39} : %m%n"
+  file:
+    name: /var/log/lucky-sms/lucky-sms.log
+    max-size: 50MB
+    max-history: 30
+    total-size-cap: 3GB
+  logback:
+    rollingpolicy:
+      max-file-size: 50MB
+      clean-history-on-start: false
+
+# 生产环境特殊配置
+app:
+  debug: false
+  show-sql: false
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:8080,http://127.0.0.1:8080}
+  
+  # 邮件配置（生产环境使用真实邮箱）
+  mail:
+    enabled: ${MAIL_ENABLED:false}
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    
+  # 短信配置（生产环境使用真实服务）
+  sms:
+    provider: ${SMS_PROVIDER:aliyun}
+    sign-name: ${SMS_SIGN_NAME:幸运学工}
+    access-key: ${SMS_ACCESS_KEY:}
+    secret-key: ${SMS_SECRET_KEY:}
+    
+  # 文件存储配置（生产环境使用云存储）
+  storage:
+    type: ${STORAGE_TYPE:local}
+    local:
+      path: ${STORAGE_PATH:/data/uploads}
+      url-prefix: ${STORAGE_URL_PREFIX:/uploads}
+    oss:
+      endpoint: ${OSS_ENDPOINT:}
+      access-key: ${OSS_ACCESS_KEY:}
+      secret-key: ${OSS_SECRET_KEY:}
+      bucket: ${OSS_BUCKET:}
+      
+  # 监控配置
+  monitoring:
+    enabled: true
+    endpoint: /actuator
+    metrics:
+      export:
+        prometheus:
+          enabled: true
+          step: 1m

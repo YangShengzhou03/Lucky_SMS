@@ -1,33 +1,24 @@
-// src/composables/useDarkMode.js
-import { ref, watchEffect, provide, inject } from 'vue'
+import { ref } from 'vue'
 
-const DARK_MODE_KEY = 'isDarkMode'
+const isDarkMode = ref(false)
 
-export function provideDarkMode() {
-  const isDarkMode = ref(localStorage.getItem(DARK_MODE_KEY) === 'true')
+const toggleDarkMode = () => {
+  isDarkMode.value = !isDarkMode.value
+  localStorage.setItem('isDarkMode', isDarkMode.value)
+  document.documentElement.classList.toggle('dark-mode', isDarkMode.value)
+}
 
-  const toggleDarkMode = () => {
-    isDarkMode.value = !isDarkMode.value
-    localStorage.setItem(DARK_MODE_KEY, isDarkMode.value)
+const provideDarkMode = () => {
+  const savedDarkMode = localStorage.getItem('isDarkMode')
+  if (savedDarkMode !== null) {
+    isDarkMode.value = savedDarkMode === 'true'
+    document.documentElement.classList.toggle('dark-mode', isDarkMode.value)
   }
 
-  watchEffect(() => {
-    document.documentElement.classList.toggle('dark', isDarkMode.value)
-    document.documentElement.style.setProperty('color-scheme', isDarkMode.value ? 'dark' : 'light')
-  })
-
-  provide('darkMode', {
+  return {
     isDarkMode,
     toggleDarkMode
-  })
-
-  return { isDarkMode, toggleDarkMode }
-}
-
-export function useDarkMode() {
-  const darkMode = inject('darkMode')
-  if (!darkMode) {
-    throw new Error('useDarkMode() is called without provider.')
   }
-  return darkMode
 }
+
+export { provideDarkMode }

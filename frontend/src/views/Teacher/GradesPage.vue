@@ -204,10 +204,8 @@ import { ref, computed, inject, watch, onMounted } from 'vue'
 import { Upload, Download, ArrowUp, ArrowDown, WarningFilled, Refresh } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
-// 深色模式状态
 const isDarkMode = inject('isDarkMode', ref(false))
 
-// 课程与班级数据
 const selectedCourse = ref(null)
 const selectedClass = ref(null)
 const currentSemester = ref('2023-2024-2')
@@ -235,7 +233,6 @@ const classes = ref([
   { id: 4, name: '软件工程2班' }
 ])
 
-// 成绩数据
 const allGrades = ref([
   {
     id: 1,
@@ -317,7 +314,6 @@ const allGrades = ref([
   }
 ])
 
-// 搜索与筛选
 const searchKeyword = ref('')
 const filterType = ref('all')
 const currentPage = ref(1)
@@ -325,33 +321,27 @@ const pageSize = ref(10)
 const isSubmitting = ref(false)
 const confirmSubmitVisible = ref(false)
 
-// 筛选成绩数据
 const filteredGrades = computed(() => {
   let grades = allGrades.value
 
-  // 筛选课程
   if (selectedCourse.value) {
     grades = grades.filter(grade => grade.courseId === selectedCourse.value)
   }
 
-  // 筛选班级
   if (selectedClass.value) {
     grades = grades.filter(grade => grade.classId === selectedClass.value)
   }
 
-  // 筛选学期
   if (currentSemester.value) {
     grades = grades.filter(grade => grade.semester === currentSemester.value)
   }
 
-  // 搜索学生姓名
   if (searchKeyword.value) {
     grades = grades.filter(grade =>
       grade.studentName.toLowerCase().includes(searchKeyword.value.toLowerCase())
     )
   }
 
-  // 筛选及格/不及格/待提交
   if (filterType.value === 'pass') {
     grades = grades.filter(grade => grade.score >= 60)
   } else if (filterType.value === 'fail') {
@@ -386,7 +376,6 @@ const courseAverageScore = computed(() => {
 
 const courseAverageScoreTrend = computed(() => {
   if (courseGrades.value.length === 0) return 0
-  // 模拟与上学期对比数据
   return (Math.random() * 10 - 5).toFixed(1) * 1
 })
 
@@ -505,11 +494,6 @@ const getEmptyText = () => {
 
 // 事件处理函数
 const handleScoreChange = (row) => {
-  // 更新成绩后可以做一些验证或其他操作
-  console.log(`成绩更新: ${row.studentName} - ${row.courseName}: ${row.score}`)
-  row.submitted = false // 成绩修改后重置提交状态
-
-  // 添加简单的验证
   if (row.score !== null && (row.score < 0 || row.score > 100)) {
     ElMessage.warning('成绩必须在0-100之间')
     row.score = null
@@ -518,12 +502,10 @@ const handleScoreChange = (row) => {
 
 const viewDetails = (row) => {
   ElMessage.info(`查看 ${row.studentName} 的 ${row.courseName} 成绩详情`)
-  // 这里可以添加查看详情的逻辑
 }
 
 const importGrades = () => {
   ElMessage.info('导入成绩功能')
-  // 这里可以添加导入成绩的逻辑
 }
 
 const exportGrades = () => {
@@ -533,7 +515,6 @@ const exportGrades = () => {
   }
 
   ElMessage.success(`导出 ${getSemesterName(currentSemester.value)} ${getCourseName(selectedCourse.value)} ${getClassName(selectedClass.value)} 的成绩数据`)
-  // 这里可以添加导出成绩的逻辑
 }
 
 const submitGrades = () => {
@@ -574,24 +555,17 @@ const checkPendingGrades = () => {
 }
 
 const resetClassSelection = () => {
-  // 当选择课程变化时，重置班级选择
   selectedClass.value = null
-  // 重置页码
   currentPage.value = 1
 }
 
 const handleSizeChange = (size) => {
   pageSize.value = size
-  currentPage.value = 1 // 重置页码
+  currentPage.value = 1
 }
 
 const handleCurrentChange = (page) => {
   currentPage.value = page
-}
-
-const handleMouseMove = (e) => {
-  document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`)
-  document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`)
 }
 
 const refreshStats = () => {
@@ -648,43 +622,14 @@ watch(isDarkMode, (newVal) => {
 
 .base-card {
   position: relative;
-  border-radius: 16px;
-  padding: 24px;
-  transition: all 0.3s ease;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.15s ease;
   overflow: hidden;
   z-index: 1;
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y),
-        rgba(99, 102, 241, 0.05) 0%,
-        transparent 80%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: -1;
-    pointer-events: none;
-  }
-
   &:hover {
-    transform: translateY(-4px);
     box-shadow: var(--shadow-medium);
-  }
-
-  &:hover::before {
-    opacity: 1;
-  }
-
-  .dark & {
-    &::before {
-      background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y),
-          rgba(99, 102, 241, 0.08) 0%,
-          transparent 80%);
-    }
   }
 }
 
@@ -694,8 +639,6 @@ watch(isDarkMode, (newVal) => {
   transition: background-color 0.3s ease;
   gap: 30px;
   padding: 0 15px;
-  --mouse-x: 0;
-  --mouse-y: 0;
 
   .dark & {
     background-color: #1e293b;
@@ -705,8 +648,8 @@ watch(isDarkMode, (newVal) => {
 
 .modern-card {
   position: relative;
-  border-radius: 16px;
-  padding: 30px;
+  border-radius: 8px;
+  padding: 20px;
   transition: all 0.3s ease;
   overflow: hidden;
   z-index: 1;
@@ -726,40 +669,13 @@ watch(isDarkMode, (newVal) => {
   }
 
   &:hover {
-    transform: translateY(-4px);
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
     border-color: rgba(199, 210, 254, 0.8);
   }
 
   .dark &:hover {
-    transform: translateY(-4px);
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
     border-color: rgba(99, 102, 241, 0.5);
-  }
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y),
-        rgba(99, 102, 241, 0.08) 0%,
-        transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: -1;
-    pointer-events: none;
-  }
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-
-    &::before {
-      opacity: 1;
-    }
   }
 
   .card-header {
@@ -805,7 +721,6 @@ watch(isDarkMode, (newVal) => {
     .stats-card {
       @extend .base-card;
       background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(10px);
       border: 1px solid rgba(226, 232, 240, 0.7);
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
 
@@ -815,13 +730,11 @@ watch(isDarkMode, (newVal) => {
       }
 
       &:hover {
-        transform: translateY(-4px);
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         border-color: rgba(199, 210, 254, 0.8);
       }
 
       .dark &:hover {
-        transform: translateY(-4px);
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
         border-color: rgba(99, 102, 241, 0.5);
       }

@@ -226,23 +226,17 @@ const currentPage = ref(1)
 const pageSize = ref(5)
 const selectedCourseIds = ref([])
 
-// 从后端获取的课程数据
 const allCourses = ref([])
 const selectedCourses = ref([])
-// 总数据量
 const totalCourses = ref(0)
 const totalSelectedCourses = ref(0)
 
-
-
-// 将星期数字转换为名称
 const getDayName = (day) => {
   if (!day) return '待安排'
   const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
   return days[day - 1] || '待安排'
 }
 
-// 将时间段转换为名称
 const getTimeSlotName = (timeSlot) => {
   if (!timeSlot && timeSlot !== 0) return '待安排'
   const slots = ['1-2节', '3-4节', '5-6节', '7-8节', '9-10节']
@@ -346,7 +340,6 @@ const selectCourse = async (course) => {
   try {
     const response = await apiSelectCourse(course.id)
     if (response.code === 200) {
-      // 选课成功，重新加载课程数据
       await loadAvailableCourses()
       await loadSelectedCourses()
       ElMessage.success(`已成功选择课程：${course.name}`)
@@ -359,12 +352,10 @@ const selectCourse = async (course) => {
   }
 }
 
-// 添加退课功能
 const dropSelectedCourse = async (course) => {
   try {
     const response = await dropCourse(course.id)
     if (response.code === 200) {
-      // 退课成功，重新加载课程数据
       await loadAvailableCourses()
       await loadSelectedCourses()
       ElMessage.success(`已成功退选课程：${course.name}`)
@@ -394,39 +385,35 @@ const handleSizeChange = (newSize) => {
 
 const handleCurrentChange = (newPage) => {
   currentPage.value = newPage
-  loadAvailableCourses() // 重新加载数据
+  loadAvailableCourses()
 }
 
 const handleSelectionChange = () => {
-  // 确保已选课程不会出现在选课列表中
   selectedCourseIds.value = selectedCourseIds.value.filter(id => 
     !isCourseSelected(id)
   )
 }
 
-// 批量选课
 const batchSelectCourses = async () => {
   if (selectedCourseIds.value.length === 0) {
     ElMessage.warning('请先选择要添加的课程')
     return
   }
-  
+
   try {
-    // 检查学分限制
-    const selectedCoursesList = allCourses.value.filter(c => 
+    const selectedCoursesList = allCourses.value.filter(c =>
       selectedCourseIds.value.includes(c.id)
     )
-    
+
     const totalCredits = selectedCoursesList.reduce((sum, c) => sum + c.credits, 0)
     if (selectedCredits.value + totalCredits > maxCredits.value) {
       ElMessage.warning(`选课将超出学分上限(${maxCredits.value}学分)，无法继续`)
       return
     }
-    
-    // 检查时间冲突
+
     let conflictFound = false
     let conflictCourse = ''
-    
+
     for (const course of selectedCoursesList) {
       const hasConflict = selectedCourses.value.some(selectedCourse => {
         if (!selectedCourse.schedule || !course.schedule) return false
@@ -434,7 +421,7 @@ const batchSelectCourses = async () => {
           course.schedule.some(cs => s && cs && s.day === cs.day && s.timeSlot === cs.timeSlot)
         )
       })
-      
+
       if (hasConflict) {
         conflictFound = true
         conflictCourse = course.name
@@ -457,7 +444,6 @@ const batchSelectCourses = async () => {
       }
     )
     
-    // 批量选课
     let successCount = 0
     for (const courseId of selectedCourseIds.value) {
       try {
@@ -469,8 +455,7 @@ const batchSelectCourses = async () => {
         console.error(`选课失败 ${courseId}:`, error)
       }
     }
-    
-    // 重新加载数据
+
     await loadAvailableCourses()
     await loadSelectedCourses()
     ElMessage.success(`成功选择 ${successCount} 门课程`)
@@ -482,13 +467,12 @@ const batchSelectCourses = async () => {
   }
 }
 
-// 批量退课
 const batchDropCourses = async () => {
   if (selectedCourseIds.value.length === 0) {
     ElMessage.warning('请先选择要退选的课程')
     return
   }
-  
+
   try {
     await ElMessageBox.confirm(
       `确定要退选这 ${selectedCourseIds.value.length} 门课程吗？`,
@@ -499,8 +483,7 @@ const batchDropCourses = async () => {
         type: 'warning'
       }
     )
-    
-    // 批量退课
+
     let successCount = 0
     for (const courseId of selectedCourseIds.value) {
       try {
@@ -525,7 +508,6 @@ const batchDropCourses = async () => {
   }
 }
 
-// 重新加载数据时清除选择
 const loadAvailableCourses = async () => {
   try {
     const response = await getAvailableCoursesWithPagination({
@@ -535,14 +517,13 @@ const loadAvailableCourses = async () => {
     })
     if (response.code === 200) {
       const data = response.data
-      // 转换后端数据为前端需要的格式
       allCourses.value = data.records.map(course => ({
         id: course.id,
         name: course.name,
         code: course.code,
         teacher: course.teacher,
-        time: course.schedule && course.schedule.length > 0 ? 
-          course.schedule.map(s => `${getDayName(s.day)} ${getTimeSlotName(s.timeSlot)}`).join(', ') : 
+        time: course.schedule && course.schedule.length > 0 ?
+          course.schedule.map(s => `${getDayName(s.day)} ${getTimeSlotName(s.timeSlot)}`).join(', ') :
           "待安排",
         location: course.location,
         credits: course.credits,
@@ -550,10 +531,8 @@ const loadAvailableCourses = async () => {
         category: (course.category || '').toLowerCase(),
         schedule: course.schedule || []
       }))
-      // 更新总数据量
       totalCourses.value = data.total
     }
-    // 清除选择状态
     selectedCourseIds.value = []
   } catch (error) {
     ElMessage.error('获取可选课程失败')
@@ -561,24 +540,22 @@ const loadAvailableCourses = async () => {
   }
 }
 
-// 重新加载数据时清除选择
 const loadSelectedCourses = async () => {
   try {
     const response = await getSelectedCoursesWithPagination({
       semesterId: currentSemester.value,
-      page: 1, // 已选课程可以默认只加载第一页
-      size: 50 // 已选课程通常不会太多，可以设置一个较大的值
+      page: 1,
+      size: 50
     })
     if (response.code === 200) {
       const data = response.data
-      // 转换后端数据为前端需要的格式
       selectedCourses.value = data.records.map(course => ({
         id: course.id,
         name: course.name,
         code: course.code,
         teacher: course.teacher,
-        time: course.schedule && course.schedule.length > 0 ? 
-          course.schedule.map(s => `${getDayName(s.day)} ${getTimeSlotName(s.timeSlot)}`).join(', ') : 
+        time: course.schedule && course.schedule.length > 0 ?
+          course.schedule.map(s => `${getDayName(s.day)} ${getTimeSlotName(s.timeSlot)}`).join(', ') :
           "待安排",
         location: course.location,
         credits: course.credits,
@@ -586,7 +563,6 @@ const loadSelectedCourses = async () => {
         category: (course.category || '').toLowerCase(),
         schedule: course.schedule || []
       }))
-      // 更新总数据量
       totalSelectedCourses.value = data.total
     }
   } catch (error) {
@@ -596,7 +572,6 @@ const loadSelectedCourses = async () => {
 }
 
 onMounted(async () => {
-  // 加载课程数据
   await loadAvailableCourses()
   await loadSelectedCourses()
 })
@@ -634,8 +609,8 @@ onMounted(async () => {
 
 .modern-card {
   position: relative;
-  border-radius: 16px;
-  padding: 30px;
+  border-radius: 8px;
+  padding: 20px;
   transition: all 0.3s ease;
   overflow: hidden;
   z-index: 1;
@@ -656,29 +631,8 @@ onMounted(async () => {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   }
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y),
-        rgba(99, 102, 241, 0.08) 0%,
-        transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: -1;
-    pointer-events: none;
-  }
-
   &:hover {
-    transform: translateY(-4px);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-
-    &::before {
-      opacity: 1;
-    }
   }
 
   .card-header {
@@ -863,7 +817,7 @@ onMounted(async () => {
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(8px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.15s ease;
     position: relative;
     overflow: hidden;
     border: 1px solid rgba(226, 232, 240, 0.6);
@@ -874,13 +828,11 @@ onMounted(async () => {
     }
 
     &:hover {
-      transform: translateY(-4px);
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
       border-color: rgba(199, 210, 254, 0.8);
     }
 
     .dark &:hover {
-      transform: translateY(-4px);
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
       border-color: rgba(99, 102, 241, 0.5);
     }
@@ -973,7 +925,7 @@ onMounted(async () => {
 
 .no-courses {
   grid-column: 2;
-  padding: 40px 0;
+  padding: 30px 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -982,7 +934,7 @@ onMounted(async () => {
 .course-card {
   display: flex;
   flex-direction: column;
-  border-radius: 16px;
+  border-radius: 8px;
   padding: 20px;
   transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.9);
@@ -996,13 +948,11 @@ onMounted(async () => {
   }
 
   &:hover {
-    transform: translateY(-4px);
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
     border-color: rgba(199, 210, 254, 0.8);
   }
 
   .dark &:hover {
-    transform: translateY(-4px);
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
     border-color: rgba(99, 102, 241, 0.5);
   }

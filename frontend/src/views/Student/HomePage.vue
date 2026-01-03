@@ -188,23 +188,21 @@ const formatCourseTime = (timeString) => {
   return timeString?.replace('-', ' - ') || '--'
 }
 
-// 计算日期与今天的天数差
 const getDaysDiff = (dueDate) => {
   if (!dueDate) return null
-  
+
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  
+
   const due = new Date(dueDate)
   due.setHours(0, 0, 0, 0)
-  
+
   const diffTime = due - today
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-  
+
   return diffDays
 }
 
-// 格式化日期显示为更友好的格式
 const formatDueDate = (dueDate) => {
   if (!dueDate) return '--'
   
@@ -225,30 +223,27 @@ const formatDueDate = (dueDate) => {
   }
 }
 
-// 判断是否紧急
 const isUrgent = (dueDate) => {
   const daysDiff = getDaysDiff(dueDate)
   return daysDiff !== null && daysDiff <= 1
 }
 
-// 判断是否已过期
 const isOverdue = (dueDate) => {
   const daysDiff = getDaysDiff(dueDate)
   return daysDiff !== null && daysDiff < 0
 }
 
-// 获取标签类型
 const getDueTagType = (dueDate) => {
   if (!dueDate) return 'info'
-  
+
   const daysDiff = getDaysDiff(dueDate)
-  
+
   if (daysDiff === null) return 'info'
-  if (daysDiff < 0) return 'danger'  // 已过期
-  if (daysDiff === 0) return 'danger'  // 今天
-  if (daysDiff === 1) return 'warning'  // 明天
-  if (daysDiff <= 3) return 'warning'  // 3天内
-  return 'success'  // 其他日期 - 绿色
+  if (daysDiff < 0) return 'danger'
+  if (daysDiff === 0) return 'danger'
+  if (daysDiff === 1) return 'warning'
+  if (daysDiff <= 3) return 'warning'
+  return 'success'
 }
 
 const getAnnouncementType = (type) => {
@@ -275,7 +270,6 @@ const fetchData = async () => {
   error.value = null
 
   try {
-    // 使用axios获取数据
     const res = await service.get('/student/home')
 
     if (res.code === 200) {
@@ -288,7 +282,6 @@ const fetchData = async () => {
     error.value = '获取数据失败，请稍后重试'
     console.error('获取数据失败:', err)
 
-    // 如果API请求失败，使用模拟数据作为后备
     student.value = {
       username: '--',
       student_no: '--',
@@ -373,8 +366,8 @@ onUnmounted(() => {
 
 .modern-card {
   position: relative;
-  border-radius: 16px;
-  padding: 30px;
+  border-radius: 8px;
+  padding: 20px;
   transition: all 0.3s ease;
   overflow: hidden;
   z-index: 1;
@@ -394,40 +387,17 @@ onUnmounted(() => {
   }
 
   &:hover {
-    transform: translateY(-4px);
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
     border-color: rgba(199, 210, 254, 0.8);
   }
 
   .dark &:hover {
-    transform: translateY(-4px);
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
     border-color: rgba(99, 102, 241, 0.5);
   }
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y),
-        rgba(99, 102, 241, 0.08) 0%,
-        transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: -1;
-    pointer-events: none;
-  }
-
   &:hover {
-    transform: translateY(-4px);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-
-    &::before {
-      opacity: 1;
-    }
   }
 
   .card-header {
@@ -463,36 +433,13 @@ onUnmounted(() => {
 .welcome-section {
   margin-bottom: 30px;
   position: relative;
-  background: linear-gradient(135deg, #f6f7f9 0%, #f0f4ff 50%, #ffffff 100%);
-  border-radius: 16px;
-  padding: 30px;
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
   overflow: hidden;
 
   .dark & {
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(to right,
-        transparent 0%,
-        rgba(255, 255, 255, 0.3) 50%,
-        transparent 100%);
-    transform: skewX(-25deg);
-    animation: shine 6s infinite;
-    z-index: 1;
-  }
-
-  .dark &::after {
-    background: linear-gradient(to right,
-        transparent 0%,
-        rgba(99, 102, 241, 0.3) 50%,
-        transparent 100%);
+    background: #1e293b;
   }
 
   h2 {
@@ -635,7 +582,7 @@ onUnmounted(() => {
     align-items: center;
     padding: 12px 0;
     border-bottom: 1px dashed rgba(0, 0, 0, 0.08);
-    transition: all 0.2s ease;
+    transition: all 0.1s ease;
 
     &:hover {
       transform: translateX(4px);
@@ -684,7 +631,6 @@ onUnmounted(() => {
       }
     }
 
-    // 为未来很久的日期添加绿色标签样式
     .todo-meta {
       .el-tag--success {
         background-color: rgba(103, 194, 58, 0.1);
@@ -839,7 +785,7 @@ onUnmounted(() => {
     background: #e6a23c;
     color: white;
     padding: 4px 10px;
-    border-radius: 20px;
+    border-radius: 8px;
     font-size: 12px;
     font-weight: bold;
     box-shadow: 0 2px 6px rgba(230, 162, 60, 0.2);
@@ -849,7 +795,7 @@ onUnmounted(() => {
 .empty-todos,
 .empty-announcements {
   text-align: center;
-  padding: 40px 20px;
+  padding: 30px 20px;
   color: var(--text-secondary);
 
   .empty-icon {

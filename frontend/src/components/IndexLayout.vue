@@ -327,7 +327,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  background: var(--primary-color);
   text-align: center;
   padding: 0 20px;
   position: relative;
@@ -444,7 +444,6 @@ onUnmounted(() => {
   box-shadow: 
     0 6px 24px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transform: translateY(-0.5px);
 }
 
 .features {
@@ -505,19 +504,12 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   height: 100%;
-  transition: transform 0.6s;
-  transform-style: preserve-3d;
-}
-
-.feature-item:hover .feature-content {
-  transform: rotateY(10deg);
 }
 
 .feature-item:hover {
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  transform: translateY(-4px) rotateX(2deg);
   border-color: rgba(255, 255, 255, 0.6);
   background: rgba(255, 255, 255, 0.9);
 }
@@ -545,7 +537,7 @@ onUnmounted(() => {
 
 .feature-item:hover .feature-icon {
   transform: scale(1.05) rotate(5deg);
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  background: var(--primary-color);
   color: var(--white);
   border-color: rgba(255, 255, 255, 0.6);
   box-shadow: 
@@ -603,7 +595,7 @@ onUnmounted(() => {
   background: var(--success-color);
   color: var(--white);
   padding: 6px 16px;
-  border-radius: 20px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   z-index: 2;
@@ -639,17 +631,16 @@ onUnmounted(() => {
 
 .pricing-card:hover {
   box-shadow: var(--shadow-xl);
-  transform: translateY(-5px) scale(1.02);
   border-color: var(--gray-300);
 }
 
 .premium-card:hover {
-  transform: translateY(-5px) scale(1.07);
+  box-shadow: var(--shadow-xl);
 }
 
 .pricing-header {
   padding: 32px;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  background: var(--primary-color);
   color: var(--white);
   text-align: center;
   position: relative;
@@ -657,11 +648,11 @@ onUnmounted(() => {
 }
 
 .pricing-card-wrapper:nth-child(2) .pricing-header {
-  background: linear-gradient(135deg, var(--warning-color) 0%, #d97706 100%);
+  background: var(--warning-color);
 }
 
 .premium-card .pricing-header {
-  background: linear-gradient(135deg, var(--success-color) 0%, #0d9488 100%);
+  background: var(--success-color);
 }
 
 .pricing-header::before {
@@ -770,7 +761,7 @@ onUnmounted(() => {
 /* CTA部分样式 */
 .cta-section {
   padding: 120px 0;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  background: var(--primary-color);
   position: relative;
   overflow: hidden;
   border-top: 1px solid var(--primary-light);
@@ -847,7 +838,7 @@ onUnmounted(() => {
   box-shadow: 
     0 4px 15px rgba(16, 185, 129, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  transition: all 0.15s ease !important;
   position: relative;
   overflow: hidden;
 }
@@ -982,7 +973,6 @@ onUnmounted(() => {
 
 .social-links .el-icon:hover {
   color: var(--white);
-  transform: translateY(-3px);
 }
 
 .newsletter {

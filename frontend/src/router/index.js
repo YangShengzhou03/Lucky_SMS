@@ -6,7 +6,6 @@ import StudentHome from '@/views/Student/HomePage.vue';
 import StudentStatus from '@/views/Student/StatusPage.vue';
 import StudentGrades from '@/views/Student/GradesPage.vue';
 import StudentSchedule from '@/views/Student/SchedulePage.vue';
-import StudentLibrary from '@/views/Student/LibraryPage.vue';
 import StudentCourse from '@/views/Student/CoursePage.vue';
 import StudentSettings from '@/views/Student/SettingsPage.vue';
 import TeacherLayout from '@/components/TeacherLayout.vue';
@@ -15,8 +14,13 @@ import TeacherCourses from '@/views/Teacher/CoursesPage.vue';
 import TeacherGrades from '@/views/Teacher/GradesPage.vue';
 import TeacherStudents from '@/views/Teacher/StudentsPage.vue';
 import TeacherSchedule from '@/views/Teacher/SchedulePage.vue';
-import TeacherCommunication from '@/views/Teacher/CommunicationPage.vue';
 import TeacherSettings from '@/views/Teacher/SettingsPage.vue';
+import AdminLayout from '@/components/AdminLayout.vue';
+import AdminHome from '@/views/Admin/HomePage.vue';
+import UserManagement from '@/views/Admin/UserManagement.vue';
+import CourseManagement from '@/views/Admin/CourseManagement.vue';
+import GradeManagement from '@/views/Admin/GradeManagement.vue';
+import DepartmentManagement from '@/views/Admin/DepartmentManagement.vue';
 
 const routes = [
   {
@@ -36,7 +40,6 @@ const routes = [
       { path: 'status', name: 'StudentStatus', component: StudentStatus, meta: { title: '学籍信息' } },
       { path: 'grades', name: 'StudentGrades', component: StudentGrades, meta: { title: '成绩查询' } },
       { path: 'schedule', name: 'StudentSchedule', component: StudentSchedule, meta: { title: '课表查询' } },
-      { path: 'library', name: 'StudentLibrary', component: StudentLibrary, meta: { title: '图书借阅' } },
       { path: 'course', name: 'StudentCourse', component: StudentCourse, meta: { title: '选课系统' } },
       { path: 'settings', name: 'StudentSettings', component: StudentSettings, meta: { title: '系统设置' } },
     ]
@@ -51,8 +54,19 @@ const routes = [
       { path: 'grades', name: 'TeacherGrades', component: TeacherGrades, meta: { title: '成绩管理' } },
       { path: 'students', name: 'TeacherStudents', component: TeacherStudents, meta: { title: '学生管理' } },
       { path: 'schedule', name: 'TeacherSchedule', component: TeacherSchedule, meta: { title: '教学计划' } },
-      { path: 'communication', name: 'TeacherCommunication', component: TeacherCommunication, meta: { title: '师生交流' } },
       { path: 'settings', name: 'TeacherSettings', component: TeacherSettings, meta: { title: '系统设置' } }
+    ]
+  },
+
+  {
+    path: '/admin',
+    component: AdminLayout,
+    children: [
+      { path: '', name: 'AdminHome', component: AdminHome, meta: { title: '管理员首页' } },
+      { path: 'users', name: 'UserManagement', component: UserManagement, meta: { title: '用户管理' } },
+      { path: 'courses', name: 'CourseManagement', component: CourseManagement, meta: { title: '课程管理' } },
+      { path: 'grades', name: 'GradeManagement', component: GradeManagement, meta: { title: '成绩管理' } },
+      { path: 'departments', name: 'DepartmentManagement', component: DepartmentManagement, meta: { title: '部门管理' } }
     ]
   },
 
@@ -64,9 +78,7 @@ const router = createRouter({
   routes
 });
 
-// 路由守卫
 router.beforeEach((to) => {
-  // 设置页面标题
   document.title = to.meta.title || 'Lucky SMS';
 });
 
