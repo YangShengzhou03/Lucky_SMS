@@ -2,9 +2,6 @@ package com.yangshengzhou.lucky_sms.pojo;
 
 import com.baomidou.mybatisplus.annotation.*;
 
-/**
- * 教学安排实体类
- */
 @TableName("teaching_assignments")
 public class TeachingAssignment extends BaseEntity {
     
@@ -58,9 +55,6 @@ public class TeachingAssignment extends BaseEntity {
     
     @TableField(exist = false)
     private CourseType courseType;
-    
-    @TableField(exist = false)
-    private AssessmentMethod assessmentMethod;
     
     @TableField(exist = false)
     private StatusType status;
@@ -207,14 +201,6 @@ public class TeachingAssignment extends BaseEntity {
 
     public void setCourseType(CourseType courseType) {
         this.courseType = courseType;
-    }
-
-    public AssessmentMethod getAssessmentMethod() {
-        return assessmentMethod;
-    }
-
-    public void setAssessmentMethod(AssessmentMethod assessmentMethod) {
-        this.assessmentMethod = assessmentMethod;
     }
 
     public StatusType getStatus() {

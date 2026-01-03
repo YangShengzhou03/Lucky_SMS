@@ -6,9 +6,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-/**
- * 学期实体类
- */
 @TableName("semesters")
 public class Semester extends BaseEntity {
     

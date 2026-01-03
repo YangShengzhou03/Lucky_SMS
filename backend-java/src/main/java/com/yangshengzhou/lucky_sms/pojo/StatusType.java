@@ -4,9 +4,6 @@ import com.baomidou.mybatisplus.annotation.*;
 
 import java.util.Objects;
 
-/**
- * 状态类型实体类
- */
 @TableName("status_types")
 public class StatusType extends BaseEntity {
     

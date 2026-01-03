@@ -3,7 +3,6 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.yangshengzhou.lucky_sms.mapper.student.StudentViewMapper">
-    <!-- 1. 定义显式映射规则：column 对应 SQL 列名，property 对应 StudentVO 属性名 -->
     <resultMap id="StudentVOMap" type="com.yangshengzhou.lucky_sms.vo.student.StudentVO">
         <result column="username" property="username"/>
         <result column="student_no" property="student_no"/>
@@ -14,9 +13,7 @@
         <result column="course_count" property="course_count"/>
     </resultMap>
 
-    <!-- 定义StudentProfileVO的映射规则 -->
     <resultMap id="StudentProfileVOMap" type="com.yangshengzhou.lucky_sms.vo.student.StudentProfileVO">
-        <!-- 用户表字段 -->
         <result column="username" property="username"/>
         <result column="email" property="email"/>
         <result column="phone" property="phone"/>
@@ -24,7 +21,6 @@
         <result column="birth_date" property="birthDate"/>
         <result column="avatar_url" property="avatarUrl"/>
         
-        <!-- 学生表字段 -->
         <result column="student_no" property="studentNo"/>
         <result column="department_name" property="departmentName"/>
         <result column="major_name" property="majorName"/>
@@ -35,14 +31,12 @@
         <result column="emergency_contact" property="emergencyContact"/>
         <result column="emergency_phone" property="emergencyPhone"/>
         
-        <!-- 地址信息字段 -->
         <result column="province" property="province"/>
         <result column="city" property="city"/>
         <result column="district" property="district"/>
         <result column="detailed_address" property="detailedAddress"/>
     </resultMap>
 
-    <!-- 2. 使用 resultMap 替换 resultType -->
     <select id="selectStudentById" parameterType="Integer" resultMap="StudentVOMap">
         SELECT
             u.username,
@@ -63,7 +57,6 @@
             u.user_id = #{userId}
     </select>
 
-    <!-- 1. 定义 Todos 的显式映射规则 -->
     <resultMap id="TodosMap" type="com.yangshengzhou.lucky_sms.pojo.Todos">
         <result column="id" property="id"/>
         <result column="text" property="text"/>
@@ -73,13 +66,12 @@
         <result column="category" property="category"/>
     </resultMap>
 
-    <!-- 2. 修改 select 标签 -->
     <select id="selectTodosList" parameterType="Integer" resultMap="TodosMap">
         SELECT
         id,
         text,
         completed,
-        due_date,  <!-- 数据库 Date 类型列，通过 TodosMap 映射到属性 -->
+        due_date,
         important,
         category
         FROM todos
@@ -108,7 +100,6 @@
         FROM announcements a LEFT JOIN departments d ON a.department_id = d.department_id
     </select>
 
-    <!-- 1. 定义 Todos 的显式映射规则 -->
     <resultMap id="BasicInfoMap" type="com.yangshengzhou.lucky_sms.pojo.BasicInfo">
         <result column="status_name" property="status"/>
         <result column="gpa" property="gpa"/>
@@ -118,7 +109,6 @@
         <result column="attendanceRate" property="attendanceRate"/>
     </resultMap>
 
-    <!-- 选择出BasicInfo数据 -->
     <select id="selectBasicInfoById" parameterType="Integer" resultMap="BasicInfoMap">
         SELECT
             st.status_name,
@@ -132,7 +122,6 @@
         WHERE user_id = #{userId}
     </select>
 
-    <!-- 定义GradesVO的映射规则 -->
     <resultMap id="GradesVOMap" type="com.yangshengzhou.lucky_sms.vo.student.GradesVO">
         <association property="gradeStats" javaType="com.yangshengzhou.lucky_sms.vo.student.GradesVO$StudentGradeStats">
             <result column="student_gpa" property="gpa"/>
@@ -160,7 +149,6 @@
         </collection>
     </resultMap>
 
-    <!-- 查询学生基础成绩统计信息 -->
     <select id="getStudentGradeStats" parameterType="Integer" resultType="com.yangshengzhou.lucky_sms.vo.student.GradesVO$StudentGradeStats">
         SELECT
             COALESCE(st.gpa, 0.0) AS gpa,
@@ -544,5 +532,39 @@
             u.updated_at = CURRENT_TIMESTAMP
         WHERE u.user_id = #{userId}
     </update>
+
+    <!-- 查询学生课表 -->
+    <resultMap id="StudentScheduleVOMap" type="com.yangshengzhou.lucky_sms.vo.teacher.ScheduleVO">
+        <collection property="classes" ofType="com.yangshengzhou.lucky_sms.vo.teacher.ScheduleVO$ClassInfo">
+            <result column="day_of_week" property="dayOfWeek"/>
+            <result column="section" property="section"/>
+            <result column="course_name" property="courseName"/>
+            <result column="location" property="location"/>
+            <result column="class_name" property="className"/>
+            <result column="student_count" property="studentCount"/>
+        </collection>
+    </resultMap>
+
+    <select id="getStudentSchedule" resultMap="StudentScheduleVOMap">
+        SELECT
+            ta.day_of_week,
+            ta.section,
+            c.course_name,
+            ta.location,
+            ci.class_name,
+            (SELECT COUNT(*) FROM course_selections cs2 WHERE cs2.assignment_id = ta.assignment_id) AS student_count
+        FROM
+            students st
+            INNER JOIN course_selections cs ON st.student_id = cs.student_id
+            INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
+            INNER JOIN courses c ON ta.course_id = c.course_id
+            INNER JOIN semesters s ON ta.semester_id = s.semester_id
+            LEFT JOIN class_info ci ON st.class_id = ci.class_id
+        WHERE
+            st.student_id = #{studentId}
+            AND CONCAT(s.academic_year, '-', s.semester_name) = #{semester}
+            AND cs.status_id = 1
+        ORDER BY ta.day_of_week, ta.section
+    </select>
 
 </mapper>

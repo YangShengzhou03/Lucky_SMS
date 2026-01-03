@@ -6,9 +6,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/**
- * 课程选择实体类
- */
 @TableName("course_selections")
 public class CourseSelection extends BaseEntity {
     

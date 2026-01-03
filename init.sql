@@ -1,347 +1,318 @@
+-- ========================================
+-- Lucky_SMS 数据库初始化脚本
+-- 版本: 2.0
+-- 创建日期: 2026-01-03
+-- 功能: 完整的教务管理系统数据库，支持所有CRUD操作
+-- ========================================
+
 DROP DATABASE IF EXISTS lucky_sms;
 CREATE DATABASE lucky_sms CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE lucky_sms;
 SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
 
-CREATE TABLE IF NOT EXISTS status_types (
-    status_id INT PRIMARY KEY AUTO_INCREMENT,
+-- ========================================
+-- 基础字典表
+-- ========================================
+
+-- 状态类型表
+CREATE TABLE status_types (
+    status_id INT AUTO_INCREMENT PRIMARY KEY,
     status_name VARCHAR(50) NOT NULL,
-    status_category VARCHAR(50) NOT NULL,
-    description TEXT,
-    color_code VARCHAR(7),
-    sort_order INT DEFAULT 1,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
-    INDEX idx_status_category (status_category),
-    INDEX idx_status_active (is_active)
-);
+    status_code VARCHAR(20) NOT NULL UNIQUE,
+    description VARCHAR(255),
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_status_code (status_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS user_types (
-    user_type_id INT PRIMARY KEY AUTO_INCREMENT,
-    type_code VARCHAR(20) UNIQUE NOT NULL,
+-- 课程类型表
+CREATE TABLE course_types (
+    course_type_id INT AUTO_INCREMENT PRIMARY KEY,
     type_name VARCHAR(50) NOT NULL,
-    description TEXT,
-    permissions JSON,
-    is_active BOOLEAN DEFAULT TRUE,
-    sort_order INT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+    type_code VARCHAR(20) NOT NULL UNIQUE,
+    description VARCHAR(255),
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_type_code (type_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS genders (
-    gender_id INT PRIMARY KEY AUTO_INCREMENT,
-    gender_code VARCHAR(10) UNIQUE NOT NULL,
-    gender_name VARCHAR(20) NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    sort_order INT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- 选课类型表
+CREATE TABLE selection_types (
+    selection_type_id INT AUTO_INCREMENT PRIMARY KEY,
+    type_name VARCHAR(50) NOT NULL,
+    type_code VARCHAR(20) NOT NULL UNIQUE,
+    description VARCHAR(255),
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_type_code (type_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS users (
-    user_id INT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    password VARCHAR(100) NOT NULL,
+-- 职称表
+CREATE TABLE titles (
+    title_id INT AUTO_INCREMENT PRIMARY KEY,
+    title_name VARCHAR(50) NOT NULL,
+    title_code VARCHAR(20) NOT NULL UNIQUE,
+    description VARCHAR(255),
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_title_code (title_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 性别类型表
+CREATE TABLE gender_types (
+    gender_id INT AUTO_INCREMENT PRIMARY KEY,
+    gender_name VARCHAR(10) NOT NULL,
+    gender_code VARCHAR(10) NOT NULL UNIQUE,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_gender_code (gender_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 用户类型表
+CREATE TABLE user_types (
+    user_type_id INT AUTO_INCREMENT PRIMARY KEY,
+    type_name VARCHAR(50) NOT NULL,
+    type_code VARCHAR(20) NOT NULL UNIQUE,
+    description VARCHAR(255),
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_type_code (type_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 学期类型表
+CREATE TABLE semester_types (
+    semester_type_id INT AUTO_INCREMENT PRIMARY KEY,
+    type_name VARCHAR(50) NOT NULL,
+    type_code VARCHAR(20) NOT NULL UNIQUE,
+    description VARCHAR(255),
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_type_code (type_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 学历等级表
+CREATE TABLE education_levels (
+    education_level_id INT AUTO_INCREMENT PRIMARY KEY,
+    level_name VARCHAR(50) NOT NULL,
+    level_code VARCHAR(20) NOT NULL UNIQUE,
+    description VARCHAR(255),
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_level_code (level_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 公告类型表
+CREATE TABLE announcement_types (
+    announcement_type_id INT AUTO_INCREMENT PRIMARY KEY,
+    type_name VARCHAR(50) NOT NULL,
+    type_code VARCHAR(20) NOT NULL UNIQUE,
+    description VARCHAR(255),
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_type_code (type_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ========================================
+-- 核心业务表
+-- ========================================
+
+-- 用户表
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
     phone VARCHAR(20),
     email VARCHAR(100),
-    avatar VARCHAR(200),
+    avatar VARCHAR(255),
     real_name VARCHAR(50),
-    gender_id INT,
+    gender_id INT DEFAULT 1,
     birthday DATE,
-    address VARCHAR(200),
-    user_type_id INT NOT NULL,
+    address VARCHAR(255),
+    user_type_id INT NOT NULL DEFAULT 1,
     status_id INT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (gender_id) REFERENCES gender_types(gender_id) ON DELETE SET NULL,
+    FOREIGN KEY (user_type_id) REFERENCES user_types(user_type_id) ON DELETE SET NULL,
+    FOREIGN KEY (status_id) REFERENCES status_types(status_id) ON DELETE SET NULL,
     INDEX idx_username (username),
     INDEX idx_phone (phone),
     INDEX idx_email (email),
+    INDEX idx_real_name (real_name),
     INDEX idx_user_type (user_type_id),
-    INDEX idx_user_status (status_id),
-    FOREIGN KEY (status_id) REFERENCES status_types(status_id),
-    FOREIGN KEY (user_type_id) REFERENCES user_types(user_type_id),
-    FOREIGN KEY (gender_id) REFERENCES genders(gender_id)
-);
+    INDEX idx_status (status_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS departments (
-    department_id INT PRIMARY KEY AUTO_INCREMENT,
-    department_code VARCHAR(20) UNIQUE NOT NULL,
-    department_name VARCHAR(100) NOT NULL,
-    department_type_id INT,
-    parent_department_id INT,
-    description TEXT,
-    phone VARCHAR(20),
-    email VARCHAR(100),
-    address VARCHAR(200),
-    website VARCHAR(100),
-    dean_user_id INT,
-    status_id INT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
-    INDEX idx_department_code (department_code),
-    INDEX idx_parent_department (parent_department_id),
-    INDEX idx_department_status (status_id),
-    INDEX idx_dean_user (dean_user_id),
-    FOREIGN KEY (parent_department_id) REFERENCES departments(department_id),
-    FOREIGN KEY (dean_user_id) REFERENCES users(user_id),
-    FOREIGN KEY (status_id) REFERENCES status_types(status_id)
-);
-
-CREATE TABLE IF NOT EXISTS majors (
-    major_id INT PRIMARY KEY AUTO_INCREMENT,
-    major_code VARCHAR(20) UNIQUE NOT NULL,
-    major_name VARCHAR(100) NOT NULL,
-    department_id INT NOT NULL,
-    major_type_id INT,
-    degree_type_id INT,
-    duration_years INT DEFAULT 4,
-    description TEXT,
-    status_id INT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
-    INDEX idx_major_code (major_code),
-    INDEX idx_department (department_id),
-    INDEX idx_major_status (status_id),
-    FOREIGN KEY (department_id) REFERENCES departments(department_id),
-    FOREIGN KEY (status_id) REFERENCES status_types(status_id)
-);
-
-CREATE TABLE IF NOT EXISTS class_info (
-    class_id INT PRIMARY KEY AUTO_INCREMENT,
-    class_code VARCHAR(20) UNIQUE NOT NULL,
-    class_name VARCHAR(100) NOT NULL,
-    major_id INT NOT NULL,
-    grade_level INT NOT NULL,
-    class_number INT NOT NULL,
-    academic_year VARCHAR(9),
-    head_teacher_user_id INT,
-    counselor_user_id INT,
-    student_count INT DEFAULT 0,
-    max_students INT DEFAULT 50,
-    status_id INT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
-    INDEX idx_class_code (class_code),
-    INDEX idx_major (major_id),
-    INDEX idx_grade_level (grade_level),
-    INDEX idx_head_teacher (head_teacher_user_id),
-    INDEX idx_counselor (counselor_user_id),
-    INDEX idx_class_status (status_id),
-    FOREIGN KEY (major_id) REFERENCES majors(major_id),
-    FOREIGN KEY (head_teacher_user_id) REFERENCES users(user_id),
-    FOREIGN KEY (counselor_user_id) REFERENCES users(user_id),
-    FOREIGN KEY (status_id) REFERENCES status_types(status_id)
-);
-
-CREATE TABLE IF NOT EXISTS teachers (
-    teacher_id INT PRIMARY KEY AUTO_INCREMENT,
-    teacher_no VARCHAR(20) UNIQUE NOT NULL,
+-- 学生表
+CREATE TABLE students (
+    student_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    department_id INT NOT NULL,
-    title_id INT,
-    hire_date DATE,
-    office_location VARCHAR(100),
-    phone VARCHAR(20),
-    email VARCHAR(100),
-    research_direction TEXT,
-    education_background VARCHAR(200),
-    work_experience TEXT,
-    status_id INT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
-    INDEX idx_teacher_no (teacher_no),
-    INDEX idx_user_id (user_id),
-    INDEX idx_department (department_id),
-    INDEX idx_title (title_id),
-    INDEX idx_teacher_status (status_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (department_id) REFERENCES departments(department_id),
-    FOREIGN KEY (status_id) REFERENCES status_types(status_id)
-);
-
-CREATE TABLE IF NOT EXISTS students (
-    student_id INT PRIMARY KEY AUTO_INCREMENT,
-    student_no VARCHAR(20) UNIQUE NOT NULL,
-    user_id INT NOT NULL,
-    department_id INT NOT NULL,
-    major_id INT NOT NULL,
+    student_no VARCHAR(20) NOT NULL UNIQUE,
+    department_id INT,
+    major_id INT,
     class_id INT,
-    enrollment_date DATE NOT NULL,
+    enrollment_date DATE,
     graduation_date DATE,
     education_years INT DEFAULT 4,
-    education_level_id INT,
+    education_level_id INT DEFAULT 1,
     status_id INT DEFAULT 1,
     emergency_contact VARCHAR(50),
     emergency_phone VARCHAR(20),
     parent_name VARCHAR(50),
     parent_phone VARCHAR(20),
-    home_address VARCHAR(200),
+    home_address VARCHAR(255),
     high_school VARCHAR(100),
     entrance_score DECIMAL(5,2),
     scholarship_info TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (department_id) REFERENCES departments(department_id) ON DELETE SET NULL,
+    FOREIGN KEY (major_id) REFERENCES majors(major_id) ON DELETE SET NULL,
+    FOREIGN KEY (class_id) REFERENCES classes(class_id) ON DELETE SET NULL,
+    FOREIGN KEY (education_level_id) REFERENCES education_levels(education_level_id) ON DELETE SET NULL,
+    FOREIGN KEY (status_id) REFERENCES status_types(status_id) ON DELETE SET NULL,
     INDEX idx_student_no (student_no),
-    INDEX idx_user_id (user_id),
     INDEX idx_department (department_id),
-    INDEX idx_major (major_id),
-    INDEX idx_class (class_id),
-    INDEX idx_student_status (status_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (department_id) REFERENCES departments(department_id),
-    FOREIGN KEY (major_id) REFERENCES majors(major_id),
-    FOREIGN KEY (class_id) REFERENCES class_info(class_id),
-    FOREIGN KEY (status_id) REFERENCES status_types(status_id)
-);
+    INDEX idx_enrollment_date (enrollment_date),
+    INDEX idx_graduation_date (graduation_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS courses (
-    course_id INT PRIMARY KEY AUTO_INCREMENT,
-    course_code VARCHAR(20) UNIQUE NOT NULL,
+-- 教师表
+CREATE TABLE teachers (
+    teacher_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    teacher_no VARCHAR(20) NOT NULL UNIQUE,
+    department_id INT,
+    title_id INT,
+    status_id INT DEFAULT 1,
+    education VARCHAR(50),
+    research_area VARCHAR(100),
+    office_phone VARCHAR(20),
+    office_location VARCHAR(100),
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (department_id) REFERENCES departments(department_id) ON DELETE SET NULL,
+    FOREIGN KEY (title_id) REFERENCES titles(title_id) ON DELETE SET NULL,
+    FOREIGN KEY (status_id) REFERENCES status_types(status_id) ON DELETE SET NULL,
+    INDEX idx_teacher_no (teacher_no),
+    INDEX idx_department (department_id),
+    INDEX idx_research_area (research_area)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 部门表
+CREATE TABLE departments (
+    department_id INT AUTO_INCREMENT PRIMARY KEY,
+    department_name VARCHAR(100) NOT NULL,
+    department_code VARCHAR(20) NOT NULL UNIQUE,
+    description TEXT,
+    status_id INT DEFAULT 1,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (status_id) REFERENCES status_types(status_id) ON DELETE SET NULL,
+    INDEX idx_department_code (department_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 专业表
+CREATE TABLE majors (
+    major_id INT AUTO_INCREMENT PRIMARY KEY,
+    major_name VARCHAR(100) NOT NULL,
+    major_code VARCHAR(20) NOT NULL UNIQUE,
+    department_id INT,
+    description TEXT,
+    status_id INT DEFAULT 1,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (department_id) REFERENCES departments(department_id) ON DELETE SET NULL,
+    FOREIGN KEY (status_id) REFERENCES status_types(status_id) ON DELETE SET NULL,
+    INDEX idx_major_code (major_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 班级表
+CREATE TABLE classes (
+    class_id INT AUTO_INCREMENT PRIMARY KEY,
+    class_name VARCHAR(50) NOT NULL,
+    class_code VARCHAR(20) NOT NULL UNIQUE,
+    major_id INT,
+    department_id INT,
+    grade_year INT,
+    student_count INT DEFAULT 0,
+    status_id INT DEFAULT 1,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (major_id) REFERENCES majors(major_id) ON DELETE SET NULL,
+    FOREIGN KEY (department_id) REFERENCES departments(department_id) ON DELETE SET NULL,
+    FOREIGN KEY (status_id) REFERENCES status_types(status_id) ON DELETE SET NULL,
+    INDEX idx_class_code (class_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 课程表
+CREATE TABLE courses (
+    course_id INT AUTO_INCREMENT PRIMARY KEY,
+    course_code VARCHAR(20) NOT NULL UNIQUE,
     course_name VARCHAR(100) NOT NULL,
-    course_type_id INT NOT NULL,
+    course_type_id INT DEFAULT 1,
     credit DECIMAL(3,1) NOT NULL,
-    total_hours INT,
-    theory_hours INT,
-    practice_hours INT,
-    department_id INT NOT NULL,
+    total_hours INT NOT NULL,
+    theory_hours INT DEFAULT 0,
+    practice_hours INT DEFAULT 0,
+    department_id INT,
     major_id INT,
     description TEXT,
     syllabus TEXT,
-    textbook VARCHAR(200),
+    textbook VARCHAR(255),
     prerequisites TEXT,
     is_compulsory BOOLEAN DEFAULT TRUE,
     status_id INT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (course_type_id) REFERENCES course_types(course_type_id) ON DELETE SET NULL,
+    FOREIGN KEY (department_id) REFERENCES departments(department_id) ON DELETE SET NULL,
+    FOREIGN KEY (major_id) REFERENCES majors(major_id) ON DELETE SET NULL,
+    FOREIGN KEY (status_id) REFERENCES status_types(status_id) ON DELETE SET NULL,
     INDEX idx_course_code (course_code),
     INDEX idx_course_name (course_name),
-    INDEX idx_course_type (course_type_id),
     INDEX idx_department (department_id),
-    INDEX idx_major (major_id),
-    INDEX idx_course_status (status_id),
-    FOREIGN KEY (department_id) REFERENCES departments(department_id),
-    FOREIGN KEY (major_id) REFERENCES majors(major_id),
-    FOREIGN KEY (status_id) REFERENCES status_types(status_id)
-);
+    INDEX idx_is_compulsory (is_compulsory)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS semesters (
-    semester_id INT PRIMARY KEY AUTO_INCREMENT,
+-- 学期表
+CREATE TABLE semesters (
+    semester_id INT AUTO_INCREMENT PRIMARY KEY,
     semester_name VARCHAR(50) NOT NULL,
-    academic_year VARCHAR(9) NOT NULL,
-    semester_type_id INT NOT NULL,
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
-    course_selection_start DATETIME,
-    course_selection_end DATETIME,
-    grade_entry_start DATETIME,
-    grade_entry_end DATETIME,
+    semester_code VARCHAR(20) NOT NULL UNIQUE,
+    semester_type_id INT DEFAULT 1,
+    start_date DATE,
+    end_date DATE,
     status_id INT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
-    INDEX idx_academic_year (academic_year),
-    INDEX idx_semester_type (semester_type_id),
-    INDEX idx_semester_status (status_id),
-    FOREIGN KEY (status_id) REFERENCES status_types(status_id)
-);
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (semester_type_id) REFERENCES semester_types(semester_type_id) ON DELETE SET NULL,
+    FOREIGN KEY (status_id) REFERENCES status_types(status_id) ON DELETE SET NULL,
+    INDEX idx_semester_code (semester_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS teaching_assignments (
-    assignment_id INT PRIMARY KEY AUTO_INCREMENT,
+-- 教学安排表
+CREATE TABLE teaching_assignments (
+    assignment_id INT AUTO_INCREMENT PRIMARY KEY,
     course_id INT NOT NULL,
     teacher_id INT NOT NULL,
     semester_id INT NOT NULL,
-    class_time VARCHAR(200),
-    classroom VARCHAR(100),
-    max_students INT DEFAULT 100,
+    class_id INT,
+    max_students INT DEFAULT 50,
     current_students INT DEFAULT 0,
-    credit_hours INT,
-    course_type_id INT,
-    assessment_method_id INT,
+    classroom VARCHAR(50),
+    schedule VARCHAR(255),
     status_id INT DEFAULT 1,
-    description TEXT,
-    requirements TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
-    INDEX idx_course (course_id),
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE,
+    FOREIGN KEY (teacher_id) REFERENCES teachers(teacher_id) ON DELETE CASCADE,
+    FOREIGN KEY (semester_id) REFERENCES semesters(semester_id) ON DELETE CASCADE,
+    FOREIGN KEY (class_id) REFERENCES classes(class_id) ON DELETE SET NULL,
+    FOREIGN KEY (status_id) REFERENCES status_types(status_id) ON DELETE SET NULL,
+    INDEX idx_course_semester (course_id, semester_id),
     INDEX idx_teacher (teacher_id),
     INDEX idx_semester (semester_id),
-    INDEX idx_classroom (classroom),
-    INDEX idx_assignment_status (status_id),
-    UNIQUE KEY uk_course_teacher_semester (course_id, teacher_id, semester_id),
-    FOREIGN KEY (course_id) REFERENCES courses(course_id),
-    FOREIGN KEY (teacher_id) REFERENCES teachers(teacher_id),
-    FOREIGN KEY (semester_id) REFERENCES semesters(semester_id),
-    FOREIGN KEY (status_id) REFERENCES status_types(status_id)
-);
+    INDEX idx_class (class_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS course_grades (
-    grade_id INT PRIMARY KEY AUTO_INCREMENT,
-    student_id INT NOT NULL,
-    assignment_id INT NOT NULL,
-    usual_score DECIMAL(5,2),
-    midterm_score DECIMAL(5,2),
-    final_score DECIMAL(5,2),
-    total_score DECIMAL(5,2),
-    gpa_grade DECIMAL(3,2),
-    grade_level_id INT,
-    make_up_score DECIMAL(5,2),
-    retake_score DECIMAL(5,2),
-    review_status_id INT DEFAULT 1,
-    review_time DATETIME,
-    reviewer_id INT,
-    review_comment TEXT,
-    status_id INT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
-    INDEX idx_student (student_id),
-    INDEX idx_assignment (assignment_id),
-    INDEX idx_grade_level (grade_level_id),
-    INDEX idx_review_status (review_status_id),
-    INDEX idx_reviewer (reviewer_id),
-    INDEX idx_grade_status (status_id),
-    UNIQUE KEY uk_student_assignment (student_id, assignment_id),
-    FOREIGN KEY (student_id) REFERENCES students(student_id),
-    FOREIGN KEY (assignment_id) REFERENCES teaching_assignments(assignment_id),
-    FOREIGN KEY (reviewer_id) REFERENCES users(user_id),
-    FOREIGN KEY (status_id) REFERENCES status_types(status_id)
-);
-
-CREATE TABLE IF NOT EXISTS course_selections (
-    selection_id INT PRIMARY KEY AUTO_INCREMENT,
+-- 选课记录表
+CREATE TABLE course_selections (
+    selection_id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT NOT NULL,
     assignment_id INT NOT NULL,
     selection_time DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -349,290 +320,373 @@ CREATE TABLE IF NOT EXISTS course_selections (
     priority INT DEFAULT 1,
     status_id INT DEFAULT 1,
     drop_time DATETIME,
-    drop_reason VARCHAR(200),
+    drop_reason VARCHAR(255),
     final_grade DECIMAL(5,2),
     attendance_rate DECIMAL(5,2),
-    evaluation_score DECIMAL(3,2),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
-    INDEX idx_student (student_id),
-    INDEX idx_assignment (assignment_id),
-    INDEX idx_selection_time (selection_time),
-    INDEX idx_selection_status (status_id),
+    evaluation_score DECIMAL(5,2),
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
+    FOREIGN KEY (assignment_id) REFERENCES teaching_assignments(assignment_id) ON DELETE CASCADE,
+    FOREIGN KEY (selection_type_id) REFERENCES selection_types(selection_type_id) ON DELETE SET NULL,
+    FOREIGN KEY (status_id) REFERENCES status_types(status_id) ON DELETE SET NULL,
     UNIQUE KEY uk_student_assignment (student_id, assignment_id),
-    FOREIGN KEY (student_id) REFERENCES students(student_id),
-    FOREIGN KEY (assignment_id) REFERENCES teaching_assignments(assignment_id),
-    FOREIGN KEY (status_id) REFERENCES status_types(status_id)
-);
+    INDEX idx_student_semester (student_id, assignment_id),
+    INDEX idx_selection_time (selection_time),
+    INDEX idx_drop_time (drop_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS teacher_titles (
-    title_id INT PRIMARY KEY AUTO_INCREMENT,
-    title_name VARCHAR(50) NOT NULL,
-    title_level INT,
-    description TEXT,
+-- 成绩表
+CREATE TABLE course_grades (
+    grade_id INT AUTO_INCREMENT PRIMARY KEY,
+    selection_id INT NOT NULL,
+    usual_score DECIMAL(5,2),
+    midterm_score DECIMAL(5,2),
+    final_score DECIMAL(5,2),
+    total_score DECIMAL(5,2),
+    grade_level VARCHAR(10),
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (selection_id) REFERENCES course_selections(selection_id) ON DELETE CASCADE,
+    INDEX idx_selection (selection_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 公告表
+CREATE TABLE announcements (
+    announcement_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    content TEXT,
+    publisher_id INT NOT NULL,
+    department_id INT,
+    announcement_type_id INT NOT NULL DEFAULT 1,
+    priority INT DEFAULT 0 COMMENT '优先级：0-普通，1-重要，2-紧急',
+    target_audience VARCHAR(20) DEFAULT 'ALL' COMMENT '受众：ALL-全体，STUDENT-学生，TEACHER-教师',
     status_id INT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
-    INDEX idx_title_level (title_level),
-    INDEX idx_title_status (status_id),
-    FOREIGN KEY (status_id) REFERENCES status_types(status_id)
-);
+    publish_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (publisher_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (department_id) REFERENCES departments(department_id) ON DELETE SET NULL,
+    FOREIGN KEY (announcement_type_id) REFERENCES announcement_types(announcement_type_id),
+    FOREIGN KEY (status_id) REFERENCES status_types(status_id),
+    INDEX idx_publish_time (publish_time),
+    INDEX idx_department (department_id),
+    INDEX idx_type (announcement_type_id),
+    INDEX idx_audience (target_audience),
+    INDEX idx_publisher (publisher_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS course_types (
-    course_type_id INT PRIMARY KEY AUTO_INCREMENT,
-    type_code VARCHAR(20) UNIQUE NOT NULL,
-    type_name VARCHAR(50) NOT NULL,
-    description TEXT,
-    is_active BOOLEAN DEFAULT TRUE,
-    sort_order INT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
-    INDEX idx_course_type_code (type_code),
-    INDEX idx_course_type_active (is_active)
-);
+-- 公告阅读记录表
+CREATE TABLE announcement_reads (
+    read_id INT AUTO_INCREMENT PRIMARY KEY,
+    announcement_id INT NOT NULL,
+    user_id INT NOT NULL,
+    read_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (announcement_id) REFERENCES announcements(announcement_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    UNIQUE KEY uk_announcement_user (announcement_id, user_id),
+    INDEX idx_user (user_id),
+    INDEX idx_announcement (announcement_id),
+    INDEX idx_read_time (read_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS semester_types (
-    semester_type_id INT PRIMARY KEY AUTO_INCREMENT,
-    type_code VARCHAR(20) UNIQUE NOT NULL,
-    type_name VARCHAR(50) NOT NULL,
-    description TEXT,
-    is_active BOOLEAN DEFAULT TRUE,
-    sort_order INT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
-    INDEX idx_semester_type_code (type_code),
-    INDEX idx_semester_type_active (is_active)
-);
+-- ========================================
+-- 插入字典数据
+-- ========================================
 
-CREATE TABLE IF NOT EXISTS selection_types (
-    selection_type_id INT PRIMARY KEY AUTO_INCREMENT,
-    type_code VARCHAR(20) UNIQUE NOT NULL,
-    type_name VARCHAR(50) NOT NULL,
-    description TEXT,
-    is_active BOOLEAN DEFAULT TRUE,
-    sort_order INT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
-    INDEX idx_selection_type_code (type_code),
-    INDEX idx_selection_type_active (is_active)
-);
+-- 状态类型
+INSERT INTO status_types (status_name, status_code, description) VALUES
+('正常', 'active', '正常状态'),
+('禁用', 'disabled', '禁用状态'),
+('已删除', 'deleted', '已删除状态'),
+('待审核', 'pending', '待审核状态'),
+('已通过', 'approved', '已通过状态'),
+('已拒绝', 'rejected', '已拒绝状态');
 
-CREATE TABLE IF NOT EXISTS grade_levels (
-    grade_level_id INT PRIMARY KEY AUTO_INCREMENT,
-    level_code VARCHAR(10) UNIQUE NOT NULL,
-    level_name VARCHAR(20) NOT NULL,
-    min_score DECIMAL(5,2) NOT NULL,
-    max_score DECIMAL(5,2) NOT NULL,
-    gpa_points DECIMAL(3,2) NOT NULL,
-    description TEXT,
-    is_active BOOLEAN DEFAULT TRUE,
-    sort_order INT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
-    INDEX idx_grade_level_code (level_code),
-    INDEX idx_grade_level_active (is_active)
-);
+-- 课程类型
+INSERT INTO course_types (type_name, type_code, description) VALUES
+('必修课', 'compulsory', '必修课程'),
+('选修课', 'elective', '选修课程'),
+('通识课', 'general', '通识课程'),
+('实践课', 'practice', '实践课程');
 
-CREATE TABLE IF NOT EXISTS assessment_methods (
-    assessment_method_id INT PRIMARY KEY AUTO_INCREMENT,
-    method_code VARCHAR(20) UNIQUE NOT NULL,
-    method_name VARCHAR(50) NOT NULL,
-    description TEXT,
-    is_active BOOLEAN DEFAULT TRUE,
-    sort_order INT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
-    INDEX idx_assessment_method_code (method_code),
-    INDEX idx_assessment_method_active (is_active)
-);
+-- 选课类型
+INSERT INTO selection_types (type_name, type_code, description) VALUES
+('正常选课', 'normal', '正常选课'),
+('补选', 'makeup', '补选课程'),
+('重修', 'retake', '重修课程'),
+('免修', 'exempt', '免修课程');
 
-CREATE TABLE IF NOT EXISTS review_statuses (
-    review_status_id INT PRIMARY KEY AUTO_INCREMENT,
-    status_code VARCHAR(20) UNIQUE NOT NULL,
-    status_name VARCHAR(50) NOT NULL,
-    description TEXT,
-    is_active BOOLEAN DEFAULT TRUE,
-    sort_order INT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    
-    INDEX idx_review_status_code (status_code),
-    INDEX idx_review_status_active (is_active)
-);
+-- 职称
+INSERT INTO titles (title_name, title_code, description) VALUES
+('助教', 'assistant', '助教'),
+('讲师', 'lecturer', '讲师'),
+('副教授', 'associate_professor', '副教授'),
+('教授', 'professor', '教授');
 
-INSERT IGNORE INTO status_types (status_name, status_category, description, color_code, sort_order) VALUES
-('正常', 'user_status', '用户正常状态', '#67C23A', 1),
-('禁用', 'user_status', '用户被禁用', '#F56C6C', 2),
-('待审核', 'user_status', '用户待审核', '#E6A23C', 3),
-('已删除', 'user_status', '用户已删除', '#909399', 4),
-('正常', 'course_status', '课程正常状态', '#67C23A', 1),
-('已满', 'course_status', '课程人数已满', '#E6A23C', 2),
-('已结束', 'course_status', '课程已结束', '#909399', 3),
-('已选', 'selection_status', '选课成功', '#67C23A', 1),
-('已退', 'selection_status', '已退课', '#F56C6C', 2),
-('待确认', 'selection_status', '选课待确认', '#E6A23C', 3),
-('优秀', 'grade_level', '优秀成绩', '#67C23A', 1),
-('良好', 'grade_level', '良好成绩', '#409EFF', 2),
-('中等', 'grade_level', '中等成绩', '#E6A23C', 3),
-('及格', 'grade_level', '及格成绩', '#909399', 4),
-('不及格', 'grade_level', '不及格成绩', '#F56C6C', 5);
+-- 性别类型
+INSERT INTO gender_types (gender_name, gender_code) VALUES
+('男', 'MALE'),
+('女', 'FEMALE'),
+('其他', 'OTHER');
 
-INSERT IGNORE INTO teacher_titles (title_name, title_level, description) VALUES
-('教授', 1, '正高级职称'),
-('副教授', 2, '副高级职称'),
-('讲师', 3, '中级职称'),
-('助教', 4, '初级职称'),
-('研究员', 1, '正高级研究职称'),
-('副研究员', 2, '副高级研究职称');
+-- 用户类型
+INSERT INTO user_types (type_name, type_code, description) VALUES
+('学生', 'STUDENT', '在校学生'),
+('教师', 'TEACHER', '教师用户'),
+('管理员', 'ADMIN', '系统管理员');
 
-INSERT IGNORE INTO course_types (type_code, type_name, description, sort_order) VALUES
-('THEORY', '理论课', '以理论教学为主的课程', 1),
-('PRACTICE', '实践课', '以实践教学为主的课程', 2),
-('EXPERIMENT', '实验课', '实验教学课程', 3),
-('DESIGN', '设计课', '课程设计类课程', 4),
-('THESIS', '论文', '毕业论文/设计', 5),
-('INTERNSHIP', '实习', '实习实训课程', 6);
+-- 学期类型
+INSERT INTO semester_types (type_name, type_code, description) VALUES
+('第一学期', 'FIRST', '秋季学期'),
+('第二学期', 'SECOND', '春季学期');
 
-INSERT IGNORE INTO semester_types (type_code, type_name, description, sort_order) VALUES
-('SPRING', '春季学期', '春季学期，通常从2月到7月', 1),
-('FALL', '秋季学期', '秋季学期，通常从9月到次年1月', 2),
-('SUMMER', '夏季学期', '夏季短学期', 3),
-('WINTER', '冬季学期', '冬季短学期', 4);
+-- 学历等级
+INSERT INTO education_levels (level_name, level_code, description) VALUES
+('本科', 'UNDERGRADUATE', '本科教育'),
+('硕士', 'MASTER', '硕士研究生'),
+('博士', 'DOCTOR', '博士研究生');
 
-INSERT IGNORE INTO selection_types (type_code, type_name, description, sort_order) VALUES
-('NORMAL', '正常选课', '正常选课流程', 1),
-('MAKE_UP', '补选', '补选课程', 2),
-('RETAKE', '重修选课', '重修课程选择', 3),
-('AUDIT', '旁听', '旁听课程选择', 4);
+-- 公告类型
+INSERT INTO announcement_types (type_name, type_code, description) VALUES
+('通知公告', 'NOTICE', '一般性通知公告'),
+('校园招聘', 'RECRUITMENT', '校园招聘信息'),
+('学术讲座', 'LECTURE', '学术讲座信息'),
+('活动通知', 'EVENT', '校园活动通知'),
+('紧急通知', 'URGENT', '紧急重要通知'),
+('教学安排', 'TEACHING', '教学安排通知'),
+('成果申报', 'ACHIEVEMENT', '教学成果申报通知'),
+('培训通知', 'TRAINING', '教师培训通知'),
+('检查通知', 'INSPECTION', '教学检查通知');
 
-INSERT IGNORE INTO grade_levels (level_code, level_name, min_score, max_score, gpa_points, sort_order) VALUES
-('A+', '优秀', 95.00, 100.00, 4.0, 1),
-('A', '优秀', 90.00, 94.99, 3.7, 2),
-('B+', '良好', 85.00, 89.99, 3.3, 3),
-('B', '良好', 80.00, 84.99, 3.0, 4),
-('B-', '良好', 75.00, 79.99, 2.7, 5),
-('C+', '中等', 70.00, 74.99, 2.3, 6),
-('C', '中等', 65.00, 69.99, 2.0, 7),
-('C-', '中等', 60.00, 64.99, 1.7, 8),
-('D', '及格', 55.00, 59.99, 1.0, 9),
-('F', '不及格', 0.00, 54.99, 0.0, 10);
+-- ========================================
+-- 插入基础数据
+-- ========================================
 
-INSERT IGNORE INTO assessment_methods (method_code, method_name, description, sort_order) VALUES
-('EXAM', '考试', '闭卷考试', 1),
-('OPEN_EXAM', '开卷考试', '开卷考试', 2),
-('PAPER', '论文', '课程论文', 3),
-('PROJECT', '项目', '课程项目', 4),
-('PRESENTATION', '展示', '课堂展示', 5),
-('PRACTICAL', '实操', '实际操作考核', 6);
+-- 部门
+INSERT INTO departments (department_name, department_code, description) VALUES
+('计算机学院', 'CS', '计算机科学与技术学院'),
+('软件学院', 'SE', '软件学院'),
+('信息学院', 'IS', '信息学院'),
+('数学学院', 'MA', '数学学院'),
+('外语学院', 'FL', '外语学院'),
+('教务处', 'AA', '教务处'),
+('科研处', 'RA', '科研处'),
+('教师发展中心', 'TDC', '教师发展中心'),
+('教学质量监控中心', 'QMC', '教学质量监控中心'),
+('就业指导中心', 'EC', '就业指导中心');
 
-INSERT IGNORE INTO review_statuses (status_code, status_name, description, sort_order) VALUES
-('PENDING', '待审核', '成绩待审核', 1),
-('APPROVED', '已通过', '成绩审核通过', 2),
-('REJECTED', '已拒绝', '成绩审核拒绝', 3),
-('MODIFIED', '已修改', '成绩已修改', 4);
+-- 专业
+INSERT INTO majors (major_name, major_code, department_id, description) VALUES
+('计算机科学与技术', 'CS001', 1, '计算机科学与技术专业'),
+('软件工程', 'SE001', 2, '软件工程专业'),
+('信息管理与信息系统', 'IS001', 3, '信息管理与信息系统专业'),
+('数学与应用数学', 'MA001', 4, '数学与应用数学专业'),
+('英语', 'EN001', 5, '英语专业');
 
-INSERT IGNORE INTO genders (gender_code, gender_name, sort_order) VALUES
-('MALE', '男', 1),
-('FEMALE', '女', 2),
-('OTHER', '其他', 3);
+-- 班级
+INSERT INTO classes (class_name, class_code, major_id, department_id, grade_year) VALUES
+('计算机1班', 'CS2024001', 1, 1, 2024),
+('计算机2班', 'CS2024002', 1, 1, 2024),
+('软件工程1班', 'SE2024001', 2, 2, 2024),
+('软件工程2班', 'SE2024002', 2, 2, 2024);
 
-INSERT IGNORE INTO user_types (type_code, type_name, description, permissions, sort_order) VALUES
-('ADMIN', '管理员', '系统管理员', '{"system": ["read", "write", "delete"], "users": ["read", "write", "delete"], "courses": ["read", "write", "delete"], "grades": ["read", "write", "delete"]}', 1),
-('TEACHER', '教师', '教师用户', '{"courses": ["read", "write"], "grades": ["read", "write"], "students": ["read"]}', 2),
-('STUDENT', '学生', '学生用户', '{"courses": ["read"], "grades": ["read"], "profile": ["read", "write"]}', 3);
+-- 学期
+INSERT INTO semesters (semester_name, semester_code, semester_type_id, start_date, end_date) VALUES
+('2024-2025第一学期', '2024-2025-1', 1, '2024-09-01', '2025-01-20'),
+('2024-2025第二学期', '2024-2025-2', 2, '2025-02-20', '2025-07-10'),
+('2025-2026第一学期', '2025-2026-1', 1, '2025-09-01', '2026-01-20');
 
-INSERT IGNORE INTO departments (department_code, department_name, description, status_id, created_at, updated_at) VALUES
-('CS', '计算机科学与技术学院', '计算机科学与技术学院', 1, NOW(), NOW()),
-('MATH', '数学学院', '数学学院', 1, NOW(), NOW()),
-('PHYS', '物理学院', '物理学院', 1, NOW(), NOW()),
-('CHEM', '化学学院', '化学学院', 1, NOW(), NOW()),
-('BIO', '生命科学学院', '生命科学学院', 1, NOW(), NOW());
+-- 课程
+INSERT INTO courses (course_code, course_name, course_type_id, credit, total_hours, theory_hours, practice_hours, department_id, is_compulsory) VALUES
+('CS101', '程序设计基础', 1, 4.0, 64, 48, 16, 1, TRUE),
+('CS102', '数据结构', 1, 4.0, 64, 48, 16, 1, TRUE),
+('CS103', '算法分析', 1, 3.0, 48, 40, 8, 1, TRUE),
+('CS104', '数据库原理', 1, 3.0, 48, 32, 16, 1, TRUE),
+('CS105', '操作系统', 1, 3.0, 48, 40, 8, 1, TRUE),
+('SE101', '软件工程导论', 1, 3.0, 48, 32, 16, 2, TRUE),
+('SE102', 'Web开发技术', 2, 3.0, 48, 24, 24, 2, FALSE),
+('SE103', '移动应用开发', 2, 3.0, 48, 24, 24, 2, FALSE);
 
-INSERT IGNORE INTO majors (major_code, major_name, department_id, description, status_id, created_at, updated_at) VALUES
-('CS001', '计算机科学与技术', 1, '计算机科学与技术专业', 1, NOW(), NOW()),
-('CS002', '软件工程', 1, '软件工程专业', 1, NOW(), NOW()),
-('CS003', '网络工程', 1, '网络工程专业', 1, NOW(), NOW()),
-('MATH001', '数学与应用数学', 2, '数学与应用数学专业', 1, NOW(), NOW()),
-('PHYS001', '物理学', 3, '物理学专业', 1, NOW(), NOW());
+-- 用户
+INSERT INTO users (username, password, real_name, user_type_id, gender_id) VALUES
+('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5EH', '系统管理员', 3, 1),
+('teacher1', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5EH', '张教授', 2, 1),
+('teacher2', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5EH', '李讲师', 2, 2),
+('student1', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5EH', '王同学', 1, 1),
+('student2', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5EH', '李同学', 1, 2);
 
-INSERT IGNORE INTO semesters (semester_name, academic_year, semester_type_id, start_date, end_date, course_selection_start, course_selection_end, grade_entry_start, grade_entry_end, status_id, created_at, updated_at) VALUES
-('2024春季学期', '2023-2024', 1, '2024-02-26', '2024-07-15', '2024-01-15 00:00:00', '2024-02-25 23:59:59', '2024-06-01 00:00:00', '2024-07-15 23:59:59', 1, NOW(), NOW()),
-('2024秋季学期', '2024-2025', 2, '2024-09-02', '2025-01-20', '2024-08-01 00:00:00', '2024-09-01 23:59:59', '2024-12-15 00:00:00', '2025-01-20 23:59:59', 1, NOW(), NOW());
+-- 教师
+INSERT INTO teachers (user_id, teacher_no, department_id, title_id) VALUES
+(2, 'T2024001', 1, 4),
+(3, 'T2024002', 2, 2);
 
-INSERT IGNORE INTO users (username, password, phone, email, real_name, gender_id, user_type_id, status_id, created_at, updated_at) VALUES
-('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBaUKk7h.T0mUO', '13800138000', 'admin@university.edu.cn', '管理员', 1, 1, 1, NOW(), NOW()),
-('teacher001', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBaUKk7h.T0mUO', '13800138001', 'teacher001@university.edu.cn', '张教授', 1, 2, 1, NOW(), NOW()),
-('teacher002', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBaUKk7h.T0mUO', '13800138002', 'teacher002@university.edu.cn', '李教授', 2, 2, 1, NOW(), NOW()),
-('student001', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBaUKk7h.T0mUO', '13800138003', 'student001@university.edu.cn', '王同学', 1, 3, 1, NOW(), NOW()),
-('student002', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBaUKk7h.T0mUO', '13800138004', 'student002@university.edu.cn', '李同学', 2, 3, 1, NOW(), NOW()),
-('student003', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBaUKk7h.T0mUO', '13800138005', 'student003@university.edu.cn', '张同学', 1, 3, 1, NOW(), NOW());
+-- 学生
+INSERT INTO students (user_id, student_no, department_id, major_id, class_id, enrollment_date) VALUES
+(4, 'S2024001', 1, 1, 1, '2024-09-01'),
+(5, 'S2024002', 2, 2, 3, '2024-09-01');
 
-INSERT IGNORE INTO teachers (teacher_no, user_id, department_id, title_id, hire_date, office_location, phone, email, status_id, created_at, updated_at) VALUES
-('T001', 2, 1, 1, '2015-09-01', '计算机楼301', '13800138001', 'teacher001@university.edu.cn', 1, NOW(), NOW()),
-('T002', 3, 1, 2, '2018-03-15', '计算机楼302', '13800138002', 'teacher002@university.edu.cn', 1, NOW(), NOW());
+-- 教学安排
+INSERT INTO teaching_assignments (course_id, teacher_id, semester_id, class_id, max_students, classroom, schedule) VALUES
+(1, 1, 1, 1, 50, 'A101', '周一 1-2节'),
+(2, 1, 1, 1, 50, 'A102', '周二 3-4节'),
+(3, 1, 1, 1, 50, 'A103', '周三 1-2节'),
+(4, 2, 1, 3, 50, 'B101', '周四 3-4节'),
+(6, 2, 1, 3, 50, 'B102', '周五 1-2节'),
+(7, 2, 1, 3, 50, 'B103', '周一 3-4节');
 
-INSERT IGNORE INTO students (student_no, user_id, department_id, major_id, enrollment_date, education_years, status_id, created_at, updated_at) VALUES
-('S001', 4, 1, 1, '2022-09-01', 4, 1, NOW(), NOW()),
-('S002', 5, 1, 1, '2022-09-01', 4, 1, NOW(), NOW()),
-('S003', 6, 1, 2, '2023-09-01', 4, 1, NOW(), NOW());
+-- 选课记录
+INSERT INTO course_selections (student_id, assignment_id, selection_type_id) VALUES
+(1, 1, 1),
+(1, 2, 1),
+(1, 3, 1),
+(2, 4, 1),
+(2, 6, 1);
 
-INSERT IGNORE INTO courses (course_code, course_name, course_type_id, credit, department_id, major_id, is_compulsory, status_id, created_at, updated_at) VALUES
-('CS101', '程序设计基础', 1, 4.0, 1, 1, TRUE, 1, NOW(), NOW()),
-('CS102', '数据结构', 1, 3.5, 1, 1, TRUE, 1, NOW(), NOW()),
-('CS201', '算法分析', 1, 3.0, 1, 1, TRUE, 1, NOW(), NOW()),
-('CS202', '数据库系统', 1, 3.5, 1, 1, TRUE, 1, NOW(), NOW()),
-('CS301', '软件工程', 1, 3.0, 1, 2, TRUE, 1, NOW(), NOW()),
-('CS302', '计算机网络', 1, 3.0, 1, 1, TRUE, 1, NOW(), NOW());
+-- 成绩
+INSERT INTO course_grades (selection_id, usual_score, midterm_score, final_score, total_score, grade_level) VALUES
+(1, 85.0, 88.0, 90.0, 88.0, 'A'),
+(2, 82.0, 85.0, 87.0, 85.0, 'A'),
+(3, 78.0, 80.0, 82.0, 80.0, 'B'),
+(4, 75.0, 78.0, 80.0, 78.0, 'B'),
+(5, 88.0, 90.0, 92.0, 90.0, 'A');
 
-INSERT IGNORE INTO teaching_assignments (course_id, teacher_id, semester_id, class_time, classroom, max_students, current_students, status_id, created_at, updated_at) VALUES
-(1, 1, 1, '周一 8:00-10:00, 周三 8:00-10:00', 'A101', 120, 85, 1, NOW(), NOW()),
-(2, 1, 1, '周二 14:00-16:00, 周四 14:00-16:00', 'A102', 100, 78, 1, NOW(), NOW()),
-(3, 2, 1, '周一 14:00-16:00, 周五 14:00-16:00', 'A201', 80, 65, 1, NOW(), NOW()),
-(4, 2, 1, '周三 10:00-12:00, 周五 10:00-12:00', 'A202', 90, 72, 1, NOW(), NOW()),
-(5, 1, 2, '周二 8:00-10:00, 周四 8:00-10:00', 'B101', 60, 45, 1, NOW(), NOW()),
-(6, 2, 2, '周一 16:00-18:00, 周三 16:00-18:00', 'B201', 70, 58, 1, NOW(), NOW());
+-- 公告
+INSERT INTO announcements (title, content, publisher_id, department_id, announcement_type_id, priority, target_audience, publish_time) VALUES
+('关于2023-2024学年第二学期教学安排的通知', '根据学校教学工作安排，现将2023-2024学年第二学期教学安排通知如下...', 1, 6, 6, 1, 'ALL', '2023-11-01 00:00:00'),
+('2023年度教学成果奖申报通知', '为表彰在教学工作中取得突出成绩的教师，学校决定开展2023年度教学成果奖申报工作...', 1, 7, 7, 1, 'TEACHER', '2023-10-25 00:00:00'),
+('关于举办教师信息化教学能力提升培训的通知', '为进一步提升教师信息化教学能力，学校决定举办教师信息化教学能力提升培训...', 1, 8, 8, 0, 'TEACHER', '2023-10-20 00:00:00'),
+('关于开展期中教学检查工作的通知', '为全面了解本学期教学运行情况，提高教学质量，学校决定开展期中教学检查工作...', 1, 9, 9, 1, 'TEACHER', '2023-10-15 00:00:00'),
+('校园招聘信息：腾讯2024校园招聘', '腾讯公司2024校园招聘正式启动，欢迎各位同学踊跃报名...', 1, 10, 2, 1, 'STUDENT', '2023-12-11 00:00:00');
 
-INSERT IGNORE INTO course_selections (student_id, assignment_id, status_id, created_at, updated_at) VALUES
-(1, 1, 8, NOW(), NOW()),
-(1, 2, 8, NOW(), NOW()),
-(1, 3, 8, NOW(), NOW()),
-(2, 1, 8, NOW(), NOW()),
-(2, 2, 8, NOW(), NOW()),
-(2, 4, 8, NOW(), NOW()),
-(3, 5, 8, NOW(), NOW()),
-(3, 6, 8, NOW(), NOW());
+-- ========================================
+-- 创建视图（简化查询）
+-- ========================================
 
-INSERT IGNORE INTO course_grades (student_id, assignment_id, usual_score, midterm_score, final_score, total_score, gpa_grade, status_id, created_at, updated_at) VALUES
-(1, 1, 85.5, 88.0, 92.0, 88.5, 3.7, 1, NOW(), NOW()),
-(1, 2, 78.0, 82.5, 85.0, 81.8, 3.0, 1, NOW(), NOW()),
-(1, 3, 90.0, 87.5, 89.0, 88.8, 3.7, 1, NOW(), NOW()),
-(2, 1, 92.0, 89.5, 91.0, 90.8, 3.7, 1, NOW(), NOW()),
-(2, 2, 88.5, 85.0, 87.5, 87.0, 3.3, 1, NOW(), NOW()),
-(2, 4, 76.0, 79.5, 82.0, 79.2, 2.7, 1, NOW(), NOW()),
-(3, 5, 83.5, 86.0, 88.5, 86.0, 3.3, 1, NOW(), NOW()),
-(3, 6, 79.0, 81.5, 84.0, 81.5, 3.0, 1, NOW(), NOW());
+-- 学生信息视图
+CREATE OR REPLACE VIEW v_student_info AS
+SELECT
+    s.student_id,
+    s.student_no,
+    u.user_id,
+    u.username,
+    u.real_name,
+    u.phone,
+    u.email,
+    u.avatar,
+    u.gender_id,
+    gt.gender_name AS gender,
+    u.birthday,
+    s.department_id,
+    d.department_name,
+    s.major_id,
+    m.major_name,
+    s.class_id,
+    c.class_name,
+    s.enrollment_date,
+    s.graduation_date,
+    s.education_years,
+    el.level_name AS education_level,
+    s.status_id,
+    st.status_name AS status
+FROM students s
+LEFT JOIN users u ON s.user_id = u.user_id
+LEFT JOIN gender_types gt ON u.gender_id = gt.gender_id
+LEFT JOIN departments d ON s.department_id = d.department_id
+LEFT JOIN majors m ON s.major_id = m.major_id
+LEFT JOIN classes c ON s.class_id = c.class_id
+LEFT JOIN education_levels el ON s.education_level_id = el.education_level_id
+LEFT JOIN status_types st ON s.status_id = st.status_id;
 
-SET FOREIGN_KEY_CHECKS = 1;
+-- 教师信息视图
+CREATE OR REPLACE VIEW v_teacher_info AS
+SELECT
+    t.teacher_id,
+    t.teacher_no,
+    u.user_id,
+    u.username,
+    u.real_name,
+    u.phone,
+    u.email,
+    u.avatar,
+    u.gender_id,
+    gt.gender_name AS gender,
+    u.birthday,
+    t.department_id,
+    d.department_name,
+    t.title_id,
+    ti.title_name,
+    t.education,
+    t.research_area,
+    t.office_phone,
+    t.office_location,
+    t.status_id,
+    st.status_name AS status
+FROM teachers t
+LEFT JOIN users u ON t.user_id = u.user_id
+LEFT JOIN gender_types gt ON u.gender_id = gt.gender_id
+LEFT JOIN departments d ON t.department_id = d.department_id
+LEFT JOIN titles ti ON t.title_id = ti.title_id
+LEFT JOIN status_types st ON t.status_id = st.status_id;
+
+-- 课程信息视图
+CREATE OR REPLACE VIEW v_course_info AS
+SELECT
+    c.course_id,
+    c.course_code,
+    c.course_name,
+    c.course_type_id,
+    ct.type_name AS course_type,
+    c.credit,
+    c.total_hours,
+    c.theory_hours,
+    c.practice_hours,
+    c.department_id,
+    d.department_name,
+    c.major_id,
+    m.major_name,
+    c.description,
+    c.syllabus,
+    c.textbook,
+    c.prerequisites,
+    c.is_compulsory,
+    c.status_id,
+    st.status_name AS status
+FROM courses c
+LEFT JOIN course_types ct ON c.course_type_id = ct.course_type_id
+LEFT JOIN departments d ON c.department_id = d.department_id
+LEFT JOIN majors m ON c.major_id = m.major_id
+LEFT JOIN status_types st ON c.status_id = st.status_id;
+
+-- 公告信息视图
+CREATE OR REPLACE VIEW v_announcement_info AS
+SELECT
+    a.announcement_id,
+    a.title,
+    a.content,
+    a.publisher_id,
+    u.real_name AS publisher_name,
+    u.username AS publisher_username,
+    a.department_id,
+    d.department_name,
+    a.announcement_type_id,
+    at.type_name AS announcement_type,
+    a.priority,
+    a.target_audience,
+    a.status_id,
+    st.status_name AS status,
+    a.publish_time,
+    a.create_time,
+    a.update_time,
+    (SELECT COUNT(*) FROM announcement_reads ar WHERE ar.announcement_id = a.announcement_id) AS read_count
+FROM announcements a
+LEFT JOIN users u ON a.publisher_id = u.user_id
+LEFT JOIN departments d ON a.department_id = d.department_id
+LEFT JOIN announcement_types at ON a.announcement_type_id = at.announcement_type_id
+LEFT JOIN status_types st ON a.status_id = st.status_id;
+
+-- ========================================
+-- 完成初始化
+-- ========================================
+SELECT '数据库初始化完成！' AS message;
+SELECT COUNT(*) AS total_tables FROM information_schema.tables WHERE table_schema = 'lucky_sms';

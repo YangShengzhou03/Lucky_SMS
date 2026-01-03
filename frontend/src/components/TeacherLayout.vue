@@ -83,12 +83,6 @@
             </el-icon>
             <template #title>学生管理</template>
           </el-menu-item>
-          <el-menu-item index="6">
-            <el-icon>
-              <Setting />
-            </el-icon>
-            <template #title>系统设置</template>
-          </el-menu-item>
         </el-menu>
       </aside>
 
@@ -143,7 +137,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router';
 import {
-  Notebook, Setting, Calendar, EditPen,
+  Notebook, Calendar, EditPen,
   Menu, Search, Bell, Moon, Sunny, Warning, House,
   UserFilled, Histogram
 } from '@element-plus/icons-vue'
@@ -187,8 +181,7 @@ const activeMenuIndex = computed(() => {
     '/teacher/courses': '2',
     '/teacher/grades': '3',
     '/teacher/students': '4',
-    '/teacher/schedule': '5',
-    '/teacher/settings': '7'
+    '/teacher/schedule': '5'
   }
   return routeMap[route.path] || '1'
 })
@@ -201,7 +194,7 @@ watch(route, (newRoute) => {
       '/teacher/courses': '课程管理',
       '/teacher/grades': '成绩管理',
       '/teacher/students': '学生管理',
-      '/teacher/settings': '系统设置'
+      '/teacher/schedule': '教学计划'
     }
     currentPageName.value = pageTitles[newRoute.path] || '教师中心'
     setPageLoading(false)
@@ -224,7 +217,7 @@ const handleMenuSelect = (index) => {
     '2': '/teacher/courses',
     '3': '/teacher/grades',
     '4': '/teacher/students',
-    '6': '/teacher/settings'
+    '5': '/teacher/schedule'
   }
   if (routeMap[index]) {
     router.push(routeMap[index])

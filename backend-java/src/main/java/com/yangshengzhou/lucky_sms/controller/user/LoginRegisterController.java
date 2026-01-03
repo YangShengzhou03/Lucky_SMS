@@ -48,11 +48,6 @@ public class LoginRegisterController {
         HashMap<String, Object> loginResult = new HashMap<>();
         try {
             LoginVO loginVO = userService.loginByPassword(phone, password);
-            // Debug logging
-            System.out.println("LoginVO: " + loginVO);
-            System.out.println("Role: " + loginVO.getRole());
-            System.out.println("Username: " + loginVO.getUsername());
-            
             loginResult.put("code", 200);
             loginResult.put("message", "登录成功");
             loginResult.put("data", loginVO);

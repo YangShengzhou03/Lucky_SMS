@@ -7,9 +7,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-/**
- * 教师实体类
- */
 @TableName("teachers")
 public class Teacher extends BaseEntity {
     

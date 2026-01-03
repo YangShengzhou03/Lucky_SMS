@@ -117,14 +117,7 @@ export function importGrades(data) {
   })
 }
 
-export function exportGrades(params) {
-  return request({
-    url: '/admin/grades/export',
-    method: 'get',
-    params,
-    responseType: 'blob'
-  })
-}
+
 
 export function getDepartmentList(params) {
   return request({
@@ -172,14 +165,6 @@ export function updateSystemSettings(data) {
   })
 }
 
-export function getStatistics(params) {
-  return request({
-    url: '/admin/statistics',
-    method: 'get',
-    params
-  })
-}
-
 export function getTeacherList() {
   return request({
     url: '/admin/teachers',
@@ -203,35 +188,36 @@ export function batchOperateCourses(data) {
   })
 }
 
-export function getSystemLogs(params) {
+export function getAnnouncementList(params) {
   return request({
-    url: '/admin/logs',
+    url: '/admin/announcements',
     method: 'get',
     params
   })
 }
 
-export function clearSystemCache() {
+export function createAnnouncement(data) {
   return request({
-    url: '/admin/cache/clear',
-    method: 'post'
-  })
-}
-
-export function backupSystemData() {
-  return request({
-    url: '/admin/backup',
-    method: 'post'
-  })
-}
-
-export function restoreSystemData(data) {
-  return request({
-    url: '/admin/restore',
+    url: '/admin/announcements',
     method: 'post',
-    data,
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+    data
   })
 }
+
+export function updateAnnouncement(data) {
+  return request({
+    url: '/admin/announcements',
+    method: 'put',
+    data
+  })
+}
+
+export function deleteAnnouncement(announcementId) {
+  return request({
+    url: `/admin/announcements/${announcementId}`,
+    method: 'delete'
+  })
+}
+
+
+

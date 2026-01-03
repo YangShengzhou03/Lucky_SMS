@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yangshengzhou.lucky_sms.mapper.AnnouncementMapper">
+
+    <select id="getAnnouncementList" resultType="java.util.HashMap">
+        SELECT 
+            a.announcement_id,
+            a.title,
+            a.content,
+            u.real_name AS publisher_name,
+            d.department_name,
+            at.type_name AS announcement_type_name,
+            a.priority,
+            a.target_audience,
+            st.status_name,
+            a.publish_time,
+            a.create_time
+        FROM announcements a
+        LEFT JOIN users u ON a.publisher_id = u.user_id
+        LEFT JOIN departments d ON a.department_id = d.department_id
+        LEFT JOIN announcement_types at ON a.announcement_type_id = at.announcement_type_id
+        LEFT JOIN status_types st ON a.status_id = st.status_id
+        ${ew.customSqlSegment}
+    </select>
+
+</mapper>

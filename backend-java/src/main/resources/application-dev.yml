@@ -1,6 +1,4 @@
-# 开发环境配置
 spring:
-  # 数据源配置
   datasource:
     url: jdbc:mysql://localhost:3306/lucky_sms?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8&createDatabaseIfNotExist=true
     username: root
@@ -14,22 +12,6 @@ spring:
       max-lifetime: 1200000
       connection-test-query: SELECT 1
   
-  # 数据库初始化配置
-  jpa:
-    hibernate:
-      ddl-auto: none
-  sql:
-    init:
-      enabled: false
-      mode: always
-      schema-locations: classpath:init.sql
-      data-locations: classpath:init.sql
-      encoding: UTF-8
-      separator: ;
-      continue-on-error: true
-      platform: mysql
-
-  # 开发工具配置
   devtools:
     restart:
       enabled: true
@@ -37,7 +19,6 @@ spring:
     livereload:
       enabled: true
 
-  # 热部署配置
   thymeleaf:
     cache: false
     prefix: classpath:/templates/
@@ -47,7 +28,6 @@ spring:
     servlet:
       content-type: text/html
 
-# 日志配置 - 开发环境更详细
 logging:
   level:
     root: INFO
@@ -60,14 +40,12 @@ logging:
   file:
     name: logs/lucky-sms-dev.log
 
-# 开发环境特殊配置
 app:
   debug: true
   show-sql: true
   cors:
     allowed-origins: "http://localhost:8080,http://127.0.0.1:8080,http://localhost:3000"
 
-  # 邮件配置（开发环境使用测试邮箱）
   mail:
     enabled: false
     host: smtp.gmail.com
@@ -75,12 +53,10 @@ app:
     username: test@example.com
     password: test
 
-  # 短信配置（开发环境使用模拟服务）
   sms:
     provider: mock
     sign-name: 幸运学工
 
-  # 文件存储配置
   storage:
     type: local
     local:

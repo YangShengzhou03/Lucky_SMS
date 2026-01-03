@@ -4,15 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- 继承 Spring Boot 基础依赖，统一管理所有子模块的依赖版本 -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.4.5</version>
-        <relativePath/> <!-- 默认从 Maven 中央仓库获取，不依赖本地路径 -->
+        <relativePath/>
     </parent>
 
-    <!-- 项目基本信息 - 与域名反写保持一致 -->
     <groupId>com.yangshengzhou</groupId>
     <artifactId>backend-java</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -20,14 +18,12 @@
     <description>来财学生管理系统服务后端</description>
 
     <properties>
-        <!-- 编码与JDK版本配置 -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>17</java.version> <!-- 使用Java 17 LTS版本 -->
+        <java.version>17</java.version>
     </properties>
 
     <dependencies>
-        <!-- MyBatis Plus 集成 - 替代MyBatis的增强框架 -->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
@@ -40,21 +36,18 @@
             </exclusions>
         </dependency>
         
-        <!-- 引入适配 Spring 6 的 mybatis-spring 版本 -->
         <dependency>
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis-spring</artifactId>
             <version>3.0.3</version>
         </dependency>
 
-        <!-- 引入适配 Spring 6.x 的 Jakarta Annotation 依赖 -->
         <dependency>
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
             <version>2.1.1</version>
         </dependency>
 
-        <!-- 排除旧版 javax.annotation 依赖 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -66,32 +59,23 @@
             </exclusions>
         </dependency>
 
-
-
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <!-- 版本号通常由 Spring Boot 父工程管理，无需手动指定 -->
         </dependency>
 
-        <!-- MySQL驱动 - MyBatis需要用 -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.33</version> <!-- 添加版本号 -->
+            <version>8.0.33</version>
             <scope>runtime</scope>
         </dependency>
 
-
-
-        <!-- JSON处理 -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
-        <!-- JWT -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -110,7 +94,6 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- 测试依赖 - 集成JUnit 5 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -120,7 +103,6 @@
 
     <build>
         <plugins>
-            <!-- Spring Boot打包插件 - 生成可执行JAR -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -128,7 +110,6 @@
                 </configuration>
             </plugin>
 
-            <!-- 资源过滤 - 替换配置文件中的环境变量 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -142,7 +123,6 @@
         </plugins>
     </build>
 
-    <!-- 配置Maven仓库 - 使用国内镜像加速依赖下载 -->
     <repositories>
         <repository>
             <id>aliyunmaven</id>

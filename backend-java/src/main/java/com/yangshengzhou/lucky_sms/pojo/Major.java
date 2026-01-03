@@ -4,9 +4,6 @@ import com.baomidou.mybatisplus.annotation.*;
 
 import java.math.BigDecimal;
 
-/**
- * 专业实体类
- */
 @TableName("majors")
 public class Major extends BaseEntity {
     

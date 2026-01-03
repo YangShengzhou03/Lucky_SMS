@@ -79,7 +79,7 @@ public class Student extends BaseEntity {
     private Major major;
     
     @TableField(exist = false)
-    private ClassInfo classInfo;
+    private Class classInfo;
     
     @TableField(exist = false)
     private StatusType status;
@@ -260,11 +260,11 @@ public class Student extends BaseEntity {
         this.major = major;
     }
 
-    public ClassInfo getClassInfo() {
+    public Class getClassInfo() {
         return classInfo;
     }
 
-    public void setClassInfo(ClassInfo classInfo) {
+    public void setClassInfo(Class classInfo) {
         this.classInfo = classInfo;
     }
 

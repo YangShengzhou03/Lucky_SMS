@@ -89,6 +89,12 @@
             </el-icon>
             <template #title>部门管理</template>
           </el-menu-item>
+          <el-menu-item index="6">
+            <el-icon>
+              <Bell />
+            </el-icon>
+            <template #title>公告管理</template>
+          </el-menu-item>
         </el-menu>
       </aside>
 
@@ -154,7 +160,8 @@ const mobileNavItems = [
   { index: '2', icon: User, text: '用户', path: '/admin/users' },
   { index: '3', icon: Notebook, text: '课程', path: '/admin/courses' },
   { index: '4', icon: EditPen, text: '成绩', path: '/admin/grades' },
-  { index: '5', icon: OfficeBuilding, text: '部门', path: '/admin/departments' }
+  { index: '5', icon: OfficeBuilding, text: '部门', path: '/admin/departments' },
+  { index: '6', icon: Bell, text: '公告', path: '/admin/announcements' }
 ]
 
 const currentPageName = ref('')
@@ -185,6 +192,7 @@ const activeMenuIndex = computed(() => {
     '/admin/courses': '3',
     '/admin/grades': '4',
     '/admin/departments': '5',
+    '/admin/announcements': '6',
     '/admin/settings': '7'
   }
   return routeMap[route.path] || '1'
@@ -198,7 +206,8 @@ watch(route, (newRoute) => {
       '/admin/users': '用户管理',
       '/admin/courses': '课程管理',
       '/admin/grades': '成绩管理',
-      '/admin/departments': '部门管理'
+      '/admin/departments': '部门管理',
+      '/admin/announcements': '公告管理'
     }
     currentPageName.value = pageTitles[newRoute.path] || '管理中心'
     setPageLoading(false)
@@ -221,7 +230,8 @@ const handleMenuSelect = (index) => {
     '2': '/admin/users',
     '3': '/admin/courses',
     '4': '/admin/grades',
-    '5': '/admin/departments'
+    '5': '/admin/departments',
+    '6': '/admin/announcements'
   }
   if (routeMap[index]) {
     router.push(routeMap[index])

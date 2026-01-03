@@ -61,28 +61,5 @@ export default {
       method: 'get',
       params
     })
-  },
-  
-  getMessages(params) {
-    return request({
-      url: '/teacher/messages',
-      method: 'get',
-      params
-    })
-  },
-  
-  sendMessage(data) {
-    return request({
-      url: '/teacher/messages',
-      method: 'post',
-      data
-    })
-  },
-  
-  markMessageRead(messageId) {
-    return request({
-      url: `/teacher/messages/${messageId}/read`,
-      method: 'post'
-    })
   }
 }

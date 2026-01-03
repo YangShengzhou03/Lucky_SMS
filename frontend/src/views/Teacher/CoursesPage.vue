@@ -12,7 +12,7 @@
               </h3>
               <div class="header-actions">
                 <div v-if="selectedCourses.length > 0" class="batch-actions">
-                  <span>已选择 {{ selectedCourses.length }} 门课程</span>
+                  <span>{{ selectedCourses.length }} </span>
                   <el-button @click="batchDeleteCourses" type="danger" size="small" style="margin-left: 12px">
                     批量删除
                   </el-button>

@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yangshengzhou.lucky_sms.mapper.teacher.TeacherViewMapper">
+
+    <resultMap id="TeacherProfileVOMap" type="com.yangshengzhou.lucky_sms.vo.teacher.TeacherProfileVO">
+        <result column="id" property="id"/>
+        <result column="teacher_id" property="teacherId"/>
+        <result column="name" property="name"/>
+        <result column="gender" property="gender"/>
+        <result column="birth_date" property="birthDate"/>
+        <result column="title" property="title"/>
+        <result column="department" property="department"/>
+        <result column="email" property="email"/>
+        <result column="phone" property="phone"/>
+        <result column="education" property="education"/>
+        <result column="hire_date" property="hireDate"/>
+    </resultMap>
+
+    <resultMap id="StudentInfoMap" type="com.yangshengzhou.lucky_sms.vo.teacher.StudentManagementVO$StudentInfo">
+        <result column="id" property="id"/>
+        <result column="student_id" property="studentId"/>
+        <result column="name" property="name"/>
+        <result column="major" property="major"/>
+        <result column="class_name" property="className"/>
+        <result column="contact" property="contact"/>
+    </resultMap>
+
+    <resultMap id="CourseInfoMap" type="com.yangshengzhou.lucky_sms.vo.teacher.CourseManagementVO$CourseInfo">
+        <result column="id" property="id"/>
+        <result column="course_code" property="courseCode"/>
+        <result column="course_name" property="courseName"/>
+        <result column="course_type" property="courseType"/>
+        <result column="credits" property="credits"/>
+        <result column="class_time" property="classTime"/>
+        <result column="location" property="location"/>
+        <result column="student_count" property="studentCount"/>
+    </resultMap>
+
+    <resultMap id="GradeInfoMap" type="com.yangshengzhou.lucky_sms.vo.teacher.GradeManagementVO$GradeInfo">
+        <result column="grade_id" property="gradeId"/>
+        <result column="student_id" property="studentId"/>
+        <result column="student_name" property="studentName"/>
+        <result column="attendance" property="attendance"/>
+        <result column="midterm" property="midterm"/>
+        <result column="final_score" property="finalScore"/>
+        <result column="total" property="total"/>
+        <result column="letter_grade" property="letterGrade"/>
+    </resultMap>
+
+    <resultMap id="ScheduleVOMap" type="com.yangshengzhou.lucky_sms.vo.teacher.ScheduleVO">
+        <collection property="classes" ofType="com.yangshengzhou.lucky_sms.vo.teacher.ScheduleVO$ClassInfo">
+            <result column="day_of_week" property="dayOfWeek"/>
+            <result column="section" property="section"/>
+            <result column="course_name" property="courseName"/>
+            <result column="location" property="location"/>
+            <result column="class_name" property="className"/>
+            <result column="student_count" property="studentCount"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectTeacherProfileById" parameterType="Integer" resultMap="TeacherProfileVOMap">
+        SELECT
+            u.user_id AS id,
+            t.teacher_no AS teacher_id,
+            u.real_name AS name,
+            g.gender_name AS gender,
+            u.birthday AS birth_date,
+            tt.title_name AS title,
+            d.department_name AS department,
+            u.email,
+            t.phone,
+            t.education_background AS education,
+            t.hire_date
+        FROM
+            users u
+            INNER JOIN teachers t ON u.user_id = t.user_id
+            LEFT JOIN genders g ON u.gender_id = g.gender_id
+            LEFT JOIN teacher_titles tt ON t.title_id = tt.title_id
+            LEFT JOIN departments d ON t.department_id = d.department_id
+        WHERE
+            u.user_id = #{userId}
+    </select>
+
+    <update id="updateTeacherProfile">
+        UPDATE users u
+        INNER JOIN teachers t ON u.user_id = t.user_id
+        SET
+            u.email = #{email},
+            t.phone = #{phone},
+            t.education_background = #{educationBackground}
+        WHERE
+            u.user_id = #{userId}
+    </update>
+
+    <select id="getStudentList" resultMap="StudentInfoMap">
+        SELECT
+            s.student_id AS id,
+            s.student_no AS student_id,
+            u.real_name AS name,
+            m.major_name AS major,
+            ci.class_name,
+            u.phone AS contact
+        FROM
+            students s
+            INNER JOIN users u ON s.user_id = u.user_id
+            INNER JOIN majors m ON s.major_id = m.major_id
+            LEFT JOIN class_info ci ON s.class_id = ci.class_id
+            INNER JOIN course_selections cs ON s.student_id = cs.student_id
+            INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
+        WHERE
+            ta.teacher_id = #{teacherId}
+            <if test="keyword != null and keyword != ''">
+                AND (u.real_name LIKE CONCAT('%', #{keyword}, '%')
+                OR s.student_no LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        GROUP BY s.student_id
+        ORDER BY s.student_id
+    </select>
+
+    <select id="getCourseList" resultMap="CourseInfoMap">
+        SELECT
+            ta.assignment_id AS id,
+            c.course_code,
+            c.course_name,
+            CASE ct.type_code
+                WHEN 'COMPULSORY' THEN '必修课'
+                WHEN 'ELECTIVE' THEN '选修课'
+                ELSE ct.type_name
+            END AS course_type,
+            c.credit AS credits,
+            ta.class_time,
+            ta.classroom AS location,
+            ta.current_students AS student_count
+        FROM
+            teaching_assignments ta
+            INNER JOIN courses c ON ta.course_id = c.course_id
+            INNER JOIN course_types ct ON c.course_type_id = ct.course_type_id
+            LEFT JOIN semesters s ON ta.semester_id = s.semester_id
+        WHERE
+            ta.teacher_id = #{teacherId}
+            <if test="semester != null and semester != ''">
+                AND CONCAT(s.academic_year, '-', s.semester_name) = #{semester}
+            </if>
+        ORDER BY ta.assignment_id
+    </select>
+
+    <select id="getCourseGrades" resultMap="GradeInfoMap">
+        SELECT
+            cg.grade_id,
+            s.student_no AS student_id,
+            u.real_name AS student_name,
+            cs.attendance_rate AS attendance,
+            cg.midterm_score AS midterm,
+            cg.final_score AS final_score,
+            cg.total_score AS total,
+            CASE
+                WHEN cg.total_score >= 90 THEN 'A'
+                WHEN cg.total_score >= 80 THEN 'B'
+                WHEN cg.total_score >= 70 THEN 'C'
+                WHEN cg.total_score >= 60 THEN 'D'
+                ELSE 'F'
+            END AS letter_grade
+        FROM
+            course_grades cg
+            INNER JOIN students s ON cg.student_id = s.student_id
+            INNER JOIN users u ON s.user_id = u.user_id
+            INNER JOIN teaching_assignments ta ON cg.assignment_id = ta.assignment_id
+            LEFT JOIN course_selections cs ON s.student_id = cs.student_id AND cg.assignment_id = cs.assignment_id
+        WHERE
+            ta.assignment_id = #{courseId}
+            AND ta.teacher_id = #{teacherId}
+        ORDER BY s.student_no
+    </select>
+
+    <update id="updateGrade">
+        UPDATE course_grades
+        SET
+            usual_score = #{usualScore},
+            midterm_score = #{midtermScore},
+            final_score = #{finalScore},
+            total_score = (COALESCE(#{usualScore}, 0) * 0.3 + COALESCE(#{midtermScore}, 0) * 0.3 + COALESCE(#{finalScore}, 0) * 0.4),
+            updated_at = CURRENT_TIMESTAMP
+        WHERE
+            grade_id = #{gradeId}
+    </update>
+
+    <select id="getSchedule" resultMap="ScheduleVOMap">
+        SELECT
+            ta.assignment_id,
+            c.course_name,
+            ta.classroom AS location,
+            ci.class_name,
+            ta.current_students AS student_count
+        FROM
+            teaching_assignments ta
+            INNER JOIN courses c ON ta.course_id = c.course_id
+            INNER JOIN semesters s ON ta.semester_id = s.semester_id
+            LEFT JOIN class_info ci ON ta.classroom LIKE CONCAT('%', ci.class_name, '%')
+        WHERE
+            ta.teacher_id = #{teacherId}
+            <if test="semester != null and semester != ''">
+                AND CONCAT(s.academic_year, '-', s.semester_name) = #{semester}
+            </if>
+        ORDER BY ta.assignment_id
+    </select>
+
+    <select id="getTotalStudents" resultType="Integer">
+        SELECT COUNT(DISTINCT s.student_id)
+        FROM
+            students s
+            INNER JOIN course_selections cs ON s.student_id = cs.student_id
+            INNER JOIN teaching_assignments ta ON cs.assignment_id = ta.assignment_id
+        WHERE
+            ta.teacher_id = #{teacherId}
+    </select>
+
+    <select id="getTotalCourses" resultType="Integer">
+        SELECT COUNT(*)
+        FROM teaching_assignments
+        WHERE teacher_id = #{teacherId}
+    </select>
+
+    <select id="getThisSemesterCourses" resultType="Integer">
+        SELECT COUNT(*)
+        FROM
+            teaching_assignments ta
+            INNER JOIN semesters s ON ta.semester_id = s.semester_id
+        WHERE
+            ta.teacher_id = #{teacherId}
+            <if test="semester != null and semester != ''">
+                AND CONCAT(s.academic_year, '-', s.semester_name) = #{semester}
+            </if>
+    </select>
+
+</mapper>

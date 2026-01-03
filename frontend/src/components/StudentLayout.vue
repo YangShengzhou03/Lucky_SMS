@@ -89,12 +89,6 @@
             </el-icon>
             <template #title>选课系统</template>
           </el-menu-item>
-          <el-menu-item index="6">
-            <el-icon>
-              <Setting />
-            </el-icon>
-            <template #title>系统设置</template>
-          </el-menu-item>
         </el-menu>
       </aside>
 
@@ -147,7 +141,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router';
 import {
-  Notebook, Histogram, Setting, Calendar, EditPen,
+  Notebook, Histogram, Calendar, EditPen,
   Menu, Search, Bell, Moon, Sunny, Warning, House
 } from '@element-plus/icons-vue'
 import { provideDarkMode } from '@/composables/useDarkMode'
@@ -193,8 +187,7 @@ const activeMenuIndex = computed(() => {
     '/student/status': '2',
     '/student/grades': '3',
     '/student/schedule': '4',
-    '/student/course': '5',
-    '/student/settings': '6'
+    '/student/course': '5'
   }
   return routeMap[route.path] || '1'
 })
@@ -208,7 +201,6 @@ watch(route, (newRoute) => {
       '/student/grades': '成绩查询',
       '/student/schedule': '课表查询',
       '/student/course': '选课系统',
-      '/student/settings': '系统设置',
       '/login': '登录'
     }
     currentPageName.value = pageTitles[newRoute.path] || '首页'
@@ -232,8 +224,7 @@ const handleMenuSelect = (index) => {
     '2': '/student/status',
     '3': '/student/grades',
     '4': '/student/schedule',
-    '5': '/student/course',
-    '6': '/student/settings'
+    '5': '/student/course'
   }
   if (routeMap[index]) {
     router.push(routeMap[index])

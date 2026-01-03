@@ -3,6 +3,7 @@ package com.yangshengzhou.lucky_sms.controller.student;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yangshengzhou.lucky_sms.service.student.CourseSelectionService;
 import com.yangshengzhou.lucky_sms.service.student.ProfileService;
+import com.yangshengzhou.lucky_sms.service.student.StudentScheduleService;
 import com.yangshengzhou.lucky_sms.service.student.impl.GradeServiceImpl;
 import com.yangshengzhou.lucky_sms.service.student.impl.HomeServiceImpl;
 import com.yangshengzhou.lucky_sms.service.student.impl.StatusServiceImpl;
@@ -14,6 +15,8 @@ import com.yangshengzhou.lucky_sms.vo.student.HomeVO;
 import com.yangshengzhou.lucky_sms.vo.student.StatusVO;
 import com.yangshengzhou.lucky_sms.vo.student.StudentProfileVO;
 import com.yangshengzhou.lucky_sms.vo.student.UpdateStudentProfileRequestVO;
+import com.yangshengzhou.lucky_sms.vo.teacher.ScheduleVO;
+import com.yangshengzhou.lucky_sms.pojo.Announcement;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 import jakarta.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -41,6 +45,9 @@ public class StudentController {
     
     @Resource
     private ProfileService profileService;
+
+    @Resource
+    private StudentScheduleService studentScheduleService;
 
     @GetMapping("/home")
     public HashMap<String, Object> studentHomeResult(
@@ -370,7 +377,7 @@ public class StudentController {
         return result;
     }
 
-    @GetMapping("/settings")
+    @GetMapping("/profile")
     public HashMap<String, Object> getStudentProfile(HttpServletRequest request) {
         HashMap<String, Object> response = new HashMap<>();
         
@@ -397,7 +404,7 @@ public class StudentController {
         return response;
     }
     
-    @PostMapping("/setting/info")
+    @PostMapping("/profile")
     public HashMap<String, Object> updateStudentProfile(
             @RequestBody UpdateStudentProfileRequestVO requestVO,
             HttpServletRequest request) {
@@ -430,5 +437,80 @@ public class StudentController {
         }
         
         return response;
+    }
+
+    @GetMapping("/schedule")
+    public HashMap<String, Object> getStudentSchedule(
+            @RequestParam(defaultValue = "2024-2025-第一学期") String semester,
+            HttpServletRequest request
+    ) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        try {
+            Integer userId = jwtUtil.getUidByRequest(request);
+            ScheduleVO schedule = studentScheduleService.getSchedule(semester, userId);
+
+            result.put("code", 200);
+            result.put("message", "获取课表成功");
+            result.put("data", schedule);
+        } catch (ResponseStatusException e) {
+            result.put("code", e.getStatusCode().value());
+            result.put("message", e.getReason());
+            result.put("data", null);
+        } catch (Exception e) {
+            result.put("code", 500);
+            result.put("message", e.getMessage());
+            result.put("data", null);
+        }
+
+        return result;
+    }
+
+    @GetMapping("/announcements")
+    public HashMap<String, Object> getStudentAnnouncements(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            HttpServletRequest request
+    ) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        try {
+            Integer userId = jwtUtil.getUidByRequest(request);
+            List<Announcement> announcements = homeServiceImpl.getAnnouncements(userId);
+
+            result.put("code", 200);
+            result.put("message", "获取公告成功");
+            result.put("data", announcements);
+        } catch (ResponseStatusException e) {
+            result.put("code", e.getStatusCode().value());
+            result.put("message", e.getReason());
+            result.put("data", null);
+        } catch (Exception e) {
+            result.put("code", 500);
+            result.put("message", e.getMessage());
+            result.put("data", null);
+        }
+
+        return result;
+    }
+
+    @PostMapping("/announcements/{announcementId}/read")
+    public HashMap<String, Object> markAnnouncementRead(
+            @PathVariable Integer announcementId,
+            HttpServletRequest request
+    ) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        try {
+            result.put("code", 200);
+            result.put("message", "标记已读成功");
+            result.put("data", true);
+        } catch (Exception e) {
+            result.put("code", 500);
+            result.put("message", e.getMessage());
+            result.put("data", false);
+        }
+
+        return result;
     }
 }

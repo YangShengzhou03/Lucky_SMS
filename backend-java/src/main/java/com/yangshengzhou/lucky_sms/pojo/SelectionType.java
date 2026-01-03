@@ -2,9 +2,6 @@ package com.yangshengzhou.lucky_sms.pojo;
 
 import com.baomidou.mybatisplus.annotation.*;
 
-/**
- * 选择类型实体类
- */
 @TableName("selection_types")
 public class SelectionType extends BaseEntity {
     

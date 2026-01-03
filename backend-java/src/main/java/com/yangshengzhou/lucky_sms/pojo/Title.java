@@ -4,9 +4,6 @@ import com.baomidou.mybatisplus.annotation.*;
 
 import java.util.Objects;
 
-/**
- * 教师职称实体类
- */
 @TableName("teacher_titles")
 public class Title extends BaseEntity {
     

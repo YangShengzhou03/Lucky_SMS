@@ -30,22 +30,22 @@ export function getSelectedCoursesWithPagination(params) {
   })
 }
 
-export function selectCourse(courseId) {
+export function selectCourse(assignmentId) {
   return request({
     url: '/student/courses/select',
     method: 'post',
     params: {
-      courseId: courseId
+      assignmentId: assignmentId
     }
   })
 }
 
-export function dropCourse(courseId) {
+export function dropCourse(selectionId) {
   return request({
     url: '/student/courses/drop',
     method: 'post',
-    data: {
-      courseId: courseId
+    params: {
+      selectionId: selectionId
     }
   })
 }
@@ -129,20 +129,5 @@ export function markAnnouncementRead(announcementId) {
   return request({
     url: `/student/announcements/${announcementId}/read`,
     method: 'post'
-  })
-}
-
-export function getStudentSettings() {
-  return request({
-    url: '/student/settings',
-    method: 'get'
-  })
-}
-
-export function updateStudentSettings(data) {
-  return request({
-    url: '/student/settings',
-    method: 'post',
-    data
   })
 }

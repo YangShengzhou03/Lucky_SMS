@@ -7,9 +7,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * 学院实体类
- */
 @TableName("departments")
 public class Department extends BaseEntity {
     

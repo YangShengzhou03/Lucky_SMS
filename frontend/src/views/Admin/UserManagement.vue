@@ -1,15 +1,5 @@
 <template>
   <div class="user-management">
-    <div class="page-header">
-      <h2>用户管理</h2>
-      <div class="header-actions">
-        <el-button type="primary" @click="showAddUserDialog">
-          <el-icon><Plus /></el-icon>
-          新增用户
-        </el-button>
-      </div>
-    </div>
-
     <div class="search-filter">
       <el-input
         v-model="searchQuery"
@@ -23,6 +13,11 @@
       </el-input>
       
       <el-button type="primary" @click="searchUsers">搜索</el-button>
+      
+      <el-button type="primary" @click="showAddUserDialog">
+        <el-icon><Plus /></el-icon>
+        新增用户
+      </el-button>
     </div>
 
     <el-table
@@ -370,25 +365,6 @@ onMounted(() => {
 <style scoped lang="scss">
 .user-management {
   padding: 20px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.page-header h2 {
-  margin: 0;
-  color: #2c3e50;
-  font-size: 24px;
-  font-weight: 600;
-}
-
-.header-actions {
-  display: flex;
-  gap: 12px;
 }
 
 .search-filter {

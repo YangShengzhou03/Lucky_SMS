@@ -2,9 +2,6 @@ package com.yangshengzhou.lucky_sms.pojo;
 
 import com.baomidou.mybatisplus.annotation.*;
 
-/**
- * 学期类型实体类
- */
 @TableName("semester_types")
 public class SemesterType extends BaseEntity {
     

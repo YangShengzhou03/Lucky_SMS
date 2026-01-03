@@ -34,4 +34,9 @@ public class HomeServiceImpl implements HomeService {
 
         return homeVO;
     }
+
+    @Override
+    public List<Announcement> getAnnouncements(Integer userId) {
+        return studentViewMapper.selectAnnouncementList();
+    }
 }

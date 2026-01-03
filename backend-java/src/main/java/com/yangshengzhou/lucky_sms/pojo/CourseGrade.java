@@ -6,9 +6,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/**
- * 课程成绩实体类
- */
 @TableName("course_grades")
 public class CourseGrade extends BaseEntity {
     
@@ -67,12 +64,6 @@ public class CourseGrade extends BaseEntity {
     
     @TableField(exist = false)
     private TeachingAssignment assignment;
-    
-    @TableField(exist = false)
-    private GradeLevel gradeLevel;
-    
-    @TableField(exist = false)
-    private ReviewStatus reviewStatus;
     
     @TableField(exist = false)
     private User reviewer;
@@ -222,22 +213,6 @@ public class CourseGrade extends BaseEntity {
 
     public void setAssignment(TeachingAssignment assignment) {
         this.assignment = assignment;
-    }
-
-    public GradeLevel getGradeLevel() {
-        return gradeLevel;
-    }
-
-    public void setGradeLevel(GradeLevel gradeLevel) {
-        this.gradeLevel = gradeLevel;
-    }
-
-    public ReviewStatus getReviewStatus() {
-        return reviewStatus;
-    }
-
-    public void setReviewStatus(ReviewStatus reviewStatus) {
-        this.reviewStatus = reviewStatus;
     }
 
     public User getReviewer() {
