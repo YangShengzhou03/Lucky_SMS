@@ -19,7 +19,7 @@
       </el-button>
     </div>
 
-    <el-table :data="filteredCourses" stripe v-loading="loading" style="width: 100%; margin-top: 20px;">
+    <el-table :data="courses" stripe v-loading="loading" style="width: 100%; margin-top: 20px;">
       <el-table-column type="selection" width="55" />
       <el-table-column prop="courseCode" label="课程代码" width="120" />
       <el-table-column prop="courseName" label="课程名称" width="200" />
@@ -151,6 +151,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
+import { getCourseList, addCourse, updateCourse, deleteCourse as apiDeleteCourse, getTeacherList } from '@/api/admin'
 
 const loading = ref(false)
 const searchQuery = ref('')
@@ -208,79 +209,8 @@ const rules = {
   ]
 }
 
-const teachers = ref([
-  { userId: 'T2001', realName: '张明' },
-  { userId: 'T2002', realName: '李华' },
-  { userId: 'T2003', realName: '王芳' },
-  { userId: 'T2004', realName: '赵强' }
-])
-
-const courses = ref([
-  {
-    courseId: 'C1001',
-    courseCode: 'CS101',
-    courseName: '计算机基础',
-    teacherId: 'T2001',
-    teacherName: '张明',
-    department: '计算机学院',
-    credit: 3,
-    hours: 48,
-    courseType: '必修课',
-    status: 'active',
-    studentCount: 45,
-    startDate: '2023-09-01',
-    endDate: '2024-01-15',
-    description: '计算机基础课程，涵盖计算机组成原理、操作系统等基础知识'
-  },
-  {
-    courseId: 'C1002',
-    courseCode: 'MATH201',
-    courseName: '高等数学',
-    teacherId: 'T2002',
-    teacherName: '李华',
-    department: '数学学院',
-    credit: 4,
-    hours: 64,
-    courseType: '必修课',
-    status: 'active',
-    studentCount: 60,
-    startDate: '2023-09-01',
-    endDate: '2024-01-15',
-    description: '高等数学课程，涵盖微积分、线性代数等数学知识'
-  },
-  {
-    courseId: 'C1003',
-    courseCode: 'PHY301',
-    courseName: '大学物理',
-    teacherId: 'T2003',
-    teacherName: '王芳',
-    department: '物理学院',
-    credit: 3,
-    hours: 48,
-    courseType: '必修课',
-    status: 'pending',
-    studentCount: 0,
-    startDate: '2024-02-20',
-    endDate: '2024-06-30',
-    description: '大学物理课程，涵盖力学、热学、电磁学等物理知识'
-  }
-])
-
-const filteredCourses = computed(() => {
-  let filtered = courses.value
-
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(course =>
-      course.courseName.toLowerCase().includes(query) ||
-      course.courseCode.toLowerCase().includes(query)
-    )
-  }
-
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return filtered.slice(start, end)
-})
+const teachers = ref([])
+const courses = ref([])
 
 const dialogTitle = computed(() => {
   return isAdd.value ? '新增课程' : '编辑课程'
@@ -327,18 +257,33 @@ const editCourse = (course) => {
 }
 
 const deleteCourse = async (course) => {
-  await ElMessageBox.confirm(
-    `确定要删除课程 "${course.courseName}" 吗？`,
-    '确认删除',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除课程 "${course.courseName}" 吗？`,
+      '确认删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    loading.value = true
+    const res = await apiDeleteCourse(course.courseId)
+    
+    if (res.code === 200) {
+      ElMessage.success('删除成功')
+      await loadCourses()
+    } else {
+      ElMessage.error(res.message || '删除失败')
     }
-  )
-
-  courses.value = courses.value.filter(c => c.courseId !== course.courseId)
-  ElMessage.success('删除成功')
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败')
+    }
+  } finally {
+    loading.value = false
+  }
 }
 
 const submitForm = async () => {
@@ -346,6 +291,7 @@ const submitForm = async () => {
 
   try {
     await courseFormRef.value.validate()
+    loading.value = true
 
     const teacher = teachers.value.find(t => t.userId === courseForm.value.teacherId)
     if (teacher) {
@@ -353,25 +299,30 @@ const submitForm = async () => {
     }
 
     if (isAdd.value) {
-      const newCourse = {
-        courseId: 'C' + Date.now(),
-        ...courseForm.value,
-        studentCount: 0
+      const res = await addCourse(courseForm.value)
+      if (res.code === 200) {
+        ElMessage.success('新增课程成功')
+        courseDialogVisible.value = false
+        resetForm()
+        await loadCourses()
+      } else {
+        ElMessage.error(res.message || '新增失败')
       }
-      courses.value.unshift(newCourse)
-      ElMessage.success('新增课程成功')
     } else {
-      const index = courses.value.findIndex(c => c.courseId === courseForm.value.courseId)
-      if (index !== -1) {
-        courses.value[index] = { ...courses.value[index], ...courseForm.value }
+      const res = await updateCourse(courseForm.value)
+      if (res.code === 200) {
         ElMessage.success('更新课程成功')
+        courseDialogVisible.value = false
+        resetForm()
+        await loadCourses()
+      } else {
+        ElMessage.error(res.message || '更新失败')
       }
     }
-
-    courseDialogVisible.value = false
-    resetForm()
   } catch (error) {
     ElMessage.error('表单验证失败')
+  } finally {
+    loading.value = false
   }
 }
 
@@ -396,19 +347,57 @@ const resetForm = () => {
 
 const searchCourses = () => {
   currentPage.value = 1
+  loadCourses()
 }
 
 const handleSizeChange = (size) => {
   pageSize.value = size
   currentPage.value = 1
+  loadCourses()
 }
 
 const handleCurrentChange = (page) => {
   currentPage.value = page
+  loadCourses()
+}
+
+const loadCourses = async () => {
+  loading.value = true
+  try {
+    const res = await getCourseList({
+      page: currentPage.value,
+      size: pageSize.value,
+      keyword: searchQuery.value
+    })
+    
+    if (res.code === 200) {
+      courses.value = res.data.list || []
+      total.value = res.data.total || 0
+    } else {
+      ElMessage.error(res.message || '获取课程列表失败')
+    }
+  } catch (error) {
+    ElMessage.error('获取课程列表失败')
+    console.error('获取课程列表失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const loadTeachers = async () => {
+  try {
+    const res = await getTeacherList()
+    if (res.code === 200) {
+      teachers.value = res.data || []
+    }
+  } catch (error) {
+    console.error('获取教师列表失败:', error)
+  }
 }
 
 onMounted(() => {
-  total.value = courses.value.length
+  loadCourses()
+  loadTeachers()
 })
 </script>
 

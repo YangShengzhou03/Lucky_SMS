@@ -20,8 +20,41 @@
       </el-button>
     </div>
 
+    <div class="grade-statistics">
+      <el-card class="stat-card">
+        <div class="stat-content">
+          <div class="stat-value">{{ statistics.average }}</div>
+          <div class="stat-label">平均分</div>
+        </div>
+      </el-card>
+      <el-card class="stat-card">
+        <div class="stat-content">
+          <div class="stat-value">{{ statistics.highest }}</div>
+          <div class="stat-label">最高分</div>
+        </div>
+      </el-card>
+      <el-card class="stat-card">
+        <div class="stat-content">
+          <div class="stat-value">{{ statistics.lowest }}</div>
+          <div class="stat-label">最低分</div>
+        </div>
+      </el-card>
+      <el-card class="stat-card">
+        <div class="stat-content">
+          <div class="stat-value">{{ statistics.passRate }}%</div>
+          <div class="stat-label">及格率</div>
+        </div>
+      </el-card>
+      <el-card class="stat-card">
+        <div class="stat-content">
+          <div class="stat-value">{{ statistics.excellentRate }}%</div>
+          <div class="stat-label">优秀率</div>
+        </div>
+      </el-card>
+    </div>
+
     <el-table
-      :data="filteredGrades"
+      :data="grades"
       stripe
       v-loading="loading"
       style="width: 100%; margin-top: 20px;"
@@ -89,7 +122,7 @@
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
         :page-sizes="[10, 20, 50, 100]"
-        :total="totalFilteredGrades"
+        :total="total"
         layout="total, sizes, prev, pager, next, jumper"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -212,14 +245,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Upload, Download, Search, ArrowDown, UploadFilled } from '@element-plus/icons-vue'
+import { getGradeList, updateGrade, deleteGrade as apiDeleteGrade } from '@/api/admin'
 
 const loading = ref(false)
 const searchQuery = ref('')
 const currentPage = ref(1)
 const pageSize = ref(10)
+const total = ref(0)
 const gradeDialogVisible = ref(false)
 const importDialogVisible = ref(false)
 const gradeFormRef = ref()
@@ -266,89 +301,7 @@ const statistics = ref({
   excellentRate: 0
 })
 
-const grades = ref([
-  {
-    gradeId: 'G1001',
-    studentId: 'S3001',
-    studentName: '李四',
-    courseId: 'C1001',
-    courseName: '计算机基础',
-    teacherName: '张明',
-    department: '计算机学院',
-    credit: 3,
-    regularScore: 85,
-    midtermScore: 78,
-    finalScore: 82,
-    totalScore: 81.5,
-    gradeLevel: '良好',
-    examDate: '2023-12-20 09:00',
-    status: 'active'
-  },
-  {
-    gradeId: 'G1002',
-    studentId: 'S3002',
-    studentName: '王五',
-    courseId: 'C1001',
-    courseName: '计算机基础',
-    teacherName: '张明',
-    department: '计算机学院',
-    credit: 3,
-    regularScore: 92,
-    midtermScore: 88,
-    finalScore: 95,
-    totalScore: 92.5,
-    gradeLevel: '优秀',
-    examDate: '2023-12-20 09:00',
-    status: 'active'
-  },
-  {
-    gradeId: 'G1003',
-    studentId: 'S3003',
-    studentName: '赵六',
-    courseId: 'C1002',
-    courseName: '高等数学',
-    teacherName: '李华',
-    department: '数学学院',
-    credit: 4,
-    regularScore: 76,
-    midtermScore: 72,
-    finalScore: 68,
-    totalScore: 70.5,
-    gradeLevel: '及格',
-    examDate: '2023-12-22 14:00',
-    status: 'active'
-  }
-])
-
-const filteredGrades = computed(() => {
-  let filtered = grades.value
-  
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(grade => 
-      grade.studentName.toLowerCase().includes(query) ||
-      grade.studentId.toLowerCase().includes(query)
-    )
-  }
-  
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return filtered.slice(start, end)
-})
-
-const totalFilteredGrades = computed(() => {
-  let filtered = grades.value
-  
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(grade => 
-      grade.studentName.toLowerCase().includes(query) ||
-      grade.studentId.toLowerCase().includes(query)
-    )
-  }
-  
-  return filtered.length
-})
+const grades = ref([])
 
 const getGradeClass = (score) => {
   if (!score) return ''
@@ -384,26 +337,6 @@ const getStatusText = (status) => {
   return texts[status] || '未知'
 }
 
-const calculateStatistics = () => {
-  const validGrades = grades.value.filter(g => g.totalScore && g.status === 'active')
-  if (validGrades.length === 0) {
-    statistics.value = { average: 0, highest: 0, lowest: 0, passRate: 0, excellentRate: 0 }
-    return
-  }
-  
-  const scores = validGrades.map(g => g.totalScore)
-  const passCount = validGrades.filter(g => g.totalScore >= 60).length
-  const excellentCount = validGrades.filter(g => g.totalScore >= 90).length
-  
-  statistics.value = {
-    average: (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1),
-    highest: Math.max(...scores),
-    lowest: Math.min(...scores),
-    passRate: ((passCount / validGrades.length) * 100).toFixed(1),
-    excellentRate: ((excellentCount / validGrades.length) * 100).toFixed(1)
-  }
-}
-
 const editGrade = (grade) => {
   gradeDialogVisible.value = true
   gradeForm.value = { ...grade }
@@ -421,11 +354,22 @@ const deleteGrade = async (grade) => {
       }
     )
     
-    grades.value = grades.value.filter(g => g.gradeId !== grade.gradeId)
-    calculateStatistics()
-    ElMessage.success('删除成功')
-  } catch {
-    ElMessage.error('删除失败')
+    loading.value = true
+    const res = await apiDeleteGrade(grade.gradeId)
+    
+    if (res.code === 200) {
+      ElMessage.success('删除成功')
+      await loadGrades()
+      await loadStatistics()
+    } else {
+      ElMessage.error(res.message || '删除失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败')
+    }
+  } finally {
+    loading.value = false
   }
 }
 
@@ -479,6 +423,7 @@ const submitForm = async () => {
   
   try {
     await gradeFormRef.value.validate()
+    loading.value = true
     
     const regularWeight = 0.3
     const midtermWeight = 0.3
@@ -491,17 +436,21 @@ const submitForm = async () => {
     gradeForm.value.totalScore = parseFloat(totalScore)
     gradeForm.value.gradeLevel = calculateGradeLevel(gradeForm.value.totalScore)
     
-    const index = grades.value.findIndex(g => g.gradeId === gradeForm.value.gradeId)
-    if (index !== -1) {
-      grades.value[index] = { ...grades.value[index], ...gradeForm.value }
-      calculateStatistics()
-      ElMessage.success('更新成绩成功')
-    }
+    const res = await updateGrade(gradeForm.value)
     
-    gradeDialogVisible.value = false
-    resetForm()
+    if (res.code === 200) {
+      ElMessage.success('更新成绩成功')
+      gradeDialogVisible.value = false
+      resetForm()
+      await loadGrades()
+      await loadStatistics()
+    } else {
+      ElMessage.error(res.message || '更新失败')
+    }
   } catch (error) {
     ElMessage.error('表单验证失败')
+  } finally {
+    loading.value = false
   }
 }
 
@@ -561,21 +510,80 @@ const downloadTemplate = () => {
 
 const searchGrades = () => {
   currentPage.value = 1
+  loadGrades()
 }
 
 const handleSizeChange = (size) => {
   pageSize.value = size
   currentPage.value = 1
+  loadGrades()
 }
 
 const handleCurrentChange = (page) => {
   currentPage.value = page
+  loadGrades()
 }
 
-watch(grades, calculateStatistics, { deep: true })
+const loadGrades = async () => {
+  loading.value = true
+  try {
+    const res = await getGradeList({
+      page: currentPage.value,
+      size: pageSize.value,
+      keyword: searchQuery.value
+    })
+    
+    if (res.code === 200) {
+      grades.value = res.data.list || []
+      total.value = res.data.total || 0
+    } else {
+      ElMessage.error(res.message || '获取成绩列表失败')
+    }
+  } catch (error) {
+    ElMessage.error('获取成绩列表失败')
+    console.error('获取成绩列表失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const loadStatistics = async () => {
+  try {
+    const res = await getGradeList({
+      page: 1,
+      size: 10000,
+      keyword: ''
+    })
+    
+    if (res.code === 200) {
+      const allGrades = res.data.list || []
+      const validGrades = allGrades.filter(g => g.totalScore && g.status === 'active')
+      
+      if (validGrades.length === 0) {
+        statistics.value = { average: 0, highest: 0, lowest: 0, passRate: 0, excellentRate: 0 }
+        return
+      }
+      
+      const scores = validGrades.map(g => g.totalScore)
+      const passCount = validGrades.filter(g => g.totalScore >= 60).length
+      const excellentCount = validGrades.filter(g => g.totalScore >= 90).length
+      
+      statistics.value = {
+        average: (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1),
+        highest: Math.max(...scores),
+        lowest: Math.min(...scores),
+        passRate: ((passCount / validGrades.length) * 100).toFixed(1),
+        excellentRate: ((excellentCount / validGrades.length) * 100).toFixed(1)
+      }
+    }
+  } catch (error) {
+    console.error('获取统计数据失败:', error)
+  }
+}
 
 onMounted(() => {
-  calculateStatistics()
+  loadGrades()
+  loadStatistics()
 })
 </script>
 

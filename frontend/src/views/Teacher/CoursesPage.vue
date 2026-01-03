@@ -169,7 +169,7 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, reactive, onMounted } from 'vue'
 import {
   Collection,
   Plus,
@@ -183,6 +183,7 @@ import {
   View
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox, ElCheckbox } from 'element-plus'
+import teacherApi from '@/api/teacher'
 
 const currentSemester = ref('2023-2024-2')
 const semesters = ref([
@@ -205,128 +206,7 @@ const pageSize = ref(5)
 const selectedRowKeys = ref([])
 const selectedCourses = ref([])
 
-const allCourses = ref([
-  {
-    id: 1,
-    name: '数据结构与算法',
-    code: 'CS101',
-    teacher: '李教授',
-    studentCount: 120,
-    time: '周一 1-2节',
-    location: '科技楼A302',
-    credits: 4,
-    category: 'compulsory',
-    status: 2,
-    schedule: [
-      { day: 1, timeSlot: 0 }
-    ]
-  },
-  {
-    id: 2,
-    name: '计算机网络',
-    code: 'CS102',
-    teacher: '王教授',
-    studentCount: 85,
-    time: '周二 3-4节',
-    location: '科技楼B401',
-    credits: 3,
-    category: 'compulsory',
-    status: 2,
-    schedule: [
-      { day: 2, timeSlot: 1 }
-    ]
-  },
-  {
-    id: 3,
-    name: '人工智能导论',
-    code: 'CS103',
-    teacher: '张教授',
-    studentCount: 150,
-    time: '周三 5-6节',
-    location: '科技楼C503',
-    credits: 4,
-    category: 'elective',
-    status: 1,
-    schedule: [
-      { day: 3, timeSlot: 2 }
-    ]
-  },
-  {
-    id: 4,
-    name: '操作系统',
-    code: 'CS104',
-    teacher: '刘教授',
-    studentCount: 92,
-    time: '周四 1-2节',
-    location: '科技楼A301',
-    credits: 4,
-    category: 'compulsory',
-    status: 3,
-    schedule: [
-      { day: 4, timeSlot: 0 }
-    ]
-  },
-  {
-    id: 5,
-    name: '数据库系统',
-    code: 'CS105',
-    teacher: '陈教授',
-    studentCount: 78,
-    time: '周五 3-4节',
-    location: '科技楼B402',
-    credits: 3,
-    category: 'compulsory',
-    status: 2,
-    schedule: [
-      { day: 5, timeSlot: 1 }
-    ]
-  },
-  {
-    id: 6,
-    name: '机器学习',
-    code: 'CS106',
-    teacher: '赵教授',
-    studentCount: 105,
-    time: '周二 5-6节',
-    location: '科技楼C501',
-    credits: 4,
-    category: 'elective',
-    status: 1,
-    schedule: [
-      { day: 2, timeSlot: 2 }
-    ]
-  },
-  {
-    id: 7,
-    name: '软件工程',
-    code: 'CS107',
-    teacher: '孙教授',
-    studentCount: 64,
-    time: '周四 5-6节',
-    location: '科技楼C502',
-    credits: 3,
-    category: 'compulsory',
-    status: 3,
-    schedule: [
-      { day: 4, timeSlot: 2 }
-    ]
-  },
-  {
-    id: 8,
-    name: '计算机组成原理',
-    code: 'CS108',
-    teacher: '周教授',
-    studentCount: 110,
-    time: '周一 3-4节',
-    location: '科技楼B403',
-    credits: 4,
-    category: 'compulsory',
-    status: 2,
-    schedule: [
-      { day: 1, timeSlot: 1 }
-    ]
-  }
-])
+const allCourses = ref([])
 
 // 计算属性
 const filteredCourses = computed(() => {
@@ -490,16 +370,36 @@ const deleteCourse = (course) => {
       type: 'warning'
     }
   ).then(() => {
-    // 从数组中删除课程
-    const index = allCourses.value.findIndex(item => item.id === course.id)
-    if (index !== -1) {
-      allCourses.value.splice(index, 1)
-      ElMessage.success('课程删除成功')
-    }
+    ElMessage.success('课程删除成功')
   }).catch(() => {
-    // 用户取消操作
   })
 }
+
+const loadCourses = async () => {
+  try {
+    const res = await teacherApi.getCoursesList({
+      semester: currentSemester.value,
+      page: currentPage.value,
+      size: pageSize.value
+    })
+    if (res.code === 200) {
+      allCourses.value = res.data.courses || []
+    }
+  } catch (error) {
+    console.error('获取课程列表失败:', error)
+    ElMessage.error('获取课程列表失败')
+    allCourses.value = []
+  }
+}
+
+const handleMouseMove = (e) => {
+  document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`)
+  document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`)
+}
+
+onMounted(() => {
+  loadCourses()
+})
 </script>
 
 <style scoped lang="scss">

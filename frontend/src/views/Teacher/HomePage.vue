@@ -267,9 +267,6 @@
               </template>
               <div v-else class="empty-announcements">
                 <el-empty description="暂无公告" :image-size="80">
-                  <el-link type="primary" :underline="false" @click="navigateToAnnouncements">
-                    查看历史公告
-                  </el-link>
                 </el-empty>
               </div>
             </div>
@@ -400,108 +397,10 @@ const fetchData = async () => {
   } catch (err) {
     error.value = '获取数据失败，请稍后重试'
     console.error('获取数据失败:', err)
-    
-    teacher.value = {
-      name: '张明华',
-      id: 'T2023001',
-      department: '计算机科学与技术学院',
-      title: '副教授',
-      teachingYears: 8,
-      online: true,
-      avatar: '',
-      courseCount: 4,
-      studentCount: 156,
-      avgScore: 4.7,
-      attendanceRate: 92.5,
-      nextClass: {
-        id: 'C001',
-        name: '数据结构与算法',
-        time: '14:00-15:30',
-        location: '逸夫楼305',
-        studentCount: 42
-      },
-      courses: [
-        { id: 'C001', name: '数据结构与算法' },
-        { id: 'C002', name: '操作系统原理' },
-        { id: 'C003', name: '计算机网络' },
-        { id: 'C004', name: '数据库系统' }
-      ],
-      tasks: [
-        {
-          id: 1,
-          text: '批改数据结构作业第3章',
-          dueDate: '明天',
-          completed: false,
-          important: true,
-          course: '数据结构与算法'
-        },
-        {
-          id: 2,
-          text: '准备下周操作系统课程PPT',
-          dueDate: '3天后',
-          completed: false,
-          important: false,
-          course: '操作系统原理'
-        },
-        {
-          id: 3,
-          text: '提交期中考试成绩',
-          dueDate: '2023-11-15',
-          completed: true,
-          important: false
-        },
-        {
-          id: 4,
-          text: '参加教学研讨会',
-          dueDate: '2023-11-20',
-          completed: false,
-          important: true
-        },
-        {
-          id: 5,
-          text: '编写数据库实验指导书',
-          dueDate: '2023-12-01',
-          completed: false,
-          important: true,
-          course: '数据库系统'
-        }
-      ]
-    }
+    ElMessage.error('获取教师数据失败')
 
-    announcements.value = [
-      {
-        id: 1,
-        title: '关于2023-2024学年第二学期教学安排的通知',
-        date: '2023-11-01',
-        department: '教务处',
-        type: 'important',
-        content: '下学期课程安排已发布，请各位老师及时查看。'
-      },
-      {
-        id: 2,
-        title: '2023年度教学成果奖申报通知',
-        date: '2023-10-25',
-        department: '科研处',
-        type: 'notice',
-        content: '2023年度教学成果奖申报工作已开始，请有意向的老师按时提交材料。'
-      },
-      {
-        id: 3,
-        title: '关于举办教师信息化教学能力提升培训的通知',
-        date: '2023-10-20',
-        department: '教师发展中心',
-        type: 'info',
-        content: '本次培训将介绍最新的信息化教学工具和方法，欢迎各位老师报名参加。'
-      },
-      {
-        id: 4,
-        title: '关于开展期中教学检查工作的通知',
-        date: '2023-10-15',
-        department: '教学质量监控中心',
-        type: 'notice',
-        content: '根据学校教学工作安排，将于第10-11周开展期中教学检查工作。'
-      }
-    ]
+    teacher.value = {}
+    announcements.value = []
   } finally {
     loading.value = false
   }

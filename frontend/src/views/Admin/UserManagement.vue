@@ -21,7 +21,7 @@
     </div>
 
     <el-table
-      :data="filteredUsers"
+      :data="users"
       stripe
       v-loading="loading"
       style="width: 100%; margin-top: 20px;"
@@ -43,7 +43,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="department" label="部门/专业" width="150" />
-      <el-table-column prop="createdAt" label="创建时间" width="160" />
+      <el-table-column prop="createTime" label="创建时间" width="160" />
       <el-table-column label="操作" width="150" fixed="right">
         <template #default="{ row }">
           <el-button size="small" @click="editUser(row)">编辑</el-button>
@@ -57,7 +57,7 @@
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
         :page-sizes="[10, 20, 50, 100]"
-        :total="totalFilteredUsers"
+        :total="total"
         layout="total, sizes, prev, pager, next, jumper"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -117,11 +117,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
+import { getUserList, addUser, updateUser, deleteUser as apiDeleteUser } from '@/api/admin'
 
 const loading = ref(false)
 const searchQuery = ref('')
 const currentPage = ref(1)
 const pageSize = ref(10)
+const total = ref(0)
 const userDialogVisible = ref(false)
 const isAdd = ref(false)
 const userFormRef = ref()
@@ -163,73 +165,7 @@ const rules = {
   ]
 }
 
-const users = ref([
-  {
-    userId: 'U1001',
-    username: 'admin',
-    realName: '系统管理员',
-    phone: '13800138000',
-    email: 'admin@lucky.edu',
-    role: 'ADMIN',
-    status: 'active',
-    department: '系统管理',
-    createdAt: '2023-01-15 10:30:00'
-  },
-  {
-    userId: 'T2001',
-    username: 'zhangming',
-    realName: '张明',
-    phone: '13900139000',
-    email: 'zhangming@lucky.edu',
-    role: 'TEACHER',
-    status: 'active',
-    department: '计算机学院',
-    createdAt: '2023-02-20 14:20:00'
-  },
-  {
-    userId: 'S3001',
-    username: 'lisi',
-    realName: '李四',
-    phone: '13700137000',
-    email: 'lisi@lucky.edu',
-    role: 'STUDENT',
-    status: 'active',
-    department: '计算机科学',
-    createdAt: '2023-09-01 09:00:00'
-  }
-])
-
-const filteredUsers = computed(() => {
-  let filtered = users.value
-  
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(user => 
-      user.username.toLowerCase().includes(query) ||
-      user.realName.toLowerCase().includes(query) ||
-      user.phone.includes(query)
-    )
-  }
-  
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return filtered.slice(start, end)
-})
-
-const totalFilteredUsers = computed(() => {
-  let filtered = users.value
-  
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(user => 
-      user.username.toLowerCase().includes(query) ||
-      user.realName.toLowerCase().includes(query) ||
-      user.phone.includes(query)
-    )
-  }
-  
-  return filtered.length
-})
+const users = ref([])
 
 const dialogTitle = computed(() => {
   return isAdd.value ? '新增用户' : '编辑用户'
@@ -295,10 +231,21 @@ const deleteUser = async (user) => {
       }
     )
     
-    users.value = users.value.filter(u => u.userId !== user.userId)
-    ElMessage.success('删除成功')
-  } catch {
-    ElMessage.error('删除操作取消')
+    loading.value = true
+    const res = await apiDeleteUser(user.userId)
+    
+    if (res.code === 200) {
+      ElMessage.success('删除成功')
+      await loadUsers()
+    } else {
+      ElMessage.error(res.message || '删除失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败')
+    }
+  } finally {
+    loading.value = false
   }
 }
 
@@ -307,27 +254,33 @@ const submitForm = async () => {
   
   try {
     await userFormRef.value.validate()
+    loading.value = true
     
     if (isAdd.value) {
-      const newUser = {
-        userId: 'U' + Date.now(),
-        ...userForm.value,
-        createdAt: new Date().toLocaleString()
+      const res = await addUser(userForm.value)
+      if (res.code === 200) {
+        ElMessage.success('新增用户成功')
+        userDialogVisible.value = false
+        resetForm()
+        await loadUsers()
+      } else {
+        ElMessage.error(res.message || '新增失败')
       }
-      users.value.unshift(newUser)
-      ElMessage.success('新增用户成功')
     } else {
-      const index = users.value.findIndex(u => u.userId === userForm.value.userId)
-      if (index !== -1) {
-        users.value[index] = { ...users.value[index], ...userForm.value }
+      const res = await updateUser(userForm.value)
+      if (res.code === 200) {
         ElMessage.success('更新用户成功')
+        userDialogVisible.value = false
+        resetForm()
+        await loadUsers()
+      } else {
+        ElMessage.error(res.message || '更新失败')
       }
     }
-    
-    userDialogVisible.value = false
-    resetForm()
   } catch (error) {
     ElMessage.error('表单验证失败')
+  } finally {
+    loading.value = false
   }
 }
 
@@ -347,18 +300,46 @@ const resetForm = () => {
 
 const searchUsers = () => {
   currentPage.value = 1
+  loadUsers()
 }
 
 const handleSizeChange = (size) => {
   pageSize.value = size
   currentPage.value = 1
+  loadUsers()
 }
 
 const handleCurrentChange = (page) => {
   currentPage.value = page
+  loadUsers()
+}
+
+const loadUsers = async () => {
+  loading.value = true
+  try {
+    const res = await getUserList({
+      page: currentPage.value,
+      size: pageSize.value,
+      keyword: searchQuery.value,
+      role: ''
+    })
+    
+    if (res.code === 200) {
+      users.value = res.data.list || []
+      total.value = res.data.total || 0
+    } else {
+      ElMessage.error(res.message || '获取用户列表失败')
+    }
+  } catch (error) {
+    ElMessage.error('获取用户列表失败')
+    console.error('获取用户列表失败:', error)
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(() => {
+  loadUsers()
 })
 </script>
 

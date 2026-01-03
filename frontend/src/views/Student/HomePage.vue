@@ -282,53 +282,8 @@ const fetchData = async () => {
     error.value = '获取数据失败，请稍后重试'
     console.error('获取数据失败:', err)
 
-    student.value = {
-      username: '--',
-      student_no: '--',
-      class_name: '--班级',
-      gpa: '4.00',
-      class_rank: '1',
-      classSize: '1',
-      course_count: '1',
-      nextCourse: {
-        "id": "CS301",
-        "name": "Web全栈开发",
-        "time": "08:00-09:40",
-        "location": "逸夫楼",
-        "teacher": "杨教授",
-        "day": "周一"
-      },
-      todos: [
-        {
-          "id": 1,
-          "text": "完成数据结构作业第一章",
-          "completed": false,
-          "dueDate": "2025-06-24",
-          "important": true,
-          "category": "作业"
-        },
-        {
-          "id": 2,
-          "text": "完成数据库原理作业第二章",
-          "completed": false,
-          "dueDate": "2025-06-25",
-          "important": false,
-          "category": "作业"
-        }
-      ]
-    }
-
-    announcements.value = [
-      {
-        "id": "ann5",
-        "title": "校园招聘信息",
-        "content": "多家知名企业将于下周来校招聘，欢迎大四同学参加...",
-        "publish_date": "2025-12-11",
-        "department_name": "就业指导中心",
-        "announcement_type": "INFO",
-        "priority": "high"
-      }
-    ]
+    student.value = {}
+    announcements.value = []
   } finally {
     loading.value = false
   }

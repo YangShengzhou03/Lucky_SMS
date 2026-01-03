@@ -1,24 +1,10 @@
 import request from '@/utils/request'
 
-export function getAvailableCourses() {
-  return request({
-    url: '/student/courses/available',
-    method: 'get'
-  })
-}
-
 export function getAvailableCoursesWithPagination(params) {
   return request({
     url: '/student/courses/available/pagination',
     method: 'get',
     params
-  })
-}
-
-export function getSelectedCourses() {
-  return request({
-    url: '/student/courses/selected',
-    method: 'get'
   })
 }
 
@@ -57,20 +43,6 @@ export function getHomeData() {
   })
 }
 
-export function getGrades() {
-  return request({
-    url: '/student/grades',
-    method: 'get'
-  })
-}
-
-export function getGradesBySemester(semester) {
-  return request({
-    url: `/student/grades/${semester}`,
-    method: 'get'
-  })
-}
-
 export function getGradesWithPagination(params) {
   return request({
     url: '/student/grades/pagination',
@@ -102,32 +74,10 @@ export function updateStudentProfile(data) {
   })
 }
 
-export function getStudentStatus() {
-  return request({
-    url: '/student/status',
-    method: 'get'
-  })
-}
-
 export function getStudentSchedule(params) {
   return request({
     url: '/student/schedule',
     method: 'get',
     params
-  })
-}
-
-export function getStudentAnnouncements(params) {
-  return request({
-    url: '/student/announcements',
-    method: 'get',
-    params
-  })
-}
-
-export function markAnnouncementRead(announcementId) {
-  return request({
-    url: `/student/announcements/${announcementId}/read`,
-    method: 'post'
   })
 }

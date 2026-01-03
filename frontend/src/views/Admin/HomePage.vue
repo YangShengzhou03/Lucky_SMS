@@ -255,6 +255,7 @@ import {
   School, Reading, Collection, Cpu, Timer, Monitor, Clock
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { getAdminHomeData } from '@/api/admin'
 
 const router = useRouter()
 const adminInfo = ref({})
@@ -262,62 +263,16 @@ const recentActivities = ref([])
 
 const fetchAdminData = async () => {
   try {
-    adminInfo.value = {
-      name: '系统管理员',
-      id: 'ADMIN001',
-      department: '系统管理',
-      online: true,
-      avatar: '',
-      totalUsers: 1250,
-      totalStudents: 1000,
-      totalTeachers: 200,
-      totalCourses: 150,
-      totalDepartments: 15,
-      totalMajors: 45,
-      avgCourseScore: 85.5,
-      courseCompletionRate: 92.3,
-      avgDepartmentUsers: 83.3,
-      systemStatus: '正常',
-      uptime: '15天8小时',
-      activeUsers: 156
+    const res = await getAdminHomeData()
+    if (res.code === 200) {
+      adminInfo.value = res.data.admin || {}
+      recentActivities.value = res.data.recentActivities || []
+    } else {
+      ElMessage.error(res.message || '获取数据失败')
     }
-
-    recentActivities.value = [
-      {
-        id: 1,
-        title: '新增用户：张三',
-        time: '5分钟前',
-        icon: 'User',
-        status: 'success',
-        statusText: '成功'
-      },
-      {
-        id: 2,
-        title: '课程数据更新',
-        time: '10分钟前',
-        icon: 'Notebook',
-        status: 'info',
-        statusText: '完成'
-      },
-      {
-        id: 3,
-        title: '系统备份',
-        time: '30分钟前',
-        icon: 'Setting',
-        status: 'warning',
-        statusText: '进行中'
-      },
-      {
-        id: 4,
-        title: '成绩统计',
-        time: '1小时前',
-        icon: 'EditPen',
-        status: 'success',
-        statusText: '完成'
-      }
-    ]
   } catch (error) {
     ElMessage.error('获取数据失败')
+    console.error('获取管理员数据失败:', error)
   }
 }
 
@@ -427,7 +382,7 @@ onMounted(() => {
 .stat-value {
   font-size: 24px;
   font-weight: bold;
-  margin-bottom: 4px;
+  margin-bottom:4px;
 }
 
 .stat-label {

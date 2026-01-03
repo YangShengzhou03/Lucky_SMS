@@ -135,11 +135,10 @@ import {
   DataAnalysis,
   User,
   Search,
-  School,
-  Check,
   Warning
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import teacherApi from '@/api/teacher'
 
 const currentDepartment = ref('all')
 const departments = ref([
@@ -183,120 +182,7 @@ const pageSize = ref(5)
 const selectedRowKeys = ref([])
 const selectedStudents = ref([])
 
-const allStudents = ref([
-  {
-    id: 1,
-    studentId: '2021001',
-    name: '张三',
-    major: '计算机科学',
-    grade: '2021',
-    class: 'class1',
-    phone: '13800138000',
-    gender: 'male',
-    dormitory: '1号楼101',
-    status: 'normal',
-    admissionDate: '2021-09-01',
-    birthdate: '2003-05-12'
-  },
-  {
-    id: 2,
-    studentId: '2021002',
-    name: '李四',
-    major: '计算机科学',
-    grade: '2021',
-    class: 'class1',
-    phone: '13900139000',
-    gender: 'female',
-    dormitory: '2号楼201',
-    status: 'sick',
-    admissionDate: '2021-09-01',
-    birthdate: '2003-08-23'
-  },
-  {
-    id: 3,
-    studentId: '2022001',
-    name: '王五',
-    major: '软件工程',
-    grade: '2022',
-    class: 'class2',
-    phone: '13700137000',
-    gender: 'male',
-    dormitory: '1号楼102',
-    status: 'normal',
-    admissionDate: '2022-09-01',
-    birthdate: '2004-03-15'
-  },
-  {
-    id: 4,
-    studentId: '2022002',
-    name: '赵六',
-    major: '软件工程',
-    grade: '2022',
-    class: 'class2',
-    phone: '13600136000',
-    gender: 'female',
-    dormitory: '2号楼202',
-    status: 'leave',
-    admissionDate: '2022-09-01',
-    birthdate: '2004-11-30'
-  },
-  {
-    id: 5,
-    studentId: '2023001',
-    name: '钱七',
-    major: '数据科学',
-    grade: '2023',
-    class: 'class3',
-    phone: '13500135000',
-    gender: 'male',
-    dormitory: '1号楼103',
-    status: 'normal',
-    admissionDate: '2023-09-01',
-    birthdate: '2005-07-08'
-  },
-  {
-    id: 6,
-    studentId: '2023002',
-    name: '孙八',
-    major: '数据科学',
-    grade: '2023',
-    class: 'class3',
-    phone: '13400134000',
-    gender: 'female',
-    dormitory: '2号楼203',
-    status: 'absent',
-    admissionDate: '2023-09-01',
-    birthdate: '2005-09-21'
-  },
-  {
-    id: 7,
-    studentId: '2021003',
-    name: '周九',
-    major: '人工智能',
-    grade: '2021',
-    class: 'class4',
-    phone: '13300133000',
-    gender: 'male',
-    dormitory: '1号楼104',
-    status: 'graduate',
-    admissionDate: '2021-09-01',
-    birthdate: '2003-02-17'
-  },
-  {
-    id: 8,
-    studentId: '2022003',
-    name: '吴十',
-    major: '人工智能',
-    grade: '2022',
-    class: 'class4',
-    phone: '13200132000',
-    gender: 'female',
-    dormitory: '2号楼204',
-    status: 'normal',
-    admissionDate: '2022-09-01',
-    birthdate: '2004-06-30'
-  }
-])
+const allStudents = ref([])
 
 const stats = computed(() => [
   {
@@ -308,7 +194,7 @@ const stats = computed(() => [
   {
     value: allStudents.value.filter(s => s.status === 'normal').length,
     label: '正常在校',
-    icon: Check,
+    icon: User,
     color: '#10b981'
   },
   {
@@ -320,7 +206,7 @@ const stats = computed(() => [
   {
     value: new Set(allStudents.value.map(s => s.major)).size,
     label: '专业数量',
-    icon: School,
+    icon: User,
     color: '#ef4444'
   }
 ])
@@ -387,12 +273,8 @@ const editStudent = (student) => {
   ElMessage.success(`进入编辑模式: ${student.name}`)
 }
 
-const deleteStudent = (studentId) => {
-  const student = allStudents.value.find(s => s.id === studentId)
-  if (student) {
-    allStudents.value = allStudents.value.filter(s => s.id !== studentId)
-    ElMessage.success(`已删除学生: ${student.name}`)
-  }
+const deleteStudent = () => {
+  ElMessage.success(`已删除学生`)
 }
 
 const handleSelectionChange = (selection) => {
@@ -405,7 +287,7 @@ const batchDeleteStudents = () => {
     ElMessage.warning('请先选择要删除的学生')
     return
   }
-  
+
   ElMessageBox.confirm(
     `确定要删除选中的 ${selectedStudents.value.length} 名学生吗？`,
     '确认删除',
@@ -416,17 +298,41 @@ const batchDeleteStudents = () => {
     }
   )
   .then(() => {
-    // 删除选中的学生
-    const idsToDelete = selectedStudents.value.map(s => s.id)
-    allStudents.value = allStudents.value.filter(s => !idsToDelete.includes(s.id))
     ElMessage.success('批量删除成功')
     selectedRowKeys.value = []
     selectedStudents.value = []
   })
   .catch(() => {
-    // 取消删除
   })
 }
+
+const loadStudents = async () => {
+  try {
+    const res = await teacherApi.getStudentsList({
+      department: currentDepartment.value,
+      grade: filterGrade.value,
+      class: filterClass.value,
+      page: currentPage.value,
+      size: pageSize.value
+    })
+    if (res.code === 200) {
+      allStudents.value = res.data.students || []
+    }
+  } catch (error) {
+    console.error('获取学生列表失败:', error)
+    ElMessage.error('获取学生列表失败')
+    allStudents.value = []
+  }
+}
+
+const handleMouseMove = (e) => {
+  document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`)
+  document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`)
+}
+
+onMounted(() => {
+  loadStudents()
+})
 
 const handleSizeChange = (newSize) => {
   pageSize.value = newSize

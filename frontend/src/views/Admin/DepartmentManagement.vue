@@ -20,8 +20,35 @@
       </el-button>
     </div>
 
+    <div class="department-stats">
+      <el-card class="stat-card">
+        <div class="stat-content">
+          <div class="stat-value">{{ statistics.totalDepartments }}</div>
+          <div class="stat-label">部门总数</div>
+        </div>
+      </el-card>
+      <el-card class="stat-card">
+        <div class="stat-content">
+          <div class="stat-value">{{ statistics.totalTeachers }}</div>
+          <div class="stat-label">教师总数</div>
+        </div>
+      </el-card>
+      <el-card class="stat-card">
+        <div class="stat-content">
+          <div class="stat-value">{{ statistics.totalStudents }}</div>
+          <div class="stat-label">学生总数</div>
+        </div>
+      </el-card>
+      <el-card class="stat-card">
+        <div class="stat-content">
+          <div class="stat-value">{{ statistics.totalCourses }}</div>
+          <div class="stat-label">课程总数</div>
+        </div>
+      </el-card>
+    </div>
+
     <el-table
-      :data="filteredDepartments"
+      :data="departments"
       stripe
       v-loading="loading"
       style="width: 100%; margin-top: 20px;"
@@ -53,7 +80,7 @@
           <el-tag :type="getStatusTag(row.status)">{{ getStatusText(row.status) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="createdAt" label="创建时间" width="160" />
+      <el-table-column prop="createTime" label="创建时间" width="160" />
       <el-table-column label="操作" width="150" fixed="right">
         <template #default="{ row }">
           <el-button size="small" @click="editDepartment(row)">编辑</el-button>
@@ -67,7 +94,7 @@
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
         :page-sizes="[10, 20, 50, 100]"
-        :total="filteredTotal"
+        :total="total"
         layout="total, sizes, prev, pager, next, jumper"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -141,11 +168,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
+import { getDepartmentList, addDepartment, updateDepartment, deleteDepartment as apiDeleteDepartment } from '@/api/admin'
 
 const loading = ref(false)
 const searchQuery = ref('')
 const currentPage = ref(1)
 const pageSize = ref(10)
+const total = ref(0)
 const departmentDialogVisible = ref(false)
 const isAdd = ref(false)
 const departmentFormRef = ref()
@@ -196,124 +225,7 @@ const statistics = ref({
   totalCourses: 0
 })
 
-const departments = ref([
-  {
-    departmentId: 'D1001',
-    departmentCode: 'CS',
-    departmentName: '计算机学院',
-    departmentType: '学院',
-    parentId: '',
-    parentName: '',
-    managerName: '张明',
-    phone: '13800138000',
-    email: 'cs@lucky.edu',
-    address: '逸夫楼',
-    description: '计算机科学与技术学院',
-    status: 'active',
-    teacherCount: 45,
-    studentCount: 1200,
-    courseCount: 35,
-    createdAt: '2023-01-15 10:30:00',
-    children: [
-      {
-        departmentId: 'D1002',
-        departmentCode: 'CS01',
-        departmentName: '计算机科学系',
-        departmentType: '系部',
-        parentId: 'D1001',
-        parentName: '计算机学院',
-        managerName: '李华',
-        phone: '13900139000',
-        email: 'cs01@lucky.edu',
-        status: 'active',
-        teacherCount: 20,
-        studentCount: 500,
-        createdAt: '2023-01-15 10:30:00'
-      },
-      {
-        departmentId: 'D1003',
-        departmentCode: 'CS02',
-        departmentName: '软件工程系',
-        departmentType: '系部',
-        parentId: 'D1001',
-        parentName: '计算机学院',
-        managerName: '王芳',
-        phone: '13700137000',
-        email: 'cs02@lucky.edu',
-        status: 'active',
-        teacherCount: 15,
-        studentCount: 400,
-        createdAt: '2023-01-15 10:30:00'
-      }
-    ]
-  },
-  {
-    departmentId: 'D2001',
-    departmentCode: 'MATH',
-    departmentName: '数学学院',
-    departmentType: '学院',
-    parentId: '',
-    parentName: '',
-    managerName: '赵强',
-    phone: '13600136000',
-    email: 'math@lucky.edu',
-    address: '数学楼',
-    description: '数学与统计学院',
-    status: 'active',
-    teacherCount: 30,
-    studentCount: 800,
-    courseCount: 25,
-    createdAt: '2023-01-15 10:30:00'
-  },
-  {
-    departmentId: 'D3001',
-    departmentCode: 'ADMIN',
-    departmentName: '教务处',
-    departmentType: '行政',
-    parentId: '',
-    parentName: '',
-    managerName: '孙伟',
-    phone: '13500135000',
-    email: 'admin@lucky.edu',
-    address: '行政楼',
-    description: '教务处管理部门',
-    status: 'active',
-    teacherCount: 0,
-    studentCount: 0,
-    courseCount: 0,
-    createdAt: '2023-01-15 10:30:00'
-  }
-])
-
-const filteredDepartments = computed(() => {
-  let filtered = [...departments.value]
-  
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(dept => 
-      dept.departmentName.toLowerCase().includes(query) ||
-      dept.departmentCode.toLowerCase().includes(query)
-    )
-  }
-  
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return filtered.slice(start, end)
-})
-
-const filteredTotal = computed(() => {
-  let filtered = [...departments.value]
-  
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(dept => 
-      dept.departmentName.toLowerCase().includes(query) ||
-      dept.departmentCode.toLowerCase().includes(query)
-    )
-  }
-  
-  return filtered.length
-})
+const departments = ref([])
 
 const parentDepartments = computed(() => {
   return departments.value.filter(dept => !dept.parentId)
@@ -349,18 +261,6 @@ const getStatusText = (status) => {
   return texts[status] || '未知'
 }
 
-const calculateStatistics = () => {
-  const allDepartments = departments.value.flatMap(dept => [dept, ...(dept.children || [])])
-  
-  statistics.value = {
-    totalDepartments: allDepartments.length,
-    totalUsers: allDepartments.reduce((sum, dept) => sum + dept.teacherCount + dept.studentCount, 0),
-    totalTeachers: allDepartments.reduce((sum, dept) => sum + dept.teacherCount, 0),
-    totalStudents: allDepartments.reduce((sum, dept) => sum + dept.studentCount, 0),
-    totalCourses: allDepartments.reduce((sum, dept) => sum + (dept.courseCount || 0), 0)
-  }
-}
-
 const showAddDepartmentDialog = () => {
   isAdd.value = true
   departmentDialogVisible.value = true
@@ -385,11 +285,22 @@ const deleteDepartment = async (department) => {
       }
     )
     
-    departments.value = departments.value.filter(dept => dept.departmentId !== department.departmentId)
-    calculateStatistics()
-    ElMessage.success('删除成功')
-  } catch {
-    ElMessage.info('已取消删除')
+    loading.value = true
+    const res = await apiDeleteDepartment(department.departmentId)
+    
+    if (res.code === 200) {
+      ElMessage.success('删除成功')
+      await loadDepartments()
+      await loadStatistics()
+    } else {
+      ElMessage.error(res.message || '删除失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败')
+    }
+  } finally {
+    loading.value = false
   }
 }
 
@@ -398,31 +309,35 @@ const submitForm = async () => {
   
   try {
     await departmentFormRef.value.validate()
+    loading.value = true
     
     if (isAdd.value) {
-      const newDepartment = {
-        departmentId: 'D' + Date.now(),
-        ...departmentForm.value,
-        teacherCount: 0,
-        studentCount: 0,
-        courseCount: 0,
-        createdAt: new Date().toLocaleString()
+      const res = await addDepartment(departmentForm.value)
+      if (res.code === 200) {
+        ElMessage.success('新增部门成功')
+        departmentDialogVisible.value = false
+        resetForm()
+        await loadDepartments()
+        await loadStatistics()
+      } else {
+        ElMessage.error(res.message || '新增失败')
       }
-      departments.value.unshift(newDepartment)
-      ElMessage.success('新增部门成功')
     } else {
-      const index = departments.value.findIndex(dept => dept.departmentId === departmentForm.value.departmentId)
-      if (index !== -1) {
-        departments.value[index] = { ...departments.value[index], ...departmentForm.value }
+      const res = await updateDepartment(departmentForm.value)
+      if (res.code === 200) {
         ElMessage.success('更新部门成功')
+        departmentDialogVisible.value = false
+        resetForm()
+        await loadDepartments()
+        await loadStatistics()
+      } else {
+        ElMessage.error(res.message || '更新失败')
       }
     }
-    
-    departmentDialogVisible.value = false
-    resetForm()
-    calculateStatistics()
   } catch (error) {
     ElMessage.error('表单验证失败')
+  } finally {
+    loading.value = false
   }
 }
 
@@ -447,19 +362,71 @@ const resetForm = () => {
 
 const searchDepartments = () => {
   currentPage.value = 1
+  loadDepartments()
 }
 
 const handleSizeChange = (size) => {
   pageSize.value = size
   currentPage.value = 1
+  loadDepartments()
 }
 
 const handleCurrentChange = (page) => {
   currentPage.value = page
+  loadDepartments()
+}
+
+const loadDepartments = async () => {
+  loading.value = true
+  try {
+    const res = await getDepartmentList({
+      page: currentPage.value,
+      size: pageSize.value,
+      keyword: searchQuery.value
+    })
+    
+    if (res.code === 200) {
+      departments.value = res.data.list || []
+      total.value = res.data.total || 0
+    } else {
+      ElMessage.error(res.message || '获取部门列表失败')
+    }
+  } catch (error) {
+    ElMessage.error('获取部门列表失败')
+    console.error('获取部门列表失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const loadStatistics = async () => {
+  try {
+    const res = await getDepartmentList({
+      page: 1,
+      size: 10000,
+      keyword: ''
+    })
+    
+    if (res.code === 200) {
+      const allDepartments = res.data.list || []
+      const flatDepartments = allDepartments.flatMap(dept => [dept, ...(dept.children || [])])
+      
+      statistics.value = {
+        totalDepartments: flatDepartments.length,
+        totalUsers: flatDepartments.reduce((sum, dept) => sum + (dept.teacherCount || 0) + (dept.studentCount || 0), 0),
+        totalTeachers: flatDepartments.reduce((sum, dept) => sum + (dept.teacherCount || 0), 0),
+        totalStudents: flatDepartments.reduce((sum, dept) => sum + (dept.studentCount || 0), 0),
+        totalCourses: flatDepartments.reduce((sum, dept) => sum + (dept.courseCount || 0), 0)
+      }
+    }
+  } catch (error) {
+    console.error('获取统计数据失败:', error)
+  }
 }
 
 onMounted(() => {
-  calculateStatistics()
+  loadDepartments()
+  loadStatistics()
 })
 </script>
 

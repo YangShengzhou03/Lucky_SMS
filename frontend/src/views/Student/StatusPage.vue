@@ -180,52 +180,23 @@ const fetchStudentStatus = async () => {
       throw new Error(response.message || '获取数据失败')
     }
   } catch (err) {
-    error.value = '获取数据失败，使用模拟数据'
+    error.value = '获取数据失败，请稍后重试'
     console.error('获取学生状态失败:', err)
-    ElMessage.warning('获取学籍状态失败，显示模拟数据')
-    
-    
-    useMockData()
+    ElMessage.error('获取学籍状态失败')
+
+    status.value = 'ACTIVE'
+    credits.value = 0
+    totalCredits.value = 140
+    effectiveDate.value = '--'
+    graduationDate.value = '--'
+    performanceLevel.value = '不及格'
+    attendanceRate.value = 0
+    academicHistory.value = []
+
+    updateChartsData()
   } finally {
     loading.value = false
   }
-}
-
-const useMockData = () => {
-
-  const mockData = {
-    basicInfo: {
-      status: "ACTIVE",
-      gpa: "0.00",
-      totalCredits: 140,
-      completedCredits: 0,
-      enrollmentDate: "2021-01-01",
-      expectedGraduationDate: "2025"
-    },
-    academicHistory: null
-  }
-
-  status.value = mockData.basicInfo.status || 'ACTIVE'
-  credits.value = mockData.basicInfo.completedCredits || 0
-  totalCredits.value = mockData.basicInfo.totalCredits || 140
-  effectiveDate.value = mockData.basicInfo.enrollmentDate || '2022-09-01'
-
-  graduationDate.value = mockData.basicInfo.expectedGraduationDate || ''
-
-  const gpa = parseFloat(mockData.basicInfo.gpa || 0)
-  if (gpa >= 3.7) performanceLevel.value = '优秀'
-  else if (gpa >= 3.0) performanceLevel.value = '良好'
-  else if (gpa >= 2.0) performanceLevel.value = '中等'
-  else if (gpa >= 1.0) performanceLevel.value = '及格'
-  else performanceLevel.value = '不及格'
-
-  attendanceRate.value = mockData.academicHistory && mockData.academicHistory.length > 0
-    ? mockData.academicHistory[mockData.academicHistory.length - 1].attendanceRate
-    : 96
-
-  academicHistory.value = mockData.academicHistory || []
-
-  updateChartsData()
 }
 
 const updateChartsData = () => {

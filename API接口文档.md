@@ -112,34 +112,7 @@ Authorization: Bearer {token}
 
 ## 二、管理员模块 (Admin)
 
-### 2.1 首页数据
-
-**接口地址**: `GET /admin/home`
-
-**请求参数**: 无
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "请求成功",
-  "data": {
-    "adminName": "管理员",
-    "adminId": 1,
-    "totalUsers": 100,
-    "totalStudents": 80,
-    "totalTeachers": 15,
-    "totalCourses": 50,
-    "totalDepartments": 5,
-    "activeUsers": 80,
-    "pendingApprovals": 0,
-    "recentActivities": [],
-    "systemStats": []
-  }
-}
-```
-
-### 2.2 用户管理
+### 2.1 用户管理
 
 #### 2.2.1 获取用户列表
 
@@ -232,7 +205,7 @@ Authorization: Bearer {token}
 }
 ```
 
-#### 2.2.4 删除用户
+#### 2.1.4 删除用户
 
 **接口地址**: `DELETE /admin/users/{userId}`
 
@@ -250,55 +223,9 @@ Authorization: Bearer {token}
 }
 ```
 
-#### 2.2.5 重置用户密码
+### 2.2 课程管理
 
-**接口地址**: `POST /admin/users/{userId}/reset-password`
-
-**路径参数**:
-| 参数名 | 类型 | 说明 |
-|--------|------|------|
-| userId | Integer | 用户ID |
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "密码重置成功",
-  "data": true
-}
-```
-
-#### 2.2.6 批量操作用户
-
-**接口地址**: `POST /admin/users/batch`
-
-**请求参数**:
-```json
-{
-  "operation": "delete",
-  "userIds": [1, 2, 3]
-}
-```
-
-**operation可选值**:
-- `delete`: 删除
-- `disable`: 禁用
-- `enable`: 启用
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "批量操作成功",
-  "data": {
-    "count": 3
-  }
-}
-```
-
-### 2.3 课程管理
-
-#### 2.3.1 获取课程列表
+#### 2.2.1 获取课程列表
 
 **接口地址**: `GET /admin/courses`
 
@@ -395,7 +322,7 @@ Authorization: Bearer {token}
 }
 ```
 
-#### 2.3.4 删除课程
+#### 2.2.4 删除课程
 
 **接口地址**: `DELETE /admin/courses/{courseId}`
 
@@ -413,59 +340,9 @@ Authorization: Bearer {token}
 }
 ```
 
-#### 2.3.5 批量操作课程
+### 2.3 成绩管理
 
-**接口地址**: `POST /admin/courses/batch`
-
-**请求参数**:
-```json
-{
-  "operation": "delete",
-  "courseIds": [1, 2, 3]
-}
-```
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "批量操作成功",
-  "data": {
-    "count": 3
-  }
-}
-```
-
-#### 2.3.6 获取课程学生列表
-
-**接口地址**: `GET /admin/courses/{courseId}/students`
-
-**路径参数**:
-| 参数名 | 类型 | 说明 |
-|--------|------|------|
-| courseId | Integer | 课程ID |
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "请求成功",
-  "data": {
-    "list": [
-      {
-        "studentId": 1,
-        "studentName": "张三",
-        "className": "计科2101班",
-        "selectionTime": "2024-09-01 10:00:00"
-      }
-    ]
-  }
-}
-```
-
-### 2.4 成绩管理
-
-#### 2.4.1 获取成绩列表
+#### 2.3.1 获取成绩列表
 
 **接口地址**: `GET /admin/grades`
 
@@ -546,27 +423,9 @@ Authorization: Bearer {token}
 }
 ```
 
-#### 2.4.4 导入成绩
+### 2.4 部门管理
 
-**接口地址**: `POST /admin/grades/import`
-
-**请求参数**: multipart/form-data
-| 参数名 | 类型 | 必填 | 说明 |
-|--------|------|------|------|
-| file | File | 是 | Excel文件 |
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "导入成功",
-  "data": true
-}
-```
-
-### 2.5 部门管理
-
-#### 2.5.1 获取部门列表
+#### 2.4.1 获取部门列表
 
 **接口地址**: `GET /admin/departments`
 
@@ -630,7 +489,7 @@ Authorization: Bearer {token}
 }
 ```
 
-#### 2.5.3 更新部门
+#### 2.4.3 更新部门
 
 **接口地址**: `PUT /admin/departments`
 
@@ -673,9 +532,9 @@ Authorization: Bearer {token}
 }
 ```
 
-### 2.6 公告管理
+### 2.5 公告管理
 
-#### 2.6.1 获取公告列表
+#### 2.5.1 获取公告列表
 
 **接口地址**: `GET /admin/announcements`
 
@@ -776,7 +635,7 @@ Authorization: Bearer {token}
 }
 ```
 
-#### 2.6.4 删除公告
+#### 2.5.4 删除公告
 
 **接口地址**: `DELETE /admin/announcements/{announcementId}`
 
@@ -794,417 +653,9 @@ Authorization: Bearer {token}
 }
 ```
 
-### 2.7 专业管理
+### 2.6 教师管理
 
-#### 2.7.1 获取专业列表
-
-**接口地址**: `GET /admin/majors`
-
-**请求参数**:
-| 参数名 | 类型 | 必填 | 默认值 | 说明 |
-|--------|------|------|--------|------|
-| page | Integer | 否 | 1 | 页码 |
-| size | Integer | 否 | 10 | 每页数量 |
-| keyword | String | 否 | - | 搜索关键词 |
-| department | String | 否 | - | 部门筛选 |
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "请求成功",
-  "data": {
-    "list": [
-      {
-        "majorId": 1,
-        "majorName": "计算机科学与技术",
-        "majorCode": "CS",
-        "departmentId": 1,
-        "description": "计算机科学与技术专业",
-        "statusId": 1,
-        "createTime": "2024-01-01 10:00:00"
-      }
-    ],
-    "total": 10,
-    "page": 1,
-    "size": 10,
-    "message": "查询成功"
-  }
-}
-```
-
-#### 2.7.2 创建专业
-
-**接口地址**: `POST /admin/majors`
-
-**请求参数**:
-```json
-{
-  "majorName": "软件工程",
-  "majorCode": "SE",
-  "departmentId": 1,
-  "description": "软件工程专业"
-}
-```
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "专业创建成功",
-  "data": {
-    "majorId": 11
-  }
-}
-```
-
-#### 2.7.3 更新专业
-
-**接口地址**: `PUT /admin/majors`
-
-**请求参数**:
-```json
-{
-  "majorId": 1,
-  "majorName": "计算机科学与技术",
-  "majorCode": "CS",
-  "departmentId": 1,
-  "description": "计算机科学与技术专业",
-  "statusId": 1
-}
-```
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "专业更新成功",
-  "data": {}
-}
-```
-
-#### 2.7.4 删除专业
-
-**接口地址**: `DELETE /admin/majors/{majorId}`
-
-**路径参数**:
-| 参数名 | 类型 | 说明 |
-|--------|------|------|
-| majorId | Integer | 专业ID |
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "专业删除成功",
-  "data": true
-}
-```
-
-### 2.8 班级管理
-
-#### 2.8.1 获取班级列表
-
-**接口地址**: `GET /admin/classes`
-
-**请求参数**:
-| 参数名 | 类型 | 必填 | 默认值 | 说明 |
-|--------|------|------|--------|------|
-| page | Integer | 否 | 1 | 页码 |
-| size | Integer | 否 | 10 | 每页数量 |
-| keyword | String | 否 | - | 搜索关键词 |
-| major | String | 否 | - | 专业筛选 |
-| department | String | 否 | - | 部门筛选 |
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "请求成功",
-  "data": {
-    "list": [
-      {
-        "classId": 1,
-        "className": "计科2101班",
-        "classCode": "CS2101",
-        "majorId": 1,
-        "departmentId": 1,
-        "gradeYear": 2021,
-        "studentCount": 30,
-        "statusId": 1,
-        "createTime": "2024-01-01 10:00:00"
-      }
-    ],
-    "total": 20,
-    "page": 1,
-    "size": 10,
-    "message": "查询成功"
-  }
-}
-```
-
-#### 2.8.2 创建班级
-
-**接口地址**: `POST /admin/classes`
-
-**请求参数**:
-```json
-{
-  "className": "计科2102班",
-  "classCode": "CS2102",
-  "majorId": 1,
-  "departmentId": 1,
-  "gradeYear": 2021,
-  "studentCount": 0
-}
-```
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "班级创建成功",
-  "data": {
-    "classId": 21
-  }
-}
-```
-
-#### 2.8.3 更新班级
-
-**接口地址**: `PUT /admin/classes`
-
-**请求参数**:
-```json
-{
-  "classId": 1,
-  "className": "计科2101班",
-  "classCode": "CS2101",
-  "majorId": 1,
-  "departmentId": 1,
-  "gradeYear": 2021,
-  "studentCount": 30,
-  "statusId": 1
-}
-```
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "班级更新成功",
-  "data": {}
-}
-```
-
-#### 2.8.4 删除班级
-
-**接口地址**: `DELETE /admin/classes/{classId}`
-
-**路径参数**:
-| 参数名 | 类型 | 说明 |
-|--------|------|------|
-| classId | Integer | 班级ID |
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "班级删除成功",
-  "data": true
-}
-```
-
-### 2.9 学期管理
-
-#### 2.9.1 获取学期列表
-
-**接口地址**: `GET /admin/semesters`
-
-**请求参数**:
-| 参数名 | 类型 | 必填 | 默认值 | 说明 |
-|--------|------|------|--------|------|
-| page | Integer | 否 | 1 | 页码 |
-| size | Integer | 否 | 10 | 每页数量 |
-| keyword | String | 否 | - | 搜索关键词 |
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "请求成功",
-  "data": {
-    "list": [
-      {
-        "semesterId": 1,
-        "semesterName": "2024-2025学年第一学期",
-        "semesterCode": "2024-2025-1",
-        "semesterTypeId": 1,
-        "startDate": "2024-09-01",
-        "endDate": "2025-01-15",
-        "statusId": 1,
-        "createTime": "2024-01-01 10:00:00"
-      }
-    ],
-    "total": 10,
-    "page": 1,
-    "size": 10,
-    "message": "查询成功"
-  }
-}
-```
-
-#### 2.9.2 创建学期
-
-**接口地址**: `POST /admin/semesters`
-
-**请求参数**:
-```json
-{
-  "semesterName": "2025-2026学年第一学期",
-  "semesterCode": "2025-2026-1",
-  "semesterTypeId": 1,
-  "startDate": "2025-09-01",
-  "endDate": "2026-01-15"
-}
-```
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "学期创建成功",
-  "data": {
-    "semesterId": 11
-  }
-}
-```
-
-#### 2.9.3 更新学期
-
-**接口地址**: `PUT /admin/semesters`
-
-**请求参数**:
-```json
-{
-  "semesterId": 1,
-  "semesterName": "2024-2025学年第一学期",
-  "semesterCode": "2024-2025-1",
-  "semesterTypeId": 1,
-  "startDate": "2024-09-01",
-  "endDate": "2025-01-15",
-  "statusId": 1
-}
-```
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "学期更新成功",
-  "data": {}
-}
-```
-
-#### 2.9.4 删除学期
-
-**接口地址**: `DELETE /admin/semesters/{semesterId}`
-
-**路径参数**:
-| 参数名 | 类型 | 说明 |
-|--------|------|------|
-| semesterId | Integer | 学期ID |
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "学期删除成功",
-  "data": true
-}
-```
-
-### 2.10 系统设置
-
-#### 2.10.1 获取系统设置
-
-**接口地址**: `GET /admin/settings`
-
-**请求参数**: 无
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "请求成功",
-  "data": {
-    "systemName": "Lucky SMS 学生管理系统",
-    "semester": "2024-2025学年第一学期",
-    "academicYear": "2024-2025",
-    "registrationStatus": "OPEN",
-    "courseSelectionStatus": "OPEN",
-    "maxCoursesPerStudent": 8,
-    "maxStudentsPerCourse": 100,
-    "notificationSettings": [],
-    "securitySettings": []
-  }
-}
-```
-
-#### 2.10.2 更新系统设置
-
-**接口地址**: `PUT /admin/settings`
-
-**请求参数**:
-```json
-{
-  "systemName": "Lucky SMS 学生管理系统",
-  "semester": "2024-2025学年第一学期",
-  "academicYear": "2024-2025",
-  "registrationStatus": "OPEN",
-  "courseSelectionStatus": "OPEN",
-  "maxCoursesPerStudent": 8,
-  "maxStudentsPerCourse": 100
-}
-```
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "设置更新成功",
-  "data": true
-}
-```
-
-### 2.11 统计数据
-
-#### 2.11.1 获取统计数据
-
-**接口地址**: `GET /admin/statistics`
-
-**请求参数**:
-| 参数名 | 类型 | 必填 | 说明 |
-|--------|------|------|------|
-| type | String | 否 | 统计类型 |
-| startDate | String | 否 | 开始日期 |
-| endDate | String | 否 | 结束日期 |
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "请求成功",
-  "data": {
-    "message": "获取统计数据成功",
-    "data": {}
-  }
-}
-```
-
-### 2.12 教师管理
-
-#### 2.12.1 获取教师列表
+#### 2.6.1 获取教师列表
 
 **接口地址**: `GET /admin/teachers`
 
@@ -1219,11 +670,8 @@ Authorization: Bearer {token}
 ```json
 {
   "code": 200,
-  "message": "请求成功",
-  "data": {
-    "message": "获取教师列表成功",
-    "data": {}
-  }
+  "message": "获取教师列表成功",
+  "data": {}
 }
 ```
 
@@ -1259,39 +707,9 @@ Authorization: Bearer {token}
 }
 ```
 
-### 3.2 学籍信息
+### 3.2 成绩查询
 
-**接口地址**: `GET /student/status`
-
-**请求参数**: 无
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "请求成功",
-  "data": {
-    "studentId": "20210001",
-    "studentName": "张三",
-    "gender": "男",
-    "birthDate": "2002-05-15",
-    "idCard": "110101200205150001",
-    "className": "计科2101班",
-    "major": "计算机科学与技术",
-    "department": "计算机学院",
-    "enrollmentDate": "2021-09-01",
-    "status": "在读",
-    "advisor": "李老师",
-    "phone": "13800138000",
-    "email": "zhangsan@example.com",
-    "address": "北京市海淀区"
-  }
-}
-```
-
-### 3.3 成绩查询
-
-#### 3.3.1 获取所有成绩
+#### 3.2.1 获取所有成绩
 
 **接口地址**: `GET /student/grades`
 
@@ -1405,42 +823,9 @@ Authorization: Bearer {token}
 }
 ```
 
-### 3.4 选课系统
+### 3.3 选课系统
 
-#### 3.4.1 获取可选课程
-
-**接口地址**: `GET /student/courses/available`
-
-**请求参数**:
-| 参数名 | 类型 | 必填 | 默认值 | 说明 |
-|--------|------|------|--------|------|
-| semesterId | Integer | 否 | 1 | 学期ID |
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "请求成功",
-  "data": [
-    {
-      "assignmentId": 1,
-      "courseId": 1,
-      "courseName": "高等数学",
-      "courseCode": "CS1001",
-      "teacherName": "王老师",
-      "credit": 4,
-      "hours": 64,
-      "classroom": "A101",
-      "schedule": "周一 1-2节",
-      "maxStudents": 60,
-      "currentStudents": 30,
-      "isSelected": false
-    }
-  ]
-}
-```
-
-#### 3.4.2 获取可选课程（分页）
+#### 3.3.1 获取可选课程（分页）
 
 **接口地址**: `GET /student/courses/available/pagination`
 
@@ -1466,40 +851,7 @@ Authorization: Bearer {token}
 }
 ```
 
-#### 3.4.3 获取已选课程
-
-**接口地址**: `GET /student/courses/selected`
-
-**请求参数**:
-| 参数名 | 类型 | 必填 | 默认值 | 说明 |
-|--------|------|------|--------|------|
-| semesterId | Integer | 否 | 1 | 学期ID |
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "请求成功",
-  "data": [
-    {
-      "selectionId": 1,
-      "assignmentId": 1,
-      "courseId": 1,
-      "courseName": "高等数学",
-      "courseCode": "CS1001",
-      "teacherName": "王老师",
-      "credit": 4,
-      "hours": 64,
-      "classroom": "A101",
-      "schedule": "周一 1-2节",
-      "selectionTime": "2024-09-01 10:00:00",
-      "status": "已选"
-    }
-  ]
-}
-```
-
-#### 3.4.4 获取已选课程（分页）
+#### 3.3.2 获取已选课程（分页）
 
 **接口地址**: `GET /student/courses/selected/pagination`
 
@@ -1569,9 +921,9 @@ Authorization: Bearer {token}
 }
 ```
 
-### 3.5 个人信息
+### 3.4 个人信息
 
-#### 3.5.1 获取个人信息
+#### 3.4.1 获取个人信息
 
 **接口地址**: `GET /student/profile`
 
@@ -1618,50 +970,7 @@ Authorization: Bearer {token}
 }
 ```
 
-### 3.6 系统设置
-
-#### 3.6.1 获取设置
-
-**接口地址**: `GET /student/settings`
-
-**请求参数**: 无
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "获取设置成功",
-  "data": {
-    "studentId": "20210001",
-    "studentName": "张三",
-    "phone": "13800138000",
-    "email": "zhangsan@example.com"
-  }
-}
-```
-
-#### 3.6.2 更新设置
-
-**接口地址**: `POST /student/settings`
-
-**请求参数**:
-```json
-{
-  "phone": "13800138000",
-  "email": "zhangsan@example.com"
-}
-```
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "更新设置成功",
-  "data": null
-}
-```
-
-### 3.7 课表查询
+### 3.5 课表查询
 
 **接口地址**: `GET /student/schedule`
 
@@ -1691,9 +1000,9 @@ Authorization: Bearer {token}
 }
 ```
 
-### 3.8 公告管理
+### 3.7 公告管理
 
-#### 3.8.1 获取公告列表
+#### 3.7.1 获取公告列表
 
 **接口地址**: `GET /student/announcements`
 
@@ -1721,7 +1030,7 @@ Authorization: Bearer {token}
 }
 ```
 
-#### 3.8.2 标记公告已读
+#### 3.7.2 标记公告已读
 
 **接口地址**: `POST /student/announcements/{announcementId}/read`
 
@@ -1806,9 +1115,9 @@ Authorization: Bearer {token}
 }
 ```
 
-### 4.3 课程管理
+### 4.2 课程管理
 
-#### 4.3.1 获取课程列表
+#### 4.2.1 获取课程列表
 
 **接口地址**: `GET /teacher/courses`
 
@@ -1847,212 +1156,7 @@ Authorization: Bearer {token}
 }
 ```
 
-### 4.4 成绩管理
-
-#### 4.4.1 获取课程成绩
-
-**接口地址**: `GET /teacher/grades`
-
-**请求参数**:
-| 参数名 | 类型 | 必填 | 说明 |
-|--------|------|------|------|
-| courseId | Integer | 是 | 课程ID |
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "请求成功",
-  "data": {
-    "records": [
-      {
-        "gradeId": 1,
-        "studentId": "20210001",
-        "studentName": "张三",
-        "className": "计科2101班",
-        "usualScore": 85.0,
-        "midtermScore": 88.0,
-        "finalScore": 90.0,
-        "totalScore": 87.5,
-        "grade": "B",
-        "status": "已录入"
-      }
-    ],
-    "total": 30,
-    "size": 10,
-    "current": 1,
-    "pages": 3
-  }
-}
-```
-
-#### 4.4.2 录入成绩
-
-**接口地址**: `POST /teacher/grades`
-
-**请求参数**:
-```json
-{
-  "gradeId": 1,
-  "usualScore": 85.0,
-  "midtermScore": 88.0,
-  "finalScore": 90.0
-}
-```
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "成绩录入成功",
-  "data": null
-}
-```
-
-### 4.5 个人信息
-
-#### 4.5.1 获取个人信息
-
-**接口地址**: `GET /teacher/profile`
-
-**请求参数**: 无
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "请求成功",
-  "data": {
-    "teacherId": "T001",
-    "teacherName": "王老师",
-    "gender": "男",
-    "birthDate": "1980-05-15",
-    "phone": "13900139000",
-    "email": "wang@example.com",
-    "department": "计算机学院",
-    "title": "教授",
-    "education": "博士",
-    "researchDirection": "人工智能"
-  }
-}
-```
-
-#### 4.5.2 更新个人信息
-
-**接口地址**: `POST /teacher/profile`
-
-**请求参数**:
-```json
-{
-  "phone": "13900139000",
-  "email": "wang@example.com",
-  "researchDirection": "人工智能"
-}
-```
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "更新成功",
-  "data": null
-}
-```
-
-### 4.6 教学计划
-
-**接口地址**: `GET /teacher/schedule`
-
-**请求参数**:
-| 参数名 | 类型 | 必填 | 默认值 | 说明 |
-|--------|------|------|--------|------|
-| semester | String | 否 | 2024-2025-第一学期 | 学期 |
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "请求成功",
-  "data": {
-    "semester": "2024-2025-第一学期",
-    "schedule": [
-      {
-        "dayOfWeek": 1,
-        "period": 1,
-        "courseName": "高等数学",
-        "classroom": "A101",
-        "className": "计科2101班",
-        "weeks": "1-16周"
-      }
-    ]
-  }
-}
-```
-
-### 4.7 消息管理
-
-#### 4.7.1 获取消息列表
-
-**接口地址**: `GET /teacher/messages`
-
-**请求参数**:
-| 参数名 | 类型 | 必填 | 默认值 | 说明 |
-|--------|------|------|--------|------|
-| page | Integer | 否 | 1 | 页码 |
-| size | Integer | 否 | 10 | 每页数量 |
-| status | String | 否 | - | 消息状态 |
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "获取消息成功",
-  "data": {
-    "list": [],
-    "total": 0
-  }
-}
-```
-
-#### 4.7.2 发送消息
-
-**接口地址**: `POST /teacher/messages`
-
-**请求参数**:
-```json
-{
-  "receiverId": 1,
-  "content": "消息内容",
-  "type": "通知"
-}
-```
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "发送消息成功",
-  "data": {}
-}
-```
-
-#### 4.7.3 标记消息已读
-
-**接口地址**: `POST /teacher/messages/{messageId}/read`
-
-**路径参数**:
-| 参数名 | 类型 | 说明 |
-|--------|------|------|
-| messageId | Integer | 消息ID |
-
-**返回示例**:
-```json
-{
-  "code": 200,
-  "message": "标记已读成功",
-  "data": true
-}
-```
+**文档结束**
 
 ---
 
@@ -2136,10 +1240,6 @@ dropCourse(selectionId)
 getStudentProfile()
 updateStudentProfile(data)
 
-// 系统设置
-getStudentSettings()
-updateStudentSettings(data)
-
 // 课表查询
 getStudentSchedule(params)
 
@@ -2170,11 +1270,6 @@ updateTeacherProfile(data)
 
 // 教学计划
 getSchedule(params)
-
-// 消息管理
-getMessages(params)
-sendMessage(data)
-markMessageRead(messageId)
 ```
 
 ---
@@ -2185,19 +1280,16 @@ markMessageRead(messageId)
 
 所有接口均已实现，包括：
 - 登录注册模块：3个接口
-- 管理员模块：41个接口
-- 学生模块：19个接口
-- 教师模块：11个接口
+- 管理员模块：32个接口
+- 学生模块：17个接口
+- 教师模块：8个接口
 
 ### 6.2 前端页面状态
 
 **已实现页面**：
 - 管理员：首页、用户管理、课程管理、成绩管理、部门管理、公告管理
-- 学生：首页、学籍信息、成绩查询、选课系统、课表查询、系统设置
-- 教师：首页、课程管理、成绩管理、学生管理、教学计划、系统设置
-
-**未实现页面**：
-- 管理员：专业管理、班级管理、学期管理（后端接口已实现，前端页面未创建）
+- 学生：首页、学籍信息、成绩查询、选课系统、课表查询、个人信息
+- 教师：首页、课程管理、成绩管理、学生管理、教学计划、个人信息
 
 ### 6.3 数据库表结构
 

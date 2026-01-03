@@ -192,6 +192,7 @@ import {
   Star
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { getStudentSchedule, getGradesWithPagination } from '@/api/student'
 
 const isDarkMode = ref(false)
 
@@ -213,104 +214,8 @@ const semesters = ref([
 const weekdays = ref(['周一', '周二', '周三', '周四', '周五', '周六', '周日'])
 const timeSlots = ref(['08:00', '10:00', '14:00', '16:00', '19:00'])
 
-const currentCourses = ref([
-  {
-    id: 1,
-    name: '数据结构与算法',
-    code: 'CS101',
-    teacher: '李教授',
-    credits: 4,
-    progress: 65,
-    schedule: [
-      { day: '周一', time: '10:00', location: '逸夫楼305' },
-      { day: '周四', time: '14:00', location: '实验楼201' }
-    ],
-    color: '#409eff'
-  },
-  {
-    id: 2,
-    name: '计算机网络',
-    code: 'CS102',
-    teacher: '王老师',
-    credits: 3,
-    progress: 75,
-    schedule: [
-      { day: '周二', time: '08:00', location: '主楼101' },
-      { day: '周五', time: '08:00', location: '主楼101' }
-    ],
-    color: '#67c23a'
-  },
-  {
-    id: 3,
-    name: '操作系统',
-    code: 'CS103',
-    teacher: '张教授',
-    credits: 4,
-    progress: 50,
-    schedule: [
-      { day: '周三', time: '14:00', location: '计算机学院203' },
-      { day: '周六', time: '10:00', location: '实验室B2' }
-    ],
-    color: '#e6a23c'
-  }
-])
-
-const historyCourses = ref([
-  {
-    semester: '2023-2024-1',
-    name: '高等数学（下）',
-    code: 'MATH102',
-    teacher: '刘教授',
-    credits: 5,
-    score: 85,
-    status: 'passed'
-  },
-  {
-    semester: '2023-2024-1',
-    name: '线性代数',
-    code: 'MATH103',
-    teacher: '陈老师',
-    credits: 4,
-    score: 78,
-    status: 'passed'
-  },
-  {
-    semester: '2023-2024-1',
-    name: '程序设计基础',
-    code: 'CS001',
-    teacher: '赵老师',
-    credits: 4,
-    score: 92,
-    status: 'passed'
-  },
-  {
-    semester: '2022-2023-2',
-    name: '大学物理',
-    code: 'PHYS101',
-    teacher: '黄教授',
-    credits: 4,
-    score: 65,
-    status: 'passed'
-  },
-  {
-    semester: '2022-2023-2',
-    name: '英语（二）',
-    code: 'ENGL102',
-    teacher: '吴老师',
-    credits: 3,
-    score: 72,
-    status: 'passed'
-  },
-  {
-    semester: '2022-2023-1',
-    name: '离散数学',
-    code: 'MATH101',
-    teacher: '郑教授',
-    credits: 4,
-    score: 88,
-    status: 'passed'
-  }
-])
+const currentCourses = ref([])
+const historyCourses = ref([])
 
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -429,7 +334,59 @@ const formatStatValue = (value) => {
   return typeof value === 'number' && !Number.isInteger(value) ? value.toFixed(1) : value
 }
 
-onMounted(() => {
+const loadScheduleData = async () => {
+  try {
+    const res = await getStudentSchedule({
+      semester: currentSemester.value
+    })
+    if (res.code === 200) {
+      const courses = res.data.courses || []
+      currentCourses.value = courses.map(course => ({
+        id: course.id,
+        name: course.name,
+        code: course.code,
+        teacher: course.teacher,
+        credits: course.credits,
+        progress: course.progress || 0,
+        schedule: course.schedule || [],
+        color: ['#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#909399'][Math.floor(Math.random() * 5)]
+      }))
+    }
+  } catch (error) {
+    console.error('获取课程表失败:', error)
+    ElMessage.error('获取课程表失败')
+    currentCourses.value = []
+  }
+}
+
+const loadHistoryData = async () => {
+  try {
+    const res = await getGradesWithPagination({
+      page: 1,
+      size: 100
+    })
+    if (res.code === 200) {
+      const grades = res.data.courseGrades || []
+      historyCourses.value = grades.map(grade => ({
+        semester: grade.semester || '--',
+        name: grade.courseName || '--',
+        code: grade.courseCode || '--',
+        teacher: grade.teacher || '--',
+        credits: grade.credits || 0,
+        score: grade.score || 0,
+        status: grade.score >= 60 ? 'passed' : 'failed'
+      }))
+    }
+  } catch (error) {
+    console.error('获取历史课程失败:', error)
+    ElMessage.error('获取历史课程失败')
+    historyCourses.value = []
+  }
+}
+
+onMounted(async () => {
+  await loadScheduleData()
+  await loadHistoryData()
 })
 </script>
 

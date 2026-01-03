@@ -73,31 +73,7 @@ public class StudentController {
         return result;
     }
 
-    @GetMapping("/status")
-    public HashMap<String, Object> studentStatusResult(
-            HttpServletRequest request
-    ) {
-        HashMap<String, Object> result = new HashMap<>();
 
-        try {
-            Integer userId = jwtUtil.getUidByRequest(request);
-            StatusVO statusDate = statusServiceImpl.getStatusDate(userId);
-
-            result.put("code", 200);
-            result.put("message", "请求成功");
-            result.put("data", statusDate);
-        } catch (ResponseStatusException e) {
-            result.put("code", e.getStatusCode().value());
-            result.put("message", e.getReason());
-            result.put("data", null);
-        } catch (Exception e) {
-            result.put("code", 500);
-            result.put("message", e.getMessage());
-            result.put("data", null);
-        }
-
-        return result;
-    }
 
     @GetMapping("/grades")
     public HashMap<String, Object> studentGradesResult(
@@ -125,33 +101,7 @@ public class StudentController {
         return result;
     }
 
-    @GetMapping("/courses/available")
-    public HashMap<String, Object> getAvailableCourses(
-            @RequestParam(defaultValue = "1") Integer semesterId,
-            HttpServletRequest request
-    ) {
-        HashMap<String, Object> result = new HashMap<>();
 
-        try {
-            Integer userId = jwtUtil.getUidByRequest(request);
-            List<CourseSelectionVO> courses = courseSelectionService.getAvailableCourses(userId, semesterId);
-
-            result.put("code", 200);
-            result.put("message", "请求成功");
-            result.put("data", courses);
-        } catch (ResponseStatusException e) {
-            result.put("code", e.getStatusCode().value());
-            result.put("message", e.getReason());
-            result.put("data", null);
-        } catch (Exception e) {
-            result.put("code", 500);
-            result.put("message", e.getMessage());
-            result.put("data", null);
-        }
-
-        return result;
-    }
-    
     @GetMapping("/courses/available/pagination")
     public HashMap<String, Object> getAvailableCoursesWithPagination(
             @RequestParam(defaultValue = "1") Integer semesterId,
@@ -181,33 +131,7 @@ public class StudentController {
         return result;
     }
 
-    @GetMapping("/courses/selected")
-    public HashMap<String, Object> getSelectedCourses(
-            @RequestParam(defaultValue = "1") Integer semesterId,
-            HttpServletRequest request
-    ) {
-        HashMap<String, Object> result = new HashMap<>();
 
-        try {
-            Integer userId = jwtUtil.getUidByRequest(request);
-            List<CourseSelectionVO> courses = courseSelectionService.getSelectedCourses(userId, semesterId);
-
-            result.put("code", 200);
-            result.put("message", "请求成功");
-            result.put("data", courses);
-        } catch (ResponseStatusException e) {
-            result.put("code", e.getStatusCode().value());
-            result.put("message", e.getReason());
-            result.put("data", null);
-        } catch (Exception e) {
-            result.put("code", 500);
-            result.put("message", e.getMessage());
-            result.put("data", null);
-        }
-
-        return result;
-    }
-    
     @GetMapping("/courses/selected/pagination")
     public HashMap<String, Object> getSelectedCoursesWithPagination(
             @RequestParam(defaultValue = "1") Integer semesterId,
@@ -466,51 +390,5 @@ public class StudentController {
         return result;
     }
 
-    @GetMapping("/announcements")
-    public HashMap<String, Object> getStudentAnnouncements(
-            @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size,
-            HttpServletRequest request
-    ) {
-        HashMap<String, Object> result = new HashMap<>();
 
-        try {
-            Integer userId = jwtUtil.getUidByRequest(request);
-            List<Announcement> announcements = homeServiceImpl.getAnnouncements(userId);
-
-            result.put("code", 200);
-            result.put("message", "获取公告成功");
-            result.put("data", announcements);
-        } catch (ResponseStatusException e) {
-            result.put("code", e.getStatusCode().value());
-            result.put("message", e.getReason());
-            result.put("data", null);
-        } catch (Exception e) {
-            result.put("code", 500);
-            result.put("message", e.getMessage());
-            result.put("data", null);
-        }
-
-        return result;
-    }
-
-    @PostMapping("/announcements/{announcementId}/read")
-    public HashMap<String, Object> markAnnouncementRead(
-            @PathVariable Integer announcementId,
-            HttpServletRequest request
-    ) {
-        HashMap<String, Object> result = new HashMap<>();
-
-        try {
-            result.put("code", 200);
-            result.put("message", "标记已读成功");
-            result.put("data", true);
-        } catch (Exception e) {
-            result.put("code", 500);
-            result.put("message", e.getMessage());
-            result.put("data", false);
-        }
-
-        return result;
-    }
 }
