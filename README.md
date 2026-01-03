@@ -107,23 +107,17 @@ npm run serve
 ## API接口说明
 
 ### 管理员接口
-- `GET /admin/home` - 获取首页数据
 - `GET /admin/users` - 获取用户列表
 - `POST /admin/users` - 添加用户
 - `PUT /admin/users` - 更新用户
 - `DELETE /admin/users/{userId}` - 删除用户
-- `POST /admin/users/{userId}/reset-password` - 重置用户密码
-- `POST /admin/users/batch` - 批量操作用户
 - `GET /admin/courses` - 获取课程列表
 - `POST /admin/courses` - 添加课程
 - `PUT /admin/courses` - 更新课程
 - `DELETE /admin/courses/{courseId}` - 删除课程
-- `POST /admin/courses/batch` - 批量操作课程
-- `GET /admin/courses/{courseId}/students` - 获取课程学生列表
 - `GET /admin/grades` - 获取成绩列表
 - `PUT /admin/grades` - 更新成绩
 - `DELETE /admin/grades/{gradeId}` - 删除成绩
-- `POST /admin/grades/import` - 导入成绩
 - `GET /admin/departments` - 获取部门列表
 - `POST /admin/departments` - 添加部门
 - `PUT /admin/departments` - 更新部门
@@ -132,56 +126,25 @@ npm run serve
 - `POST /admin/announcements` - 创建公告
 - `PUT /admin/announcements` - 更新公告
 - `DELETE /admin/announcements/{announcementId}` - 删除公告
-- `GET /admin/majors` - 获取专业列表
-- `POST /admin/majors` - 创建专业
-- `PUT /admin/majors` - 更新专业
-- `DELETE /admin/majors/{majorId}` - 删除专业
-- `GET /admin/classes` - 获取班级列表
-- `POST /admin/classes` - 创建班级
-- `PUT /admin/classes` - 更新班级
-- `DELETE /admin/classes/{classId}` - 删除班级
-- `GET /admin/semesters` - 获取学期列表
-- `POST /admin/semesters` - 创建学期
-- `PUT /admin/semesters` - 更新学期
-- `DELETE /admin/semesters/{semesterId}` - 删除学期
-- `GET /admin/settings` - 获取系统设置
-- `PUT /admin/settings` - 更新系统设置
-- `GET /admin/statistics` - 获取统计数据
 - `GET /admin/teachers` - 获取教师列表
 
 ### 学生接口
 - `GET /student/home` - 获取首页数据
-- `GET /student/status` - 获取学生状态
 - `GET /student/grades` - 获取成绩
 - `GET /student/grades/{semester}` - 按学期获取成绩
 - `GET /student/grades/pagination` - 分页获取成绩
 - `GET /student/grades/{semester}/pagination` - 按学期分页获取成绩
-- `GET /student/courses/available` - 获取可选课程
 - `GET /student/courses/available/pagination` - 分页获取可选课程
-- `GET /student/courses/selected` - 获取已选课程
 - `GET /student/courses/selected/pagination` - 分页获取已选课程
 - `POST /student/courses/select` - 选课
 - `POST /student/courses/drop` - 退课
 - `GET /student/profile` - 获取个人信息
 - `POST /student/profile` - 更新个人信息
-- `GET /student/settings` - 获取设置
-- `POST /student/settings` - 更新设置
 - `GET /student/schedule` - 获取课表
-- `GET /student/announcements` - 获取公告
-- `POST /student/announcements/{announcementId}/read` - 标记公告已读
 
 ### 教师接口
-- `GET /teacher/home` - 获取首页数据
 - `GET /teacher/students` - 获取学生列表
 - `GET /teacher/courses` - 获取课程列表
-- `GET /teacher/profile` - 获取个人信息
-- `POST /teacher/profile` - 更新个人信息
-- `GET /teacher/grades` - 获取成绩
-- `POST /teacher/grades` - 录入成绩
-- `GET /teacher/schedule` - 获取课表
-- `GET /teacher/messages` - 获取消息
-- `POST /teacher/messages` - 发送消息
-- `POST /teacher/messages/{messageId}/read` - 标记消息已读
 
 ## 注意事项
 
