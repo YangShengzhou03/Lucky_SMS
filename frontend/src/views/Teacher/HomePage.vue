@@ -706,7 +706,7 @@ onMounted(() => {
       .stat-icon {
         width: 40px;
         height: 40px;
-        border-radius: 8px;
+        border-radius: 4px;
         background-color: rgba(64, 158, 255, 0.1);
         display: flex;
         align-items: center;
@@ -946,14 +946,9 @@ onMounted(() => {
       padding: 16px 0;
       cursor: pointer;
       border-bottom: 1px dashed rgba(0, 0, 0, 0.08);
-      transition: all 0.2s ease;
 
       .dark & {
         border-bottom-color: rgba(255, 255, 255, 0.1);
-      }
-
-      &:hover {
-        transform: translateX(5px);
       }
 
       &:last-child {
@@ -1126,10 +1121,7 @@ onMounted(() => {
   .announcements-card .el-scrollbar {
     height: 250px;
   }
-
-  .announcement-item:hover {
-    transform: translateX(3px);
-  }
+}
 
   .class-actions {
     flex-direction: column;
@@ -1143,5 +1135,4 @@ onMounted(() => {
   .class-actions .el-button:last-child {
     margin-bottom: 0;
   }
-}
 </style>

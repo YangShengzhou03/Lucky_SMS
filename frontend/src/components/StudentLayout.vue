@@ -324,8 +324,8 @@ onUnmounted(() => {
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  --border-radius: 8px;
-  --border-radius-lg: 16px;
+  --border-radius: 4px;
+  --border-radius-lg: 6px;
   --transition: all 0.15s ease;
   --transition-fast: all 0.1s ease;
 }
@@ -477,11 +477,6 @@ onUnmounted(() => {
 }
 
 .search-icon {
-  transition: all 0.3s ease;
-}
-
-.search-input:focus-within .search-icon {
-  transform: scale(1.1);
 }
 
 :deep(.el-input__clear) {
@@ -507,7 +502,6 @@ onUnmounted(() => {
   .search-input:hover,
   .search-input:focus-within {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
   }
 }
 
@@ -525,11 +519,10 @@ onUnmounted(() => {
   cursor: pointer;
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--transition);
   position: relative;
   outline: none;
 }
@@ -537,10 +530,6 @@ onUnmounted(() => {
 .action-btn:hover {
   background-color: var(--gray-100);
   color: var(--primary-color);
-}
-
-.action-btn:active {
-  transform: scale(0.95);
 }
 
 .dark-mode .action-btn:hover {
@@ -884,8 +873,8 @@ onUnmounted(() => {
   button {
     color: var(--gray-400);
 
-    &:hover:not(.active) {
-      color: var(--gray-300);
+    &.active {
+      color: var(--primary-light);
     }
   }
 }

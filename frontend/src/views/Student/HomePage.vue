@@ -321,9 +321,8 @@ onUnmounted(() => {
 
 .modern-card {
   position: relative;
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 20px;
-  transition: all 0.3s ease;
   overflow: hidden;
   z-index: 1;
 
@@ -334,26 +333,13 @@ onUnmounted(() => {
 
   background: white;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
   .dark & {
     background: rgba(30, 41, 59, 0.9);
     border-color: rgba(74, 85, 104, 0.4);
   }
-
-  &:hover {
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-    border-color: rgba(199, 210, 254, 0.8);
-  }
-
-  .dark &:hover {
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-    border-color: rgba(99, 102, 241, 0.5);
-  }
-
-  &:hover {
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-  }
+}
 
   .card-header {
     display: flex;
@@ -376,7 +362,6 @@ onUnmounted(() => {
       font-size: 14px;
     }
   }
-}
 
 .info-cards {
   display: grid;
@@ -634,19 +619,6 @@ onUnmounted(() => {
     padding: 16px 0;
     cursor: pointer;
     border-bottom: 1px dashed rgba(0, 0, 0, 0.08);
-    transition: all 0.2s ease;
-
-    &:hover {
-      transform: translateX(4px);
-      background: rgba(245, 247, 250, 0.4);
-      border-radius: 8px;
-      padding: 16px;
-      margin: 0 -16px;
-
-      .dark & {
-        background: rgba(40, 45, 55, 0.6);
-      }
-    }
 
     &:last-child {
       border-bottom: none;
@@ -779,16 +751,11 @@ onUnmounted(() => {
 
   .empty-button {
     padding: 10px 20px;
-    border-radius: 8px;
+    border-radius: 4px;
     font-weight: 500;
-    transition: all 0.3s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
-    &:hover {
-      transform: translateY(-2px);
-    }
   }
 }
 
@@ -807,12 +774,6 @@ onUnmounted(() => {
     color: #409eff;
     border: 1px solid #409eff;
     background-color: rgba(64, 158, 255, 0.1);
-
-    &:hover {
-      background-color: rgba(64, 158, 255, 0.2);
-      border-color: #66b1ff;
-      color: #66b1ff;
-    }
   }
 }
 

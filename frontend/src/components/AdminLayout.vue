@@ -385,15 +385,12 @@ onUnmounted(() => {
 }
 
 .top-nav {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: #ffffff;
   padding: 8px 0;
   box-shadow: var(--shadow-sm);
   position: sticky;
   z-index: 1000;
   border-right: 1px solid var(--gray-200);
-  transition: var(--transition);
 }
 
 .dark-mode .top-nav {
@@ -517,7 +514,6 @@ onUnmounted(() => {
   .search-input:hover,
   .search-input:focus-within {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
   }
 }
 

@@ -444,9 +444,8 @@ onUnmounted(() => {
 }
 
 .search-input {
-  border-radius: 8px;
+  border-radius: 4px;
   border: 1px solid var(--gray-300);
-  transition: all 0.3s ease;
   background-color: var(--gray-50);
   box-shadow: none;
 
@@ -475,11 +474,6 @@ onUnmounted(() => {
 }
 
 .search-icon {
-  transition: all 0.3s ease;
-}
-
-.search-input:focus-within .search-icon {
-  transform: scale(1.1);
 }
 
 :deep(.el-input__clear) {
@@ -505,7 +499,10 @@ onUnmounted(() => {
   .search-input:hover,
   .search-input:focus-within {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+
+    :deep(.el-input__inner) {
+      color: var(--gray-200);
+    }
   }
 }
 
@@ -523,11 +520,10 @@ onUnmounted(() => {
   cursor: pointer;
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--transition);
   position: relative;
   outline: none;
 }
@@ -535,10 +531,6 @@ onUnmounted(() => {
 .action-btn:hover {
   background-color: var(--gray-100);
   color: var(--primary-color);
-}
-
-.action-btn:active {
-  transform: scale(0.95);
 }
 
 .dark-mode .action-btn:hover {

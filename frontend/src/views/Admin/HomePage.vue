@@ -399,9 +399,9 @@ onMounted(() => {
 
 .dashboard-card {
   background: white;
-  border-radius: 12px;
+  border-radius: 4px;
   padding: 20px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
@@ -512,9 +512,9 @@ onMounted(() => {
 
 .recent-activities {
   background: white;
-  border-radius: 12px;
+  border-radius: 4px;
   padding: 20px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .activity-list {
@@ -539,7 +539,7 @@ onMounted(() => {
 .activity-icon {
   width: 32px;
   height: 32px;
-  border-radius: 6px;
+  border-radius: 4px;
   background: #f5f7fa;
   display: flex;
   align-items: center;

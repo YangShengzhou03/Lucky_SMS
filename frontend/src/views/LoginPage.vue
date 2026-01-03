@@ -403,8 +403,8 @@ onUnmounted(() => {
 
 .login-card {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   padding: 40px;
   position: relative;
   min-height: 400px;
@@ -612,7 +612,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   background: #f8fafc;
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 10px;
   margin-bottom: 20px;
 }
@@ -674,7 +674,7 @@ onUnmounted(() => {
 @media (max-width: 480px) {
   .login-card {
     padding: 30px 20px;
-    border-radius: 12px;
+    border-radius: 4px;
   }
 
   .qr-code-container {

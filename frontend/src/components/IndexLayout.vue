@@ -189,8 +189,8 @@ onUnmounted(() => {
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  --border-radius: 12px;
-  --transition: all 0.3s ease;
+  --border-radius: 4px;
+  --transition: all 0.15s ease;
 }
 
 .app-container {
@@ -272,7 +272,6 @@ onUnmounted(() => {
   font-weight: 700;
   color: var(--primary-color);
   letter-spacing: 0.5px;
-  text-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 .logo-badge {
@@ -370,7 +369,6 @@ onUnmounted(() => {
   color: var(--white);
   margin-bottom: 24px;
   line-height: 1.1;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .hero-subtitle-accent {
@@ -428,22 +426,9 @@ onUnmounted(() => {
 }
 
 .glass-effect {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition: all 0.4s cubic-bezier(0.16, 0.77, 0.21, 0.99);
-}
-
-.glass-effect:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.25);
-  box-shadow: 
-    0 6px 24px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-md);
 }
 
 .features {
@@ -607,7 +592,6 @@ onUnmounted(() => {
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-md);
   border: 2px solid var(--gray-200);
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   overflow: hidden;
   position: relative;
   z-index: 1;
@@ -664,33 +648,6 @@ onUnmounted(() => {
   height: 40px;
   background: var(--white);
   transform: translateX(-50%) rotate(45deg);
-}
-
-.pricing-header::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(to bottom right,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0) 45%,
-      rgba(255, 255, 255, 0.15) 48%,
-      rgba(255, 255, 255, 0) 50%,
-      rgba(255, 255, 255, 0) 100%);
-  transform: rotate(30deg);
-  animation: shine 3s infinite;
-}
-
-@keyframes shine {
-  0% {
-    transform: translateX(-100%) rotate(30deg);
-  }
-
-  100% {
-    transform: translateX(100%) rotate(30deg);
-  }
 }
 
 .plan-title {
@@ -868,25 +825,11 @@ onUnmounted(() => {
 .cta-btn-secondary {
   padding: 16px 40px !important;
   font-size: 18px !important;
-  border-radius: 12px !important;
+  border-radius: 4px !important;
   background: rgba(255, 255, 255, 0.2) !important;
   color: var(--white) !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  box-shadow: 
-    0 4px 15px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-}
-
-.cta-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.3) !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
-  transform: translateY(-3px) scale(1.05) !important;
-  box-shadow: 
-    0 8px 25px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  box-shadow: var(--shadow-sm);
 }
 
 .footer {
