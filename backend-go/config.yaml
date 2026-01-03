@@ -1,0 +1,50 @@
+server:
+  port: 8081
+  mode: debug
+
+database:
+  host: localhost
+  port: 3306
+  username: root
+  password: root
+  dbname: lucky_sms
+  charset: utf8mb4
+  parseTime: true
+  loc: Local
+
+jwt:
+  secret: 3f7d2a9b5e8c1d4f6h0j2k7m9n1p3q5r8t0v2x4y6z8b0d2f4h6j8l0n2p
+  expiration: 86400000
+  issuer: lucky-sms
+
+cors:
+  allowedOrigins:
+    - http://localhost:8080
+    - http://127.0.0.1:8080
+  allowedMethods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  allowedHeaders: "*"
+  allowCredentials: true
+
+upload:
+  maxSize: 10485760
+  allowedExtensions:
+    - .jpg
+    - .jpeg
+    - .png
+    - .gif
+    - .pdf
+    - .doc
+    - .docx
+
+log:
+  level: debug
+  filename: logs/lucky-sms.log
+  maxSize: 10
+  maxBackups: 30
+  maxAge: 30
+  compress: true
